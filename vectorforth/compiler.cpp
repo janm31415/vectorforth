@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <algorithm>
 
 using namespace ASM;
 

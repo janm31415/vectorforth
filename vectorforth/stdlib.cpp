@@ -1,6 +1,7 @@
 #include "stdlib.h"
 #include "dictionary.h"
 #include "tokenize.h"
+#include <algorithm>
 #include <cassert>
 
 

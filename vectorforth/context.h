@@ -8,7 +8,11 @@
 
 VF_BEGIN
 
-__declspec(align(32)) struct context
+
+#ifdef _WIN32
+__declspec(align(32)) // windows alignment
+#endif
+struct context
   {
   context() : memory_allocated(nullptr) {}
 
@@ -36,7 +40,11 @@ __declspec(align(32)) struct context
   uint64_t all_bits[4]; // offset 192
 
   char* memory_allocated;  
-  };
+  }
+#ifndef _WIN32 // linux alignment in gcc
+__attribute__ ((aligned (32)))
+#endif
+  ;
 
 
 VECTOR_FORTH_API context create_context(uint64_t stack_size_in_bytes);

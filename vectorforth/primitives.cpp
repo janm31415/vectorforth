@@ -3,6 +3,8 @@
 #include "asm_aux.h"
 #include "avx_mathfun.h"
 
+#include <cassert>
+
 using namespace ASM;
 
 VF_BEGIN

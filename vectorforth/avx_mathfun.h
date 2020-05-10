@@ -4,7 +4,9 @@
 
 #include <immintrin.h>
 
+#ifdef _WIN32
 #define USE_VECTORCALL
+#endif
 
 #ifdef USE_VECTORCALL
 
