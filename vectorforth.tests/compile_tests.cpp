@@ -19,6 +19,28 @@ VF_BEGIN
 
 namespace
   {
+
+  int32_t get_avx2_i32(__m256i v, int i)
+    {
+    return v.m256i_i32[i];
+    }
+
+  float get_avx2_f32(__m256 v, int i)
+    {
+    return v.m256_f32[i];
+    }
+
+  int32_t get_avx2_i32(__m256 v, int i)
+    {
+    float f = get_avx2_f32(v, i);
+    return *reinterpret_cast<int32_t*>(&f);
+    }
+
+  uint64_t get_avx2_u64(__m256 v, int i)
+    {
+    return *reinterpret_cast<uint64_t*>(&v.m256_f32[i]);
+    }
+
   struct compile_fixture
     {
     context ctxt;
@@ -106,7 +128,7 @@ namespace
         return std::numeric_limits<float>::signaling_NaN();
         }
       __m256 sv = _mm256_load_ps(ptr);
-      return sv.m256_f32[0];
+      return get_avx2_f32(sv, 0);
       }
 
     uint32_t get_stack_valuei(size_t index) const
@@ -118,7 +140,8 @@ namespace
         return 0xffffffff;
         }
       __m256 sv = _mm256_load_ps(ptr);      
-      return *reinterpret_cast<uint32_t*>(&sv.m256_f32[0]);
+      //return *reinterpret_cast<uint32_t*>(&sget_avx2_f32(v, 0));
+      return (uint32_t)get_avx2_i32(sv, 0);
       }
 
     uint64_t get_stack_valuef_uint64(size_t index) const
@@ -130,10 +153,9 @@ namespace
         return 0xffffffffffffffff;
         }
       __m256 sv = _mm256_load_ps(ptr);
-      return *reinterpret_cast<uint64_t*>(&sv.m256_f32[0]);
+      return get_avx2_u64(sv, 0);
       }
     };
-
   }
 
 struct empty_program : public compile_fixture
@@ -150,36 +172,36 @@ struct floats : public compile_fixture
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.14"));
     auto v = get_last_stack_value();
-    TEST_EQ(3.14f, v.m256_f32[0]);
-    TEST_EQ(3.14f, v.m256_f32[1]);
-    TEST_EQ(3.14f, v.m256_f32[2]);
-    TEST_EQ(3.14f, v.m256_f32[3]);
-    TEST_EQ(3.14f, v.m256_f32[4]);
-    TEST_EQ(3.14f, v.m256_f32[5]);
-    TEST_EQ(3.14f, v.m256_f32[6]);
-    TEST_EQ(3.14f, v.m256_f32[7]);
+    TEST_EQ(3.14f, get_avx2_f32(v, 0));
+    TEST_EQ(3.14f, get_avx2_f32(v, 1));
+    TEST_EQ(3.14f, get_avx2_f32(v, 2));
+    TEST_EQ(3.14f, get_avx2_f32(v, 3));
+    TEST_EQ(3.14f, get_avx2_f32(v, 4));
+    TEST_EQ(3.14f, get_avx2_f32(v, 5));
+    TEST_EQ(3.14f, get_avx2_f32(v, 6));
+    TEST_EQ(3.14f, get_avx2_f32(v, 7));
 
     TEST_EQ(ctxt.aligned_stack_top - 64, run("54"));
     v = get_last_stack_value();
-    TEST_EQ(54.f, v.m256_f32[0]);
-    TEST_EQ(54.f, v.m256_f32[1]);
-    TEST_EQ(54.f, v.m256_f32[2]);
-    TEST_EQ(54.f, v.m256_f32[3]);
-    TEST_EQ(54.f, v.m256_f32[4]);
-    TEST_EQ(54.f, v.m256_f32[5]);
-    TEST_EQ(54.f, v.m256_f32[6]);
-    TEST_EQ(54.f, v.m256_f32[7]);
+    TEST_EQ(54.f, get_avx2_f32(v, 0));
+    TEST_EQ(54.f, get_avx2_f32(v, 1));
+    TEST_EQ(54.f, get_avx2_f32(v, 2));
+    TEST_EQ(54.f, get_avx2_f32(v, 3));
+    TEST_EQ(54.f, get_avx2_f32(v, 4));
+    TEST_EQ(54.f, get_avx2_f32(v, 5));
+    TEST_EQ(54.f, get_avx2_f32(v, 6));
+    TEST_EQ(54.f, get_avx2_f32(v, 7));
 
     TEST_EQ(ctxt.aligned_stack_top - 128, run("100 20.45"));
     v = get_last_stack_value();
-    TEST_EQ(20.45f, v.m256_f32[0]);
-    TEST_EQ(20.45f, v.m256_f32[1]);
-    TEST_EQ(20.45f, v.m256_f32[2]);
-    TEST_EQ(20.45f, v.m256_f32[3]);
-    TEST_EQ(20.45f, v.m256_f32[4]);
-    TEST_EQ(20.45f, v.m256_f32[5]);
-    TEST_EQ(20.45f, v.m256_f32[6]);
-    TEST_EQ(20.45f, v.m256_f32[7]);
+    TEST_EQ(20.45f, get_avx2_f32(v, 0));
+    TEST_EQ(20.45f, get_avx2_f32(v, 1));
+    TEST_EQ(20.45f, get_avx2_f32(v, 2));
+    TEST_EQ(20.45f, get_avx2_f32(v, 3));
+    TEST_EQ(20.45f, get_avx2_f32(v, 4));
+    TEST_EQ(20.45f, get_avx2_f32(v, 5));
+    TEST_EQ(20.45f, get_avx2_f32(v, 6));
+    TEST_EQ(20.45f, get_avx2_f32(v, 7));
     }
   };
 
@@ -196,14 +218,14 @@ struct definitions : public compile_fixture
     TEST_ASSERT(e.words.front().value == "3.14");
     TEST_EQ(ctxt.aligned_stack_top - 32, run("pi"));
     auto v = get_last_stack_value();
-    TEST_EQ(3.14f, v.m256_f32[0]);
-    TEST_EQ(3.14f, v.m256_f32[1]);
-    TEST_EQ(3.14f, v.m256_f32[2]);
-    TEST_EQ(3.14f, v.m256_f32[3]);
-    TEST_EQ(3.14f, v.m256_f32[4]);
-    TEST_EQ(3.14f, v.m256_f32[5]);
-    TEST_EQ(3.14f, v.m256_f32[6]);
-    TEST_EQ(3.14f, v.m256_f32[7]);
+    TEST_EQ(3.14f, get_avx2_f32(v, 0));
+    TEST_EQ(3.14f, get_avx2_f32(v, 1));
+    TEST_EQ(3.14f, get_avx2_f32(v, 2));
+    TEST_EQ(3.14f, get_avx2_f32(v, 3));
+    TEST_EQ(3.14f, get_avx2_f32(v, 4));
+    TEST_EQ(3.14f, get_avx2_f32(v, 5));
+    TEST_EQ(3.14f, get_avx2_f32(v, 6));
+    TEST_EQ(3.14f, get_avx2_f32(v, 7));
     }
   };
 
@@ -213,14 +235,14 @@ struct add : public compile_fixture
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 +"));
     auto v = get_last_stack_value();
-    TEST_EQ(5.5f, v.m256_f32[0]);
-    TEST_EQ(5.5f, v.m256_f32[1]);
-    TEST_EQ(5.5f, v.m256_f32[2]);
-    TEST_EQ(5.5f, v.m256_f32[3]);
-    TEST_EQ(5.5f, v.m256_f32[4]);
-    TEST_EQ(5.5f, v.m256_f32[5]);
-    TEST_EQ(5.5f, v.m256_f32[6]);
-    TEST_EQ(5.5f, v.m256_f32[7]);
+    TEST_EQ(5.5f, get_avx2_f32(v, 0));
+    TEST_EQ(5.5f, get_avx2_f32(v, 1));
+    TEST_EQ(5.5f, get_avx2_f32(v, 2));
+    TEST_EQ(5.5f, get_avx2_f32(v, 3));
+    TEST_EQ(5.5f, get_avx2_f32(v, 4));
+    TEST_EQ(5.5f, get_avx2_f32(v, 5));
+    TEST_EQ(5.5f, get_avx2_f32(v, 6));
+    TEST_EQ(5.5f, get_avx2_f32(v, 7));
     }
   };
 
@@ -230,14 +252,14 @@ struct sub : public compile_fixture
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 -"));
     auto v = get_last_stack_value();
-    TEST_EQ_CLOSE(0.7f, v.m256_f32[0], 1e-6f);
-    TEST_EQ_CLOSE(0.7f, v.m256_f32[1], 1e-6f);
-    TEST_EQ_CLOSE(0.7f, v.m256_f32[2], 1e-6f);
-    TEST_EQ_CLOSE(0.7f, v.m256_f32[3], 1e-6f);
-    TEST_EQ_CLOSE(0.7f, v.m256_f32[4], 1e-6f);
-    TEST_EQ_CLOSE(0.7f, v.m256_f32[5], 1e-6f);
-    TEST_EQ_CLOSE(0.7f, v.m256_f32[6], 1e-6f);
-    TEST_EQ_CLOSE(0.7f, v.m256_f32[7], 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 0), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 1), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 2), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 3), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 4), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 7), 1e-6f);
     }
   };
 
@@ -247,14 +269,14 @@ struct mul : public compile_fixture
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 *"));
     auto v = get_last_stack_value();
-    TEST_EQ_CLOSE(3.1f*2.4f, v.m256_f32[0], 1e-6f);
-    TEST_EQ_CLOSE(3.1f*2.4f, v.m256_f32[1], 1e-6f);
-    TEST_EQ_CLOSE(3.1f*2.4f, v.m256_f32[2], 1e-6f);
-    TEST_EQ_CLOSE(3.1f*2.4f, v.m256_f32[3], 1e-6f);
-    TEST_EQ_CLOSE(3.1f*2.4f, v.m256_f32[4], 1e-6f);
-    TEST_EQ_CLOSE(3.1f*2.4f, v.m256_f32[5], 1e-6f);
-    TEST_EQ_CLOSE(3.1f*2.4f, v.m256_f32[6], 1e-6f);
-    TEST_EQ_CLOSE(3.1f*2.4f, v.m256_f32[7], 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 0), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 1), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 2), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 3), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 4), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 7), 1e-6f);
     }
   };
 
@@ -264,14 +286,14 @@ struct division : public compile_fixture
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 /"));
     auto v = get_last_stack_value();
-    TEST_EQ_CLOSE(3.1f/2.4f, v.m256_f32[0], 1e-6f);
-    TEST_EQ_CLOSE(3.1f/2.4f, v.m256_f32[1], 1e-6f);
-    TEST_EQ_CLOSE(3.1f/2.4f, v.m256_f32[2], 1e-6f);
-    TEST_EQ_CLOSE(3.1f/2.4f, v.m256_f32[3], 1e-6f);
-    TEST_EQ_CLOSE(3.1f/2.4f, v.m256_f32[4], 1e-6f);
-    TEST_EQ_CLOSE(3.1f/2.4f, v.m256_f32[5], 1e-6f);
-    TEST_EQ_CLOSE(3.1f/2.4f, v.m256_f32[6], 1e-6f);
-    TEST_EQ_CLOSE(3.1f/2.4f, v.m256_f32[7], 1e-6f);
+    TEST_EQ_CLOSE(3.1f/2.4f, get_avx2_f32(v, 0), 1e-6f);
+    TEST_EQ_CLOSE(3.1f/2.4f, get_avx2_f32(v, 1), 1e-6f);
+    TEST_EQ_CLOSE(3.1f/2.4f, get_avx2_f32(v, 2), 1e-6f);
+    TEST_EQ_CLOSE(3.1f/2.4f, get_avx2_f32(v, 3), 1e-6f);
+    TEST_EQ_CLOSE(3.1f/2.4f, get_avx2_f32(v, 4), 1e-6f);
+    TEST_EQ_CLOSE(3.1f/2.4f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(3.1f/2.4f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(3.1f/2.4f, get_avx2_f32(v, 7), 1e-6f);
     }
   };
 
@@ -282,14 +304,14 @@ struct v8 : public compile_fixture
     // ymm0 = x7 / x6 / x5 / x4 / x3 / x2 / x1 / x0
     TEST_EQ(ctxt.aligned_stack_top - 32, run("v8 1 2 3 4 5 6 7 8"));
     auto v = get_last_stack_value();
-    TEST_EQ(1.f, v.m256_f32[7]);
-    TEST_EQ(2.f, v.m256_f32[6]);
-    TEST_EQ(3.f, v.m256_f32[5]);
-    TEST_EQ(4.f, v.m256_f32[4]);
-    TEST_EQ(5.f, v.m256_f32[3]);
-    TEST_EQ(6.f, v.m256_f32[2]);
-    TEST_EQ(7.f, v.m256_f32[1]);
-    TEST_EQ(8.f, v.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(v, 7));
+    TEST_EQ(2.f, get_avx2_f32(v, 6));
+    TEST_EQ(3.f, get_avx2_f32(v, 5));
+    TEST_EQ(4.f, get_avx2_f32(v, 4));
+    TEST_EQ(5.f, get_avx2_f32(v, 3));
+    TEST_EQ(6.f, get_avx2_f32(v, 2));
+    TEST_EQ(7.f, get_avx2_f32(v, 1));
+    TEST_EQ(8.f, get_avx2_f32(v, 0));
     }
   };
 
@@ -299,80 +321,80 @@ struct avx_mathfun : public compile_fixture
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.14159265359 sin"));
     auto v = get_last_stack_value();
-    TEST_EQ_CLOSE(0.f, v.m256_f32[7], 1e-6f);
-    TEST_EQ_CLOSE(0.f, v.m256_f32[6], 1e-6f);
-    TEST_EQ_CLOSE(0.f, v.m256_f32[5], 1e-6f);
-    TEST_EQ_CLOSE(0.f, v.m256_f32[4], 1e-6f);
-    TEST_EQ_CLOSE(0.f, v.m256_f32[3], 1e-6f);
-    TEST_EQ_CLOSE(0.f, v.m256_f32[2], 1e-6f);
-    TEST_EQ_CLOSE(0.f, v.m256_f32[1], 1e-6f);
-    TEST_EQ_CLOSE(0.f, v.m256_f32[0], 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 7), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 4), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 3), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 2), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 1), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 0), 1e-6f);
 
     run("v8 0 1 2 3 4 5 6 7 sin");
     v = get_last_stack_value();
-    TEST_EQ_CLOSE(0.f, v.m256_f32[7], 1e-6f);
-    TEST_EQ_CLOSE(0.841471f, v.m256_f32[6], 1e-6f);
-    TEST_EQ_CLOSE(0.909297f, v.m256_f32[5], 1e-6f);
-    TEST_EQ_CLOSE(0.14112f, v.m256_f32[4], 1e-6f);
-    TEST_EQ_CLOSE(-0.756802f, v.m256_f32[3], 1e-6f);
-    TEST_EQ_CLOSE(-0.958924f, v.m256_f32[2], 1e-6f);
-    TEST_EQ_CLOSE(-0.279415f, v.m256_f32[1], 1e-6f);
-    TEST_EQ_CLOSE(0.656987f, v.m256_f32[0], 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 7), 1e-6f);
+    TEST_EQ_CLOSE(0.841471f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(0.909297f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(0.14112f, get_avx2_f32(v, 4), 1e-6f);
+    TEST_EQ_CLOSE(-0.756802f, get_avx2_f32(v, 3), 1e-6f);
+    TEST_EQ_CLOSE(-0.958924f, get_avx2_f32(v, 2), 1e-6f);
+    TEST_EQ_CLOSE(-0.279415f, get_avx2_f32(v, 1), 1e-6f);
+    TEST_EQ_CLOSE(0.656987f, get_avx2_f32(v, 0), 1e-6f);
 
     run("v8 0 1 2 3 4 5 6 7 cos");
     v = get_last_stack_value();
-    TEST_EQ_CLOSE(1.f, v.m256_f32[7], 1e-6f);
-    TEST_EQ_CLOSE(0.540302f, v.m256_f32[6], 1e-6f);
-    TEST_EQ_CLOSE(-0.416147f, v.m256_f32[5], 1e-6f);
-    TEST_EQ_CLOSE(-0.989992f, v.m256_f32[4], 1e-6f);
-    TEST_EQ_CLOSE(-0.653644f, v.m256_f32[3], 1e-6f);
-    TEST_EQ_CLOSE(0.283662f, v.m256_f32[2], 1e-6f);
-    TEST_EQ_CLOSE(0.96017f, v.m256_f32[1], 1e-6f);
-    TEST_EQ_CLOSE(0.753902f, v.m256_f32[0], 1e-6f);
+    TEST_EQ_CLOSE(1.f, get_avx2_f32(v, 7), 1e-6f);
+    TEST_EQ_CLOSE(0.540302f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(-0.416147f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(-0.989992f, get_avx2_f32(v, 4), 1e-6f);
+    TEST_EQ_CLOSE(-0.653644f, get_avx2_f32(v, 3), 1e-6f);
+    TEST_EQ_CLOSE(0.283662f, get_avx2_f32(v, 2), 1e-6f);
+    TEST_EQ_CLOSE(0.96017f, get_avx2_f32(v, 1), 1e-6f);
+    TEST_EQ_CLOSE(0.753902f, get_avx2_f32(v, 0), 1e-6f);
 
     run("v8 0 1 2 3 4 5 6 7 exp");
     v = get_last_stack_value();
-    TEST_EQ_CLOSE(1.f, v.m256_f32[7], 1e-6f);
-    TEST_EQ_CLOSE(2.71828f, v.m256_f32[6], 1e-5f);
-    TEST_EQ_CLOSE(7.38906f, v.m256_f32[5], 1e-5f);
-    TEST_EQ_CLOSE(20.0855f, v.m256_f32[4], 1e-4f);
-    TEST_EQ_CLOSE(54.5982f, v.m256_f32[3], 1e-4f);
-    TEST_EQ_CLOSE(148.413f, v.m256_f32[2], 1e-3f);
-    TEST_EQ_CLOSE(403.429f, v.m256_f32[1], 1e-3f);
-    TEST_EQ_CLOSE(1096.63f, v.m256_f32[0], 1e-2f);
+    TEST_EQ_CLOSE(1.f, get_avx2_f32(v, 7), 1e-6f);
+    TEST_EQ_CLOSE(2.71828f, get_avx2_f32(v, 6), 1e-5f);
+    TEST_EQ_CLOSE(7.38906f, get_avx2_f32(v, 5), 1e-5f);
+    TEST_EQ_CLOSE(20.0855f, get_avx2_f32(v, 4), 1e-4f);
+    TEST_EQ_CLOSE(54.5982f, get_avx2_f32(v, 3), 1e-4f);
+    TEST_EQ_CLOSE(148.413f, get_avx2_f32(v, 2), 1e-3f);
+    TEST_EQ_CLOSE(403.429f, get_avx2_f32(v, 1), 1e-3f);
+    TEST_EQ_CLOSE(1096.63f, get_avx2_f32(v, 0), 1e-2f);
 
     run("v8 0 1 2 3 4 5 6 7 log");
     v = get_last_stack_value();
-    TEST_EQ_CLOSE(-std::numeric_limits<float>::infinity(), v.m256_f32[7], 1e-6f);
-    TEST_EQ_CLOSE(0.f, v.m256_f32[6], 1e-6f);
-    TEST_EQ_CLOSE(0.693147f, v.m256_f32[5], 1e-6f);
-    TEST_EQ_CLOSE(1.09861f, v.m256_f32[4], 1e-5f);
-    TEST_EQ_CLOSE(1.38629f, v.m256_f32[3], 1e-5f);
-    TEST_EQ_CLOSE(1.60944f, v.m256_f32[2], 1e-5f);
-    TEST_EQ_CLOSE(1.79176f, v.m256_f32[1], 1e-5f);
-    TEST_EQ_CLOSE(1.94591f, v.m256_f32[0], 1e-5f);
+    TEST_EQ_CLOSE(-std::numeric_limits<float>::infinity(), get_avx2_f32(v, 7), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(0.693147f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(1.09861f, get_avx2_f32(v, 4), 1e-5f);
+    TEST_EQ_CLOSE(1.38629f, get_avx2_f32(v, 3), 1e-5f);
+    TEST_EQ_CLOSE(1.60944f, get_avx2_f32(v, 2), 1e-5f);
+    TEST_EQ_CLOSE(1.79176f, get_avx2_f32(v, 1), 1e-5f);
+    TEST_EQ_CLOSE(1.94591f, get_avx2_f32(v, 0), 1e-5f);
 
     run("v8 1 4 3 2 3 2 2 2 v8 0 1 2 3 4 5 6 7 **");
     v = get_last_stack_value();
-    TEST_EQ_CLOSE(1.f, v.m256_f32[7], 1e-6f);
-    TEST_EQ_CLOSE(4.f, v.m256_f32[6], 1e-6f);
-    TEST_EQ_CLOSE(9.f, v.m256_f32[5], 1e-6f);
-    TEST_EQ_CLOSE(8.f, v.m256_f32[4], 1e-6f);
-    TEST_EQ_CLOSE(81.f, v.m256_f32[3], 1e-5f);
-    TEST_EQ_CLOSE(32.f, v.m256_f32[2], 1e-5f);
-    TEST_EQ_CLOSE(64.f, v.m256_f32[1], 1e-5f);
-    TEST_EQ_CLOSE(128.f, v.m256_f32[0], 1e-5f);
+    TEST_EQ_CLOSE(1.f, get_avx2_f32(v, 7), 1e-6f);
+    TEST_EQ_CLOSE(4.f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(9.f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(8.f, get_avx2_f32(v, 4), 1e-6f);
+    TEST_EQ_CLOSE(81.f, get_avx2_f32(v, 3), 1e-5f);
+    TEST_EQ_CLOSE(32.f, get_avx2_f32(v, 2), 1e-5f);
+    TEST_EQ_CLOSE(64.f, get_avx2_f32(v, 1), 1e-5f);
+    TEST_EQ_CLOSE(128.f, get_avx2_f32(v, 0), 1e-5f);
 
     run("v8 1 4 9 16 25 36 49 64 sqrt");
     v = get_last_stack_value();
-    TEST_EQ_CLOSE(1.f, v.m256_f32[7], 1e-6f);
-    TEST_EQ_CLOSE(2.f, v.m256_f32[6], 1e-6f);
-    TEST_EQ_CLOSE(3.f, v.m256_f32[5], 1e-6f);
-    TEST_EQ_CLOSE(4.f, v.m256_f32[4], 1e-6f);
-    TEST_EQ_CLOSE(5.f, v.m256_f32[3], 1e-5f);
-    TEST_EQ_CLOSE(6.f, v.m256_f32[2], 1e-5f);
-    TEST_EQ_CLOSE(7.f, v.m256_f32[1], 1e-5f);
-    TEST_EQ_CLOSE(8.f, v.m256_f32[0], 1e-5f);
+    TEST_EQ_CLOSE(1.f, get_avx2_f32(v, 7), 1e-6f);
+    TEST_EQ_CLOSE(2.f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(3.f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(4.f, get_avx2_f32(v, 4), 1e-6f);
+    TEST_EQ_CLOSE(5.f, get_avx2_f32(v, 3), 1e-5f);
+    TEST_EQ_CLOSE(6.f, get_avx2_f32(v, 2), 1e-5f);
+    TEST_EQ_CLOSE(7.f, get_avx2_f32(v, 1), 1e-5f);
+    TEST_EQ_CLOSE(8.f, get_avx2_f32(v, 0), 1e-5f);
     }
   };
 
@@ -449,14 +471,14 @@ struct integers : public compile_fixture
 
     run("v8 #1 #2 #3 #4 #5 #6 #7 #8");
     auto v = get_last_stack_value_i();
-    TEST_EQ(1, v.m256i_u32[7]);
-    TEST_EQ(2, v.m256i_u32[6]);
-    TEST_EQ(3, v.m256i_u32[5]);
-    TEST_EQ(4, v.m256i_u32[4]);
-    TEST_EQ(5, v.m256i_u32[3]);
-    TEST_EQ(6, v.m256i_u32[2]);
-    TEST_EQ(7, v.m256i_u32[1]);
-    TEST_EQ(8, v.m256i_u32[0]);
+    TEST_EQ(1, get_avx2_i32(v, 7));
+    TEST_EQ(2, get_avx2_i32(v, 6));
+    TEST_EQ(3, get_avx2_i32(v, 5));
+    TEST_EQ(4, get_avx2_i32(v, 4));
+    TEST_EQ(5, get_avx2_i32(v, 3));
+    TEST_EQ(6, get_avx2_i32(v, 2));
+    TEST_EQ(7, get_avx2_i32(v, 1));
+    TEST_EQ(8, get_avx2_i32(v, 0));
 
     run("#100 #1+");
     TEST_EQ(101, get_stack_valuei(0));
@@ -520,136 +542,136 @@ struct comparisons : public compile_fixture
     {
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 =");
     auto v = get_last_stack_value_i();
-    TEST_EQ(-1, v.m256i_i32[7]);
-    TEST_EQ(-1, v.m256i_i32[6]);
-    TEST_EQ(0, v.m256i_i32[5]);
-    TEST_EQ(0, v.m256i_i32[4]);
-    TEST_EQ(0, v.m256i_i32[3]);
-    TEST_EQ(0, v.m256i_i32[2]);
-    TEST_EQ(0, v.m256i_i32[1]);
-    TEST_EQ(-1, v.m256i_i32[0]);
+    TEST_EQ(-1, get_avx2_i32(v, 7));
+    TEST_EQ(-1, get_avx2_i32(v, 6));
+    TEST_EQ(0, get_avx2_i32(v, 5));
+    TEST_EQ(0, get_avx2_i32(v, 4));
+    TEST_EQ(0, get_avx2_i32(v, 3));
+    TEST_EQ(0, get_avx2_i32(v, 2));
+    TEST_EQ(0, get_avx2_i32(v, 1));
+    TEST_EQ(-1, get_avx2_i32(v, 0));
 
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 <>");
     v = get_last_stack_value_i();
-    TEST_EQ(0, v.m256i_i32[7]);
-    TEST_EQ(0, v.m256i_i32[6]);
-    TEST_EQ(-1, v.m256i_i32[5]);
-    TEST_EQ(-1, v.m256i_i32[4]);
-    TEST_EQ(-1, v.m256i_i32[3]);
-    TEST_EQ(-1, v.m256i_i32[2]);
-    TEST_EQ(-1, v.m256i_i32[1]);
-    TEST_EQ(0, v.m256i_i32[0]);
+    TEST_EQ(0, get_avx2_i32(v, 7));
+    TEST_EQ(0, get_avx2_i32(v, 6));
+    TEST_EQ(-1, get_avx2_i32(v, 5));
+    TEST_EQ(-1, get_avx2_i32(v, 4));
+    TEST_EQ(-1, get_avx2_i32(v, 3));
+    TEST_EQ(-1, get_avx2_i32(v, 2));
+    TEST_EQ(-1, get_avx2_i32(v, 1));
+    TEST_EQ(0, get_avx2_i32(v, 0));
 
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 <");
     v = get_last_stack_value_i();
-    TEST_EQ(0, v.m256i_i32[7]);
-    TEST_EQ(0, v.m256i_i32[6]);
-    TEST_EQ(0, v.m256i_i32[5]);
-    TEST_EQ(0, v.m256i_i32[4]);
-    TEST_EQ(-1, v.m256i_i32[3]);
-    TEST_EQ(-1, v.m256i_i32[2]);
-    TEST_EQ(-1, v.m256i_i32[1]);
-    TEST_EQ(0, v.m256i_i32[0]);
+    TEST_EQ(0, get_avx2_i32(v, 7));
+    TEST_EQ(0, get_avx2_i32(v, 6));
+    TEST_EQ(0, get_avx2_i32(v, 5));
+    TEST_EQ(0, get_avx2_i32(v, 4));
+    TEST_EQ(-1, get_avx2_i32(v, 3));
+    TEST_EQ(-1, get_avx2_i32(v, 2));
+    TEST_EQ(-1, get_avx2_i32(v, 1));
+    TEST_EQ(0, get_avx2_i32(v, 0));
 
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 <=");
     v = get_last_stack_value_i();
-    TEST_EQ(-1, v.m256i_i32[7]);
-    TEST_EQ(-1, v.m256i_i32[6]);
-    TEST_EQ(0, v.m256i_i32[5]);
-    TEST_EQ(0, v.m256i_i32[4]);
-    TEST_EQ(-1, v.m256i_i32[3]);
-    TEST_EQ(-1, v.m256i_i32[2]);
-    TEST_EQ(-1, v.m256i_i32[1]);
-    TEST_EQ(-1, v.m256i_i32[0]);
+    TEST_EQ(-1, get_avx2_i32(v, 7));
+    TEST_EQ(-1, get_avx2_i32(v, 6));
+    TEST_EQ(0, get_avx2_i32(v, 5));
+    TEST_EQ(0, get_avx2_i32(v, 4));
+    TEST_EQ(-1, get_avx2_i32(v, 3));
+    TEST_EQ(-1, get_avx2_i32(v, 2));
+    TEST_EQ(-1, get_avx2_i32(v, 1));
+    TEST_EQ(-1, get_avx2_i32(v, 0));
 
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 >");
     v = get_last_stack_value_i();
-    TEST_EQ(0, v.m256i_i32[7]);
-    TEST_EQ(0, v.m256i_i32[6]);
-    TEST_EQ(-1, v.m256i_i32[5]);
-    TEST_EQ(-1, v.m256i_i32[4]);
-    TEST_EQ(0, v.m256i_i32[3]);
-    TEST_EQ(0, v.m256i_i32[2]);
-    TEST_EQ(0, v.m256i_i32[1]);
-    TEST_EQ(0, v.m256i_i32[0]);
+    TEST_EQ(0, get_avx2_i32(v, 7));
+    TEST_EQ(0, get_avx2_i32(v, 6));
+    TEST_EQ(-1, get_avx2_i32(v, 5));
+    TEST_EQ(-1, get_avx2_i32(v, 4));
+    TEST_EQ(0, get_avx2_i32(v, 3));
+    TEST_EQ(0, get_avx2_i32(v, 2));
+    TEST_EQ(0, get_avx2_i32(v, 1));
+    TEST_EQ(0, get_avx2_i32(v, 0));
 
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 >=");
     v = get_last_stack_value_i();
-    TEST_EQ(-1, v.m256i_i32[7]);
-    TEST_EQ(-1, v.m256i_i32[6]);
-    TEST_EQ(-1, v.m256i_i32[5]);
-    TEST_EQ(-1, v.m256i_i32[4]);
-    TEST_EQ(0, v.m256i_i32[3]);
-    TEST_EQ(0, v.m256i_i32[2]);
-    TEST_EQ(0, v.m256i_i32[1]);
-    TEST_EQ(-1, v.m256i_i32[0]);
+    TEST_EQ(-1, get_avx2_i32(v, 7));
+    TEST_EQ(-1, get_avx2_i32(v, 6));
+    TEST_EQ(-1, get_avx2_i32(v, 5));
+    TEST_EQ(-1, get_avx2_i32(v, 4));
+    TEST_EQ(0, get_avx2_i32(v, 3));
+    TEST_EQ(0, get_avx2_i32(v, 2));
+    TEST_EQ(0, get_avx2_i32(v, 1));
+    TEST_EQ(-1, get_avx2_i32(v, 0));
 
 
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 f=");
     auto f = get_last_stack_value();
-    TEST_EQ(1.f, f.m256_f32[7]);
-    TEST_EQ(1.f, f.m256_f32[6]);
-    TEST_EQ(0.f, f.m256_f32[5]);
-    TEST_EQ(0.f, f.m256_f32[4]);
-    TEST_EQ(0.f, f.m256_f32[3]);
-    TEST_EQ(0.f, f.m256_f32[2]);
-    TEST_EQ(0.f, f.m256_f32[1]);
-    TEST_EQ(1.f, f.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(f, 7));
+    TEST_EQ(1.f, get_avx2_f32(f, 6));
+    TEST_EQ(0.f, get_avx2_f32(f, 5));
+    TEST_EQ(0.f, get_avx2_f32(f, 4));
+    TEST_EQ(0.f, get_avx2_f32(f, 3));
+    TEST_EQ(0.f, get_avx2_f32(f, 2));
+    TEST_EQ(0.f, get_avx2_f32(f, 1));
+    TEST_EQ(1.f, get_avx2_f32(f, 0));
 
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 f<>");
     f = get_last_stack_value();
-    TEST_EQ(0.f, f.m256_f32[7]);
-    TEST_EQ(0.f, f.m256_f32[6]);
-    TEST_EQ(1.f, f.m256_f32[5]);
-    TEST_EQ(1.f, f.m256_f32[4]);
-    TEST_EQ(1.f, f.m256_f32[3]);
-    TEST_EQ(1.f, f.m256_f32[2]);
-    TEST_EQ(1.f, f.m256_f32[1]);
-    TEST_EQ(0.f, f.m256_f32[0]);
+    TEST_EQ(0.f, get_avx2_f32(f, 7));
+    TEST_EQ(0.f, get_avx2_f32(f, 6));
+    TEST_EQ(1.f, get_avx2_f32(f, 5));
+    TEST_EQ(1.f, get_avx2_f32(f, 4));
+    TEST_EQ(1.f, get_avx2_f32(f, 3));
+    TEST_EQ(1.f, get_avx2_f32(f, 2));
+    TEST_EQ(1.f, get_avx2_f32(f, 1));
+    TEST_EQ(0.f, get_avx2_f32(f, 0));
 
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 f<");
     f = get_last_stack_value();
-    TEST_EQ(0.f, f.m256_f32[7]);
-    TEST_EQ(0.f, f.m256_f32[6]);
-    TEST_EQ(0.f, f.m256_f32[5]);
-    TEST_EQ(0.f, f.m256_f32[4]);
-    TEST_EQ(1.f, f.m256_f32[3]);
-    TEST_EQ(1.f, f.m256_f32[2]);
-    TEST_EQ(1.f, f.m256_f32[1]);
-    TEST_EQ(0.f, f.m256_f32[0]);
+    TEST_EQ(0.f, get_avx2_f32(f, 7));
+    TEST_EQ(0.f, get_avx2_f32(f, 6));
+    TEST_EQ(0.f, get_avx2_f32(f, 5));
+    TEST_EQ(0.f, get_avx2_f32(f, 4));
+    TEST_EQ(1.f, get_avx2_f32(f, 3));
+    TEST_EQ(1.f, get_avx2_f32(f, 2));
+    TEST_EQ(1.f, get_avx2_f32(f, 1));
+    TEST_EQ(0.f, get_avx2_f32(f, 0));
 
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 f<=");
     f = get_last_stack_value();
-    TEST_EQ(1.f, f.m256_f32[7]);
-    TEST_EQ(1.f, f.m256_f32[6]);
-    TEST_EQ(0.f, f.m256_f32[5]);
-    TEST_EQ(0.f, f.m256_f32[4]);
-    TEST_EQ(1.f, f.m256_f32[3]);
-    TEST_EQ(1.f, f.m256_f32[2]);
-    TEST_EQ(1.f, f.m256_f32[1]);
-    TEST_EQ(1.f, f.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(f, 7));
+    TEST_EQ(1.f, get_avx2_f32(f, 6));
+    TEST_EQ(0.f, get_avx2_f32(f, 5));
+    TEST_EQ(0.f, get_avx2_f32(f, 4));
+    TEST_EQ(1.f, get_avx2_f32(f, 3));
+    TEST_EQ(1.f, get_avx2_f32(f, 2));
+    TEST_EQ(1.f, get_avx2_f32(f, 1));
+    TEST_EQ(1.f, get_avx2_f32(f, 0));
 
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 f>");
     f = get_last_stack_value();
-    TEST_EQ(0.f, f.m256_f32[7]);
-    TEST_EQ(0.f, f.m256_f32[6]);
-    TEST_EQ(1.f, f.m256_f32[5]);
-    TEST_EQ(1.f, f.m256_f32[4]);
-    TEST_EQ(0.f, f.m256_f32[3]);
-    TEST_EQ(0.f, f.m256_f32[2]);
-    TEST_EQ(0.f, f.m256_f32[1]);
-    TEST_EQ(0.f, f.m256_f32[0]);
+    TEST_EQ(0.f, get_avx2_f32(f, 7));
+    TEST_EQ(0.f, get_avx2_f32(f, 6));
+    TEST_EQ(1.f, get_avx2_f32(f, 5));
+    TEST_EQ(1.f, get_avx2_f32(f, 4));
+    TEST_EQ(0.f, get_avx2_f32(f, 3));
+    TEST_EQ(0.f, get_avx2_f32(f, 2));
+    TEST_EQ(0.f, get_avx2_f32(f, 1));
+    TEST_EQ(0.f, get_avx2_f32(f, 0));
 
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 f>=");
     f = get_last_stack_value();
-    TEST_EQ(1.f, f.m256_f32[7]);
-    TEST_EQ(1.f, f.m256_f32[6]);
-    TEST_EQ(1.f, f.m256_f32[5]);
-    TEST_EQ(1.f, f.m256_f32[4]);
-    TEST_EQ(0.f, f.m256_f32[3]);
-    TEST_EQ(0.f, f.m256_f32[2]);
-    TEST_EQ(0.f, f.m256_f32[1]);
-    TEST_EQ(1.f, f.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(f, 7));
+    TEST_EQ(1.f, get_avx2_f32(f, 6));
+    TEST_EQ(1.f, get_avx2_f32(f, 5));
+    TEST_EQ(1.f, get_avx2_f32(f, 4));
+    TEST_EQ(0.f, get_avx2_f32(f, 3));
+    TEST_EQ(0.f, get_avx2_f32(f, 2));
+    TEST_EQ(0.f, get_avx2_f32(f, 1));
+    TEST_EQ(1.f, get_avx2_f32(f, 0));
     }
   };
 
@@ -665,25 +687,25 @@ struct address : public compile_fixture
 
     run("st@ #32- @"); // get stack top, then move 32 bytes back, then fetch
     auto v = get_last_stack_value();
-    TEST_EQ(12345.f, v.m256_f32[7]);
-    TEST_EQ(12345.f, v.m256_f32[6]);
-    TEST_EQ(12345.f, v.m256_f32[5]);
-    TEST_EQ(12345.f, v.m256_f32[4]);
-    TEST_EQ(12345.f, v.m256_f32[3]);
-    TEST_EQ(12345.f, v.m256_f32[2]);
-    TEST_EQ(12345.f, v.m256_f32[1]);
-    TEST_EQ(12345.f, v.m256_f32[0]);
+    TEST_EQ(12345.f, get_avx2_f32(v, 7));
+    TEST_EQ(12345.f, get_avx2_f32(v, 6));
+    TEST_EQ(12345.f, get_avx2_f32(v, 5));
+    TEST_EQ(12345.f, get_avx2_f32(v, 4));
+    TEST_EQ(12345.f, get_avx2_f32(v, 3));
+    TEST_EQ(12345.f, get_avx2_f32(v, 2));
+    TEST_EQ(12345.f, get_avx2_f32(v, 1));
+    TEST_EQ(12345.f, get_avx2_f32(v, 0));
 
     run("101 st@ #32- !   st@ #32- @ "); // store 101 on stack, get stack top, move 32 bytes back, store 101 at address,  get stack top, move 32 bytes back, fetch
     v = get_last_stack_value();
-    TEST_EQ(101.f, v.m256_f32[7]);
-    TEST_EQ(101.f, v.m256_f32[6]);
-    TEST_EQ(101.f, v.m256_f32[5]);
-    TEST_EQ(101.f, v.m256_f32[4]);
-    TEST_EQ(101.f, v.m256_f32[3]);
-    TEST_EQ(101.f, v.m256_f32[2]);
-    TEST_EQ(101.f, v.m256_f32[1]);
-    TEST_EQ(101.f, v.m256_f32[0]);
+    TEST_EQ(101.f, get_avx2_f32(v, 7));
+    TEST_EQ(101.f, get_avx2_f32(v, 6));
+    TEST_EQ(101.f, get_avx2_f32(v, 5));
+    TEST_EQ(101.f, get_avx2_f32(v, 4));
+    TEST_EQ(101.f, get_avx2_f32(v, 3));
+    TEST_EQ(101.f, get_avx2_f32(v, 2));
+    TEST_EQ(101.f, get_avx2_f32(v, 1));
+    TEST_EQ(101.f, get_avx2_f32(v, 0));
     }
   };
 
@@ -693,131 +715,131 @@ struct prim : public compile_fixture
     {
     run("v8 -1 2 -3 4 5 -6 7 -8 abs");
     auto v = get_last_stack_value();
-    TEST_EQ(1.f, v.m256_f32[7]);
-    TEST_EQ(2.f, v.m256_f32[6]);
-    TEST_EQ(3.f, v.m256_f32[5]);
-    TEST_EQ(4.f, v.m256_f32[4]);
-    TEST_EQ(5.f, v.m256_f32[3]);
-    TEST_EQ(6.f, v.m256_f32[2]);
-    TEST_EQ(7.f, v.m256_f32[1]);
-    TEST_EQ(8.f, v.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(v, 7));
+    TEST_EQ(2.f, get_avx2_f32(v, 6));
+    TEST_EQ(3.f, get_avx2_f32(v, 5));
+    TEST_EQ(4.f, get_avx2_f32(v, 4));
+    TEST_EQ(5.f, get_avx2_f32(v, 3));
+    TEST_EQ(6.f, get_avx2_f32(v, 2));
+    TEST_EQ(7.f, get_avx2_f32(v, 1));
+    TEST_EQ(8.f, get_avx2_f32(v, 0));
 
     run("v8 -1 2 -3 4 5 -6 7 -8 negate");
     v = get_last_stack_value();
-    TEST_EQ(1.f, v.m256_f32[7]);
-    TEST_EQ(-2.f, v.m256_f32[6]);
-    TEST_EQ(3.f, v.m256_f32[5]);
-    TEST_EQ(-4.f, v.m256_f32[4]);
-    TEST_EQ(-5.f, v.m256_f32[3]);
-    TEST_EQ(6.f, v.m256_f32[2]);
-    TEST_EQ(-7.f, v.m256_f32[1]);
-    TEST_EQ(8.f, v.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(v, 7));
+    TEST_EQ(-2.f, get_avx2_f32(v, 6));
+    TEST_EQ(3.f, get_avx2_f32(v, 5));
+    TEST_EQ(-4.f, get_avx2_f32(v, 4));
+    TEST_EQ(-5.f, get_avx2_f32(v, 3));
+    TEST_EQ(6.f, get_avx2_f32(v, 2));
+    TEST_EQ(-7.f, get_avx2_f32(v, 1));
+    TEST_EQ(8.f, get_avx2_f32(v, 0));
 
     run("v8 #1 #3 #7 #15 #31 #63 #127 #255  v8 #10 #10 #10 #10 #10 #10 #10 #10  and");
     auto i = get_last_stack_value_i();
-    TEST_EQ(0, i.m256i_u32[7]);
-    TEST_EQ(2, i.m256i_u32[6]);
-    TEST_EQ(2, i.m256i_u32[5]);
-    TEST_EQ(10, i.m256i_u32[4]);
-    TEST_EQ(10, i.m256i_u32[3]);
-    TEST_EQ(10, i.m256i_u32[2]);
-    TEST_EQ(10, i.m256i_u32[1]);
-    TEST_EQ(10, i.m256i_u32[0]);
+    TEST_EQ(0, get_avx2_i32(i, 7));
+    TEST_EQ(2, get_avx2_i32(i, 6));
+    TEST_EQ(2, get_avx2_i32(i, 5));
+    TEST_EQ(10, get_avx2_i32(i, 4));
+    TEST_EQ(10, get_avx2_i32(i, 3));
+    TEST_EQ(10, get_avx2_i32(i, 2));
+    TEST_EQ(10, get_avx2_i32(i, 1));
+    TEST_EQ(10, get_avx2_i32(i, 0));
 
     run("v8 #1 #3 #7 #15 #31 #63 #127 #255  v8 #10 #10 #10 #10 #10 #10 #10 #10  or");
     i = get_last_stack_value_i();
-    TEST_EQ(11, i.m256i_u32[7]);
-    TEST_EQ(11, i.m256i_u32[6]);
-    TEST_EQ(15, i.m256i_u32[5]);
-    TEST_EQ(15, i.m256i_u32[4]);
-    TEST_EQ(31, i.m256i_u32[3]);
-    TEST_EQ(63, i.m256i_u32[2]);
-    TEST_EQ(127, i.m256i_u32[1]);
-    TEST_EQ(255, i.m256i_u32[0]);
+    TEST_EQ(11, get_avx2_i32(i, 7));
+    TEST_EQ(11, get_avx2_i32(i, 6));
+    TEST_EQ(15, get_avx2_i32(i, 5));
+    TEST_EQ(15, get_avx2_i32(i, 4));
+    TEST_EQ(31, get_avx2_i32(i, 3));
+    TEST_EQ(63, get_avx2_i32(i, 2));
+    TEST_EQ(127, get_avx2_i32(i, 1));
+    TEST_EQ(255, get_avx2_i32(i, 0));
 
     run("v8 #1 #3 #7 #15 #31 #63 #127 #255  v8 #10 #10 #10 #10 #10 #10 #10 #10  xor");
     i = get_last_stack_value_i();
-    TEST_EQ(11, i.m256i_u32[7]);
-    TEST_EQ(9, i.m256i_u32[6]);
-    TEST_EQ(13, i.m256i_u32[5]);
-    TEST_EQ(5, i.m256i_u32[4]);
-    TEST_EQ(21, i.m256i_u32[3]);
-    TEST_EQ(53, i.m256i_u32[2]);
-    TEST_EQ(117, i.m256i_u32[1]);
-    TEST_EQ(245, i.m256i_u32[0]);
+    TEST_EQ(11, get_avx2_i32(i, 7));
+    TEST_EQ(9, get_avx2_i32(i, 6));
+    TEST_EQ(13, get_avx2_i32(i, 5));
+    TEST_EQ(5, get_avx2_i32(i, 4));
+    TEST_EQ(21, get_avx2_i32(i, 3));
+    TEST_EQ(53, get_avx2_i32(i, 2));
+    TEST_EQ(117, get_avx2_i32(i, 1));
+    TEST_EQ(245, get_avx2_i32(i, 0));
 
     run("v8 1.2 -1.2 1.7 -1.7 3 -3 1.5 -1.5 floor");
     v = get_last_stack_value();
-    TEST_EQ(1.f, v.m256_f32[7]);
-    TEST_EQ(-2.f, v.m256_f32[6]);
-    TEST_EQ(1.f, v.m256_f32[5]);
-    TEST_EQ(-2.f, v.m256_f32[4]);
-    TEST_EQ(3.f, v.m256_f32[3]);
-    TEST_EQ(-3.f, v.m256_f32[2]);
-    TEST_EQ(1.f, v.m256_f32[1]);
-    TEST_EQ(-2.f, v.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(v, 7));
+    TEST_EQ(-2.f, get_avx2_f32(v, 6));
+    TEST_EQ(1.f, get_avx2_f32(v, 5));
+    TEST_EQ(-2.f, get_avx2_f32(v, 4));
+    TEST_EQ(3.f, get_avx2_f32(v, 3));
+    TEST_EQ(-3.f, get_avx2_f32(v, 2));
+    TEST_EQ(1.f, get_avx2_f32(v, 1));
+    TEST_EQ(-2.f, get_avx2_f32(v, 0));
 
     run("v8 1.2 -1.2 1.7 -1.7 3 -3 1.5 -1.5 ceil");
     v = get_last_stack_value();
-    TEST_EQ(2.f, v.m256_f32[7]);
-    TEST_EQ(-1.f, v.m256_f32[6]);
-    TEST_EQ(2.f, v.m256_f32[5]);
-    TEST_EQ(-1.f, v.m256_f32[4]);
-    TEST_EQ(3.f, v.m256_f32[3]);
-    TEST_EQ(-3.f, v.m256_f32[2]);
-    TEST_EQ(2.f, v.m256_f32[1]);
-    TEST_EQ(-1.f, v.m256_f32[0]);
+    TEST_EQ(2.f, get_avx2_f32(v, 7));
+    TEST_EQ(-1.f, get_avx2_f32(v, 6));
+    TEST_EQ(2.f, get_avx2_f32(v, 5));
+    TEST_EQ(-1.f, get_avx2_f32(v, 4));
+    TEST_EQ(3.f, get_avx2_f32(v, 3));
+    TEST_EQ(-3.f, get_avx2_f32(v, 2));
+    TEST_EQ(2.f, get_avx2_f32(v, 1));
+    TEST_EQ(-1.f, get_avx2_f32(v, 0));
 
     run("v8 1.2 -1.2 1.7 -1.7 3 -3 1.5 -1.5 round");
     v = get_last_stack_value();
-    TEST_EQ(1.f, v.m256_f32[7]);
-    TEST_EQ(-1.f, v.m256_f32[6]);
-    TEST_EQ(2.f, v.m256_f32[5]);
-    TEST_EQ(-2.f, v.m256_f32[4]);
-    TEST_EQ(3.f, v.m256_f32[3]);
-    TEST_EQ(-3.f, v.m256_f32[2]);
-    TEST_EQ(2.f, v.m256_f32[1]);
-    TEST_EQ(-2.f, v.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(v, 7));
+    TEST_EQ(-1.f, get_avx2_f32(v, 6));
+    TEST_EQ(2.f, get_avx2_f32(v, 5));
+    TEST_EQ(-2.f, get_avx2_f32(v, 4));
+    TEST_EQ(3.f, get_avx2_f32(v, 3));
+    TEST_EQ(-3.f, get_avx2_f32(v, 2));
+    TEST_EQ(2.f, get_avx2_f32(v, 1));
+    TEST_EQ(-2.f, get_avx2_f32(v, 0));
 
     run("v8 1.2 -1.2 1.7 -1.7 3 -3 1.5 -1.5 trunc");
     v = get_last_stack_value();
-    TEST_EQ(1.f, v.m256_f32[7]);
-    TEST_EQ(-1.f, v.m256_f32[6]);
-    TEST_EQ(1.f, v.m256_f32[5]);
-    TEST_EQ(-1.f, v.m256_f32[4]);
-    TEST_EQ(3.f, v.m256_f32[3]);
-    TEST_EQ(-3.f, v.m256_f32[2]);
-    TEST_EQ(1.f, v.m256_f32[1]);
-    TEST_EQ(-1.f, v.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(v, 7));
+    TEST_EQ(-1.f, get_avx2_f32(v, 6));
+    TEST_EQ(1.f, get_avx2_f32(v, 5));
+    TEST_EQ(-1.f, get_avx2_f32(v, 4));
+    TEST_EQ(3.f, get_avx2_f32(v, 3));
+    TEST_EQ(-3.f, get_avx2_f32(v, 2));
+    TEST_EQ(1.f, get_avx2_f32(v, 1));
+    TEST_EQ(-1.f, get_avx2_f32(v, 0));
     
     run("v8 #-1 #xf0f0f0f0 #x0f0f0f0f #0 #0 #0 #0 #0 not");
     i = get_last_stack_value_i();
-    TEST_EQ(0, i.m256i_u32[7]);
-    TEST_EQ(0x0f0f0f0f, i.m256i_u32[6]);
-    TEST_EQ(0xf0f0f0f0, i.m256i_u32[5]);
-    TEST_EQ(-1, i.m256i_u32[4]);
+    TEST_EQ(0, get_avx2_i32(i, 7));
+    TEST_EQ(0x0f0f0f0f, get_avx2_i32(i, 6));
+    TEST_EQ(0xf0f0f0f0, get_avx2_i32(i, 5));
+    TEST_EQ(-1, get_avx2_i32(i, 4));
 
     run("v8 #1 #2 #3 #4 #5 #6 #7 #8 fcast");
     v = get_last_stack_value();
-    TEST_EQ(1.f, v.m256_f32[7]);
-    TEST_EQ(2.f, v.m256_f32[6]);
-    TEST_EQ(3.f, v.m256_f32[5]);
-    TEST_EQ(4.f, v.m256_f32[4]);
-    TEST_EQ(5.f, v.m256_f32[3]);
-    TEST_EQ(6.f, v.m256_f32[2]);
-    TEST_EQ(7.f, v.m256_f32[1]);
-    TEST_EQ(8.f, v.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(v, 7));
+    TEST_EQ(2.f, get_avx2_f32(v, 6));
+    TEST_EQ(3.f, get_avx2_f32(v, 5));
+    TEST_EQ(4.f, get_avx2_f32(v, 4));
+    TEST_EQ(5.f, get_avx2_f32(v, 3));
+    TEST_EQ(6.f, get_avx2_f32(v, 2));
+    TEST_EQ(7.f, get_avx2_f32(v, 1));
+    TEST_EQ(8.f, get_avx2_f32(v, 0));
 
     run("v8 1 2 3 4 5 6 7 8 icast");
     i = get_last_stack_value_i();
-    TEST_EQ(1, i.m256i_u32[7]);
-    TEST_EQ(2, i.m256i_u32[6]);
-    TEST_EQ(3, i.m256i_u32[5]);
-    TEST_EQ(4, i.m256i_u32[4]);
-    TEST_EQ(5, i.m256i_u32[3]);
-    TEST_EQ(6, i.m256i_u32[2]);
-    TEST_EQ(7, i.m256i_u32[1]);
-    TEST_EQ(8, i.m256i_u32[0]);
+    TEST_EQ(1, get_avx2_i32(i, 7));
+    TEST_EQ(2, get_avx2_i32(i, 6));
+    TEST_EQ(3, get_avx2_i32(i, 5));
+    TEST_EQ(4, get_avx2_i32(i, 4));
+    TEST_EQ(5, get_avx2_i32(i, 3));
+    TEST_EQ(6, get_avx2_i32(i, 2));
+    TEST_EQ(7, get_avx2_i32(i, 1));
+    TEST_EQ(8, get_avx2_i32(i, 0));
 
     run("4.2 2.1 fm/mod");
     TEST_EQ(2.f, get_stack_valuef(0));
@@ -833,25 +855,25 @@ struct prim : public compile_fixture
 
     run("v8 1 2 3 4 5 6 7 8 v8 8 7 6 5 4 3 2 1 min");
     v = get_last_stack_value();
-    TEST_EQ(1.f, v.m256_f32[7]);
-    TEST_EQ(2.f, v.m256_f32[6]);
-    TEST_EQ(3.f, v.m256_f32[5]);
-    TEST_EQ(4.f, v.m256_f32[4]);
-    TEST_EQ(4.f, v.m256_f32[3]);
-    TEST_EQ(3.f, v.m256_f32[2]);
-    TEST_EQ(2.f, v.m256_f32[1]);
-    TEST_EQ(1.f, v.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(v, 7));
+    TEST_EQ(2.f, get_avx2_f32(v, 6));
+    TEST_EQ(3.f, get_avx2_f32(v, 5));
+    TEST_EQ(4.f, get_avx2_f32(v, 4));
+    TEST_EQ(4.f, get_avx2_f32(v, 3));
+    TEST_EQ(3.f, get_avx2_f32(v, 2));
+    TEST_EQ(2.f, get_avx2_f32(v, 1));
+    TEST_EQ(1.f, get_avx2_f32(v, 0));
 
     run("v8 1 2 3 4 5 6 7 8 v8 8 7 6 5 4 3 2 1 max");
     v = get_last_stack_value();
-    TEST_EQ(8.f, v.m256_f32[7]);
-    TEST_EQ(7.f, v.m256_f32[6]);
-    TEST_EQ(6.f, v.m256_f32[5]);
-    TEST_EQ(5.f, v.m256_f32[4]);
-    TEST_EQ(5.f, v.m256_f32[3]);
-    TEST_EQ(6.f, v.m256_f32[2]);
-    TEST_EQ(7.f, v.m256_f32[1]);
-    TEST_EQ(8.f, v.m256_f32[0]);
+    TEST_EQ(8.f, get_avx2_f32(v, 7));
+    TEST_EQ(7.f, get_avx2_f32(v, 6));
+    TEST_EQ(6.f, get_avx2_f32(v, 5));
+    TEST_EQ(5.f, get_avx2_f32(v, 4));
+    TEST_EQ(5.f, get_avx2_f32(v, 3));
+    TEST_EQ(6.f, get_avx2_f32(v, 2));
+    TEST_EQ(7.f, get_avx2_f32(v, 1));
+    TEST_EQ(8.f, get_avx2_f32(v, 0));
     }
   };
 
@@ -918,63 +940,63 @@ struct if_tests : public compile_fixture
     */
     run("v8 1 2 3 4 5 6 7 8 4 > if 2 else 3 then");
     auto v = get_stack_value(0);
-    TEST_EQ(3.f, v.m256_f32[7]);
-    TEST_EQ(3.f, v.m256_f32[6]);
-    TEST_EQ(3.f, v.m256_f32[5]);
-    TEST_EQ(3.f, v.m256_f32[4]);
-    TEST_EQ(2.f, v.m256_f32[3]);
-    TEST_EQ(2.f, v.m256_f32[2]);
-    TEST_EQ(2.f, v.m256_f32[1]);
-    TEST_EQ(2.f, v.m256_f32[0]);
+    TEST_EQ(3.f, get_avx2_f32(v, 7));
+    TEST_EQ(3.f, get_avx2_f32(v, 6));
+    TEST_EQ(3.f, get_avx2_f32(v, 5));
+    TEST_EQ(3.f, get_avx2_f32(v, 4));
+    TEST_EQ(2.f, get_avx2_f32(v, 3));
+    TEST_EQ(2.f, get_avx2_f32(v, 2));
+    TEST_EQ(2.f, get_avx2_f32(v, 1));
+    TEST_EQ(2.f, get_avx2_f32(v, 0));
 
     run("v8 1 2 3 4 5 6 7 8 2 fm/mod drop 0 = if 10 12 else 11 13 then");
     v = get_stack_value(0);
-    TEST_EQ(13.f, v.m256_f32[7]);
-    TEST_EQ(12.f, v.m256_f32[6]);
-    TEST_EQ(13.f, v.m256_f32[5]);
-    TEST_EQ(12.f, v.m256_f32[4]);
-    TEST_EQ(13.f, v.m256_f32[3]);
-    TEST_EQ(12.f, v.m256_f32[2]);
-    TEST_EQ(13.f, v.m256_f32[1]);
-    TEST_EQ(12.f, v.m256_f32[0]);
+    TEST_EQ(13.f, get_avx2_f32(v, 7));
+    TEST_EQ(12.f, get_avx2_f32(v, 6));
+    TEST_EQ(13.f, get_avx2_f32(v, 5));
+    TEST_EQ(12.f, get_avx2_f32(v, 4));
+    TEST_EQ(13.f, get_avx2_f32(v, 3));
+    TEST_EQ(12.f, get_avx2_f32(v, 2));
+    TEST_EQ(13.f, get_avx2_f32(v, 1));
+    TEST_EQ(12.f, get_avx2_f32(v, 0));
     v = get_stack_value(1);
-    TEST_EQ(11.f, v.m256_f32[7]);
-    TEST_EQ(10.f, v.m256_f32[6]);
-    TEST_EQ(11.f, v.m256_f32[5]);
-    TEST_EQ(10.f, v.m256_f32[4]);
-    TEST_EQ(11.f, v.m256_f32[3]);
-    TEST_EQ(10.f, v.m256_f32[2]);
-    TEST_EQ(11.f, v.m256_f32[1]);
-    TEST_EQ(10.f, v.m256_f32[0]);
+    TEST_EQ(11.f, get_avx2_f32(v, 7));
+    TEST_EQ(10.f, get_avx2_f32(v, 6));
+    TEST_EQ(11.f, get_avx2_f32(v, 5));
+    TEST_EQ(10.f, get_avx2_f32(v, 4));
+    TEST_EQ(11.f, get_avx2_f32(v, 3));
+    TEST_EQ(10.f, get_avx2_f32(v, 2));
+    TEST_EQ(11.f, get_avx2_f32(v, 1));
+    TEST_EQ(10.f, get_avx2_f32(v, 0));
 
     run("1 2 > if 3 else 5 then");
     v = get_stack_value(0);
-    TEST_EQ(5.f, v.m256_f32[7]);
-    TEST_EQ(5.f, v.m256_f32[6]);
-    TEST_EQ(5.f, v.m256_f32[5]);
-    TEST_EQ(5.f, v.m256_f32[4]);
-    TEST_EQ(5.f, v.m256_f32[3]);
-    TEST_EQ(5.f, v.m256_f32[2]);
-    TEST_EQ(5.f, v.m256_f32[1]);
-    TEST_EQ(5.f, v.m256_f32[0]);
+    TEST_EQ(5.f, get_avx2_f32(v, 7));
+    TEST_EQ(5.f, get_avx2_f32(v, 6));
+    TEST_EQ(5.f, get_avx2_f32(v, 5));
+    TEST_EQ(5.f, get_avx2_f32(v, 4));
+    TEST_EQ(5.f, get_avx2_f32(v, 3));
+    TEST_EQ(5.f, get_avx2_f32(v, 2));
+    TEST_EQ(5.f, get_avx2_f32(v, 1));
+    TEST_EQ(5.f, get_avx2_f32(v, 0));
 
     run("1 2 < if 3 else 5 then");
     v = get_stack_value(0);
-    TEST_EQ(3.f, v.m256_f32[7]);
-    TEST_EQ(3.f, v.m256_f32[6]);
-    TEST_EQ(3.f, v.m256_f32[5]);
-    TEST_EQ(3.f, v.m256_f32[4]);
-    TEST_EQ(3.f, v.m256_f32[3]);
-    TEST_EQ(3.f, v.m256_f32[2]);
-    TEST_EQ(3.f, v.m256_f32[1]);
-    TEST_EQ(3.f, v.m256_f32[0]);
+    TEST_EQ(3.f, get_avx2_f32(v, 7));
+    TEST_EQ(3.f, get_avx2_f32(v, 6));
+    TEST_EQ(3.f, get_avx2_f32(v, 5));
+    TEST_EQ(3.f, get_avx2_f32(v, 4));
+    TEST_EQ(3.f, get_avx2_f32(v, 3));
+    TEST_EQ(3.f, get_avx2_f32(v, 2));
+    TEST_EQ(3.f, get_avx2_f32(v, 1));
+    TEST_EQ(3.f, get_avx2_f32(v, 0));
     
     run("1 2 < if 3 2 1 else 5 6 7 then");    
     for (int i = 0; i < 3; ++i)
       {
       v = get_stack_value(i);
       for (int j = 0; j < 8; ++j)
-        TEST_EQ(i == 0 ? 1.f : i == 1 ? 2.f : 3.f, v.m256_f32[j]);
+        TEST_EQ(i == 0 ? 1.f : i == 1 ? 2.f : 3.f, get_avx2_f32(v, j));
       }
    
     run("1 2 > if 3 2 1 else 5 6 7 then");
@@ -982,30 +1004,30 @@ struct if_tests : public compile_fixture
       {
       v = get_stack_value(i);
       for (int j = 0; j < 8; ++j)
-        TEST_EQ(i == 0 ? 7.f : i == 1 ? 6.f : 5.f, v.m256_f32[j]);
+        TEST_EQ(i == 0 ? 7.f : i == 1 ? 6.f : 5.f, get_avx2_f32(v, j));
       }
 
     run("v8 1 2 3 4 5 6 7 8 dup 2 fm/mod drop 0 = if dup 4 > if 40 else 39 then else  dup 2 < if 11 else 27 then then");
     v = get_stack_value(0);
-    TEST_EQ(11.f, v.m256_f32[7]);
-    TEST_EQ(39.f, v.m256_f32[6]);
-    TEST_EQ(27.f, v.m256_f32[5]);
-    TEST_EQ(39.f, v.m256_f32[4]);
-    TEST_EQ(27.f, v.m256_f32[3]);
-    TEST_EQ(40.f, v.m256_f32[2]);
-    TEST_EQ(27.f, v.m256_f32[1]);
-    TEST_EQ(40.f, v.m256_f32[0]);
+    TEST_EQ(11.f, get_avx2_f32(v, 7));
+    TEST_EQ(39.f, get_avx2_f32(v, 6));
+    TEST_EQ(27.f, get_avx2_f32(v, 5));
+    TEST_EQ(39.f, get_avx2_f32(v, 4));
+    TEST_EQ(27.f, get_avx2_f32(v, 3));
+    TEST_EQ(40.f, get_avx2_f32(v, 2));
+    TEST_EQ(27.f, get_avx2_f32(v, 1));
+    TEST_EQ(40.f, get_avx2_f32(v, 0));
 
     run("3 4 > if 2 > 1 if 10 else 11 then else 7 8 < if 2 else 20 then then");
     v = get_stack_value(0);
-    TEST_EQ(2.f, v.m256_f32[7]);
-    TEST_EQ(2.f, v.m256_f32[6]);
-    TEST_EQ(2.f, v.m256_f32[5]);
-    TEST_EQ(2.f, v.m256_f32[4]);
-    TEST_EQ(2.f, v.m256_f32[3]);
-    TEST_EQ(2.f, v.m256_f32[2]);
-    TEST_EQ(2.f, v.m256_f32[1]);
-    TEST_EQ(2.f, v.m256_f32[0]);
+    TEST_EQ(2.f, get_avx2_f32(v, 7));
+    TEST_EQ(2.f, get_avx2_f32(v, 6));
+    TEST_EQ(2.f, get_avx2_f32(v, 5));
+    TEST_EQ(2.f, get_avx2_f32(v, 4));
+    TEST_EQ(2.f, get_avx2_f32(v, 3));
+    TEST_EQ(2.f, get_avx2_f32(v, 2));
+    TEST_EQ(2.f, get_avx2_f32(v, 1));
+    TEST_EQ(2.f, get_avx2_f32(v, 0));
     }
   };
 
@@ -1053,26 +1075,26 @@ struct stdlib_tests : public compile_fixture
 
     run("2 1 3 within");
     auto u = get_last_stack_value_i();
-    TEST_EQ(-1, u.m256i_i32[7]);
-    TEST_EQ(-1, u.m256i_i32[6]);
-    TEST_EQ(-1, u.m256i_i32[5]);
-    TEST_EQ(-1, u.m256i_i32[4]);
-    TEST_EQ(-1, u.m256i_i32[3]);
-    TEST_EQ(-1, u.m256i_i32[2]);
-    TEST_EQ(-1, u.m256i_i32[1]);
-    TEST_EQ(-1, u.m256i_i32[0]);
+    TEST_EQ(-1, get_avx2_i32(u, 7));
+    TEST_EQ(-1, get_avx2_i32(u, 6));
+    TEST_EQ(-1, get_avx2_i32(u, 5));
+    TEST_EQ(-1, get_avx2_i32(u, 4));
+    TEST_EQ(-1, get_avx2_i32(u, 3));
+    TEST_EQ(-1, get_avx2_i32(u, 2));
+    TEST_EQ(-1, get_avx2_i32(u, 1));
+    TEST_EQ(-1, get_avx2_i32(u, 0));
 
 
     run("v8 0 0.5 1 1.5 2 2.5 3 3.5 1 3 within");
     u = get_last_stack_value_i();
-    TEST_EQ(0, u.m256i_i32[7]);
-    TEST_EQ(0, u.m256i_i32[6]);
-    TEST_EQ(-1, u.m256i_i32[5]);
-    TEST_EQ(-1, u.m256i_i32[4]);
-    TEST_EQ(-1, u.m256i_i32[3]);
-    TEST_EQ(-1, u.m256i_i32[2]);
-    TEST_EQ(0, u.m256i_i32[1]);
-    TEST_EQ(0, u.m256i_i32[0]);
+    TEST_EQ(0, get_avx2_i32(u, 7));
+    TEST_EQ(0, get_avx2_i32(u, 6));
+    TEST_EQ(-1, get_avx2_i32(u, 5));
+    TEST_EQ(-1, get_avx2_i32(u, 4));
+    TEST_EQ(-1, get_avx2_i32(u, 3));
+    TEST_EQ(-1, get_avx2_i32(u, 2));
+    TEST_EQ(0, get_avx2_i32(u, 1));
+    TEST_EQ(0, get_avx2_i32(u, 0));
 
     ctxt.stack_pointer = ctxt.aligned_stack_top;
     run("100 200 300 depth");
@@ -1092,14 +1114,14 @@ struct stdlib_tests : public compile_fixture
 
     run("v8 0 0.5 1 1.5 2 2.5 3 3.5 1 3 clamp");
     auto v = get_last_stack_value();
-    TEST_EQ(1.f, v.m256_f32[7]);
-    TEST_EQ(1.f, v.m256_f32[6]);
-    TEST_EQ(1.f, v.m256_f32[5]);
-    TEST_EQ(1.5f, v.m256_f32[4]);
-    TEST_EQ(2.f, v.m256_f32[3]);
-    TEST_EQ(2.5f, v.m256_f32[2]);
-    TEST_EQ(3.f, v.m256_f32[1]);
-    TEST_EQ(3.f, v.m256_f32[0]);
+    TEST_EQ(1.f, get_avx2_f32(v, 7));
+    TEST_EQ(1.f, get_avx2_f32(v, 6));
+    TEST_EQ(1.f, get_avx2_f32(v, 5));
+    TEST_EQ(1.5f, get_avx2_f32(v, 4));
+    TEST_EQ(2.f, get_avx2_f32(v, 3));
+    TEST_EQ(2.5f, get_avx2_f32(v, 2));
+    TEST_EQ(3.f, get_avx2_f32(v, 1));
+    TEST_EQ(3.f, get_avx2_f32(v, 0));
     }
   };
 
