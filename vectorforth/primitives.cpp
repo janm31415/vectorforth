@@ -373,7 +373,7 @@ void primitive_sin(asmcode& code, compile_data&)
 #ifdef USE_VECTORCALL
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
 #else
-  assert(0);// todo
+  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
 #endif
 
 #ifdef _WIN32
@@ -385,6 +385,7 @@ void primitive_sin(asmcode& code, compile_data&)
 #endif  
   code.add(asmcode::CALL, asmcode::R11);
 
+  code.add(asmcode::MOV, CONTEXT, asmcode::R15); // restore context
   restore_stack(code);
 
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, asmcode::YMM0);
@@ -400,7 +401,7 @@ void primitive_cos(asmcode& code, compile_data&)
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
   
 #else
-  assert(0);// todo
+  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
 #endif
 
 #ifdef _WIN32
@@ -428,7 +429,9 @@ void primitive_tan(asmcode& code, compile_data&)
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
 
 #else
-  assert(0);// todo
+  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
+
+
 #endif
 
 #ifdef _WIN32
@@ -454,7 +457,7 @@ void primitive_exp(asmcode& code, compile_data&)
 #ifdef USE_VECTORCALL
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
 #else
-  assert(0);// todo
+  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
 #endif
 
 #ifdef _WIN32
@@ -480,7 +483,7 @@ void primitive_log(asmcode& code, compile_data&)
 #ifdef USE_VECTORCALL
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
 #else
-  assert(0);// todo
+  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
 #endif
 
 #ifdef _WIN32
@@ -507,7 +510,8 @@ void primitive_pow(asmcode& code, compile_data&)
   code.add(asmcode::VMOVAPS, asmcode::YMM1, MEM_STACK_REGISTER);
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER, CELLS(4));
 #else
-  assert(0);// todo
+  code.add(asmcode::VMOVAPS, asmcode::YMM1, MEM_STACK_REGISTER);
+  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER, CELLS(4));
 #endif
 
 #ifdef _WIN32
@@ -535,7 +539,8 @@ void primitive_atan2(asmcode& code, compile_data&)
   code.add(asmcode::VMOVAPS, asmcode::YMM1, MEM_STACK_REGISTER);
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER, CELLS(4));
 #else
-  assert(0);// todo
+  code.add(asmcode::VMOVAPS, asmcode::YMM1, MEM_STACK_REGISTER);
+  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER, CELLS(4));
 #endif
 
 #ifdef _WIN32

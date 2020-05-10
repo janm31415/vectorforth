@@ -14,7 +14,7 @@
 
 #else
 
-#define _VECTORCALL
+#define _VECTORCALL 
 
 #endif
 

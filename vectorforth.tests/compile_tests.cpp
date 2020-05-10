@@ -25,7 +25,8 @@ namespace
 #ifdef _WIN32
     return v.m256i_i32[i];
 #else
-    return v[i];
+    int32_t* a = (int32_t*)&v;
+    return a[i];
 #endif
     }
 
@@ -406,7 +407,7 @@ struct avx_mathfun : public compile_fixture
     TEST_EQ_CLOSE(5.f, get_avx2_f32(v, 3), 1e-5f);
     TEST_EQ_CLOSE(6.f, get_avx2_f32(v, 2), 1e-5f);
     TEST_EQ_CLOSE(7.f, get_avx2_f32(v, 1), 1e-5f);
-    TEST_EQ_CLOSE(8.f, get_avx2_f32(v, 0), 1e-5f);
+    TEST_EQ_CLOSE(8.f, get_avx2_f32(v, 0), 1e-5f);    
     }
   };
 
@@ -1141,7 +1142,7 @@ VF_END
 
 void run_all_compile_tests()
   {
-  using namespace VF;
+  using namespace VF;  
   empty_program().test();
   floats().test();
   definitions().test();
@@ -1149,7 +1150,7 @@ void run_all_compile_tests()
   sub().test();
   mul().test();
   division().test();
-  v8().test();
+  v8().test();  
   avx_mathfun().test();
   prim_test().test();
   integers().test();
