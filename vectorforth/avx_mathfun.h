@@ -5,19 +5,10 @@
 #include <immintrin.h>
 
 #ifdef _WIN32
-#define USE_VECTORCALL
-#endif
-
-#ifdef USE_VECTORCALL
-
 #define _VECTORCALL __vectorcall
-
 #else
-
-#define _VECTORCALL 
-
+#define _VECTORCALL
 #endif
-
 
 VF_BEGIN
 

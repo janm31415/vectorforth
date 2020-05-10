@@ -39,10 +39,6 @@ set(CMAKE_C_FLAGS_DEBUG "-mavx2 -mfma")
 set(CMAKE_CXX_FLAGS_DEBUG "-mavx2 -mfma")
 set(CMAKE_C_FLAGS_RELEASE "-mavx2 -mfma")
 set(CMAKE_CXX_FLAGS_RELEASE "-mavx2 -mfma")
-#set(CMAKE_C_FLAGS_DEBUG "-mavx2")
-#set(CMAKE_CXX_FLAGS_DEBUG "-mavx2")
-#set(CMAKE_C_FLAGS_RELEASE "-mavx2")
-#set(CMAKE_CXX_FLAGS_RELEASE "-mavx2")
 endif (UNIX)
 
 # general build definitions

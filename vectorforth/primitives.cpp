@@ -370,11 +370,7 @@ void primitive_sin(asmcode& code, compile_data&)
   align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
-#ifdef USE_VECTORCALL
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
-#else
-  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
-#endif
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
@@ -396,13 +392,7 @@ void primitive_cos(asmcode& code, compile_data&)
   align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
-#ifdef USE_VECTORCALL
-  
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
-  
-#else
-  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
-#endif
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
@@ -424,15 +414,7 @@ void primitive_tan(asmcode& code, compile_data&)
   align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
-#ifdef USE_VECTORCALL
-
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
-
-#else
-  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
-
-
-#endif
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
@@ -454,11 +436,7 @@ void primitive_exp(asmcode& code, compile_data&)
   align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
-#ifdef USE_VECTORCALL
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
-#else
-  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
-#endif
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
@@ -480,11 +458,7 @@ void primitive_log(asmcode& code, compile_data&)
   align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
-#ifdef USE_VECTORCALL
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
-#else
-  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
-#endif
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
@@ -506,13 +480,8 @@ void primitive_pow(asmcode& code, compile_data&)
   align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
-#ifdef USE_VECTORCALL
   code.add(asmcode::VMOVAPS, asmcode::YMM1, MEM_STACK_REGISTER);
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER, CELLS(4));
-#else
-  code.add(asmcode::VMOVAPS, asmcode::YMM1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER, CELLS(4));
-#endif
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
@@ -535,13 +504,8 @@ void primitive_atan2(asmcode& code, compile_data&)
   align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
-#ifdef USE_VECTORCALL
   code.add(asmcode::VMOVAPS, asmcode::YMM1, MEM_STACK_REGISTER);
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER, CELLS(4));
-#else
-  code.add(asmcode::VMOVAPS, asmcode::YMM1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER, CELLS(4));
-#endif
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
