@@ -22,23 +22,35 @@ namespace
 
   int32_t get_avx2_i32(__m256i v, int i)
     {
+#ifdef _WIN32
     return v.m256i_i32[i];
+#else
+    return v[i];
+#endif
     }
 
   float get_avx2_f32(__m256 v, int i)
     {
+#ifdef _WIN32
     return v.m256_f32[i];
+#else
+    return v[i];
+#endif
     }
 
   int32_t get_avx2_i32(__m256 v, int i)
-    {
+    {    
     float f = get_avx2_f32(v, i);
     return *reinterpret_cast<int32_t*>(&f);
     }
 
   uint64_t get_avx2_u64(__m256 v, int i)
     {
+#ifdef _WIN32    
     return *reinterpret_cast<uint64_t*>(&v.m256_f32[i]);
+#else
+    return *reinterpret_cast<uint64_t*>(&v[i]);
+#endif
     }
 
   struct compile_fixture
