@@ -2,7 +2,7 @@
 
 void AppLog::Clear() { Buf.clear(); LineOffsets.clear(); }
 
-void AppLog::AddLog(const char* fmt, ...) IM_FMTARGS(2)
+void AppLog::AddLog(const char* fmt, ...)// IM_FMTARGS(2)
   {
   int old_size = Buf.size();
   va_list args;
