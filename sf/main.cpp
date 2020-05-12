@@ -269,7 +269,8 @@ int main(int argc, char** argv)
           }
         }
       });
-    paint(wh, (const uint8_t*)image, w, -h, 4);
+    if (!l.quit)
+      paint(wh, (const uint8_t*)image, w, -h, 4);
 
     os_restart_line();
     printf("%.2f FPS     ", 1.f / time_delta);
