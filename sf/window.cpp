@@ -699,6 +699,8 @@ namespace
 
 void paint(WindowHandle h_wnd, const uint8_t* bytes, int w, int h, int channels)
   {
+  if (h_wnd->quit)
+    return;
   bool flip_topdown = false;
   if (h < 0)
     {

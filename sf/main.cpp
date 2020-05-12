@@ -35,8 +35,13 @@ struct listener : public IWindowListener
 
   virtual void OnKeyUp(int k) 
     {
+#ifdef _WIN32
     if (k == 27)
       quit = true;
+#else
+    if (k == 9)
+      quit = true;
+#endif
     };
   };
 
@@ -48,6 +53,8 @@ void os_restart_line()
   GetConsoleScreenBufferInfo(out, &info);
   info.dwCursorPosition.X = 0;
   SetConsoleCursorPosition(out, info.dwCursorPosition);
+#else
+  printf("\r");
 #endif
   }
 
@@ -274,7 +281,12 @@ int main(int argc, char** argv)
 
   _mm_free(image);
 
+  for (auto& ctxt : local_context)
+    {
+    VF::destroy_context(ctxt);
+    }
   ASM::free_assembled_function((void*)fun, fun_size);
 
+  printf("\n");
   return 0;
   }

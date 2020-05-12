@@ -55,6 +55,10 @@ shader_program::shader_program(int w, int h) : _w(w), _h(h), _fun_size(0), _fun(
 
 shader_program::~shader_program()
   {  
+  for (auto& ctxt : local_context)
+    {
+    VF::destroy_context(ctxt);
+    }
   if (_fun)
     ASM::free_assembled_function((void*)_fun, _fun_size);
   }
