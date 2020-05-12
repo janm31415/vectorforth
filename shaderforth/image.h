@@ -18,35 +18,35 @@ class image
 
     image(uint32_t w, uint32_t h, bool init_to_zero = true) : _data(nullptr), _access(nullptr), _w(w), _h(h), _stride(w)
       {
-      if ((_w * sizeof(T)) & 15)
+      if ((_w * sizeof(T)) & 31)
         {
         switch (sizeof(T))
           {
           case 1:
           {
-          _stride += 16 - (_stride & 15);
+          _stride += 32 - (_stride & 31);
           break;
           }
           case 2:
           {
-          _stride += 8 - (_stride & 7);
+          _stride += 16 - (_stride & 15);
           break;
           }
           case 4:
           {
-          _stride += 4 - (_stride & 3);
+          _stride += 8 - (_stride & 7);
           break;
           }
           default:
           {
           ++_stride;
-          while ((_stride * sizeof(T)) & 15)
+          while ((_stride * sizeof(T)) & 31)
             ++_stride;
           break;
           }
           }
         }
-      _data = (T*)(_mm_malloc(_stride*_h * sizeof(T), 16));
+      _data = (T*)(_mm_malloc(_stride*_h * sizeof(T), 32));
       _access = (T**)(malloc(_h * sizeof(T*)));
       for (uint32_t i = 0; i < h; ++i)
         _access[i] = _data + (i * _stride);

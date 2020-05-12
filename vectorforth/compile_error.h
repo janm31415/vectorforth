@@ -15,6 +15,6 @@ enum compile_error
   VF_ERROR_VECTOR8_INVALID_SYNTAX
   };
 
-std::string compile_error_text(compile_error err, int line_nr, int column_nr);
+std::string compile_error_text(compile_error err, int line_nr, int column_nr, std::string info = "");
 
 VF_END

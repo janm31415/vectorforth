@@ -989,6 +989,35 @@ void primitive_else(ASM::asmcode& code, compile_data& cd)
 
   }
 
+void primitive_begin(ASM::asmcode& code, compile_data& cd)
+  {
+  cd.begin_label.push_back(label_to_string(cd.label++));
+  cd.repeat_label.push_back(label_to_string(cd.label++));
+  code.add(asmcode::LABEL, cd.begin_label.back());
+  }
+
+void primitive_while(ASM::asmcode& code, compile_data& cd)
+  {
+  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER); // pop ymm0 from stack
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+
+  /*
+  The begin while repeat test only fails if it fails for all values in the simd vector
+  */
+
+  code.add(asmcode::VMOVMSKPS, asmcode::RAX, asmcode::YMM0); // if rax == 0, then all conditions are false
+  code.add(asmcode::TEST, asmcode::RAX, asmcode::RAX);
+  code.add(asmcode::JE, cd.repeat_label.back()); // if rax == 0, skip to the end of the begin while repeat code, otherwise continue
+  }
+
+void primitive_repeat(ASM::asmcode& code, compile_data& cd)
+  {
+  code.add(asmcode::JMP, cd.begin_label.back());
+  code.add(asmcode::LABEL, cd.repeat_label.back());
+  cd.begin_label.pop_back();
+  cd.repeat_label.pop_back();
+  }
+
 prim_map generate_primitives_map()
   {
   prim_map pm;
@@ -1133,6 +1162,10 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("if", &primitive_if));
   pm.insert(std::pair<std::string, prim_fun>("then", &primitive_then));
   pm.insert(std::pair<std::string, prim_fun>("else", &primitive_else));
+
+  pm.insert(std::pair<std::string, prim_fun>("begin", &primitive_begin));
+  pm.insert(std::pair<std::string, prim_fun>("while", &primitive_while));
+  pm.insert(std::pair<std::string, prim_fun>("repeat", &primitive_repeat));
 
   return pm;
   }

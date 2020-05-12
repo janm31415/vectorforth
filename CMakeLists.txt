@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(asm)
 add_subdirectory(asm.tests)
+add_subdirectory(sf)
 add_subdirectory(shaderforth)
 add_subdirectory(vectorforth)
 add_subdirectory(vectorforth.tests)

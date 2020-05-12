@@ -109,6 +109,10 @@ void primitive_if(ASM::asmcode& code, compile_data& cd);
 void primitive_then(ASM::asmcode& code, compile_data& cd);
 void primitive_else(ASM::asmcode& code, compile_data& cd);
 
+void primitive_begin(ASM::asmcode& code, compile_data& cd);
+void primitive_while(ASM::asmcode& code, compile_data& cd);
+void primitive_repeat(ASM::asmcode& code, compile_data& cd);
+
 typedef void(*prim_fun)(ASM::asmcode&, compile_data&);
 typedef std::map<std::string, prim_fun> prim_map;
 

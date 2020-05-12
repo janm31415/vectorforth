@@ -19,7 +19,7 @@ void compile_primitive(asmcode& code, compile_data& cd, token word)
   static prim_map pm = generate_primitives_map();
   auto it = pm.find(word.value);
   if (it == pm.end())
-    throw std::runtime_error(compile_error_text(VF_ERROR_WORD_UNKNOWN, word.line_nr, word.column_nr).c_str());
+    throw std::runtime_error(compile_error_text(VF_ERROR_WORD_UNKNOWN, word.line_nr, word.column_nr, word.value).c_str());
   it->second(code, cd);
   }
 

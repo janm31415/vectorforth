@@ -3,6 +3,8 @@
 
 #include "logging.h"
 
+#include <sstream>
+
 #include <tbb/parallel_for.h>
 #include <tbb/enumerable_thread_specific.h>
 
@@ -11,6 +13,41 @@
 #include <vectorforth/dictionary.h>
 #include <vectorforth/tokenize.h>
 #include <vectorforth/stdlib.h>
+
+namespace
+  {
+
+  std::string adapt_line_number_in_error_message(const std::string& msg, int line_change)
+    {
+    std::stringstream ss;
+    ss << msg;
+    std::string out;
+    bool read_line = false;
+    while (!ss.eof())
+      {
+      std::string txt;
+      if (!read_line)
+        {
+        ss >> txt;
+        if (txt == "line")
+          read_line = true;
+        }
+      else
+        {
+        int ln;
+        ss >> ln;
+        ln -= line_change;
+        std::stringstream ss2;
+        ss2 << ln;
+        ss2 >> txt;
+        read_line = false;
+        }
+      out += txt;
+      out += " ";
+      }
+    return out;
+    }
+  }
 
 shader_program::shader_program(int w, int h) : _w(w), _h(h), _fun_size(0), _fun(nullptr)
   {
@@ -43,6 +80,8 @@ bool shader_program::compile(const std::string& script)
 : mw st@ #416 #- @ ;
 )";
 
+  int main_lines = std::count(main.begin(), main.end(), '\n');
+
   std::string shader = main + script;
 
   try
@@ -58,7 +97,7 @@ bool shader_program::compile(const std::string& script)
     }
   catch (std::runtime_error e)
     {
-    Logging::Error() << "shader program: error: " << e.what() << "\n";
+    Logging::Error() << "shader program: " << adapt_line_number_in_error_message(e.what(), main_lines) << "\n";
     _fun = nullptr;
     return false;
     }
