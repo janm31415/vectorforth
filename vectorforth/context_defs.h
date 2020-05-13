@@ -18,8 +18,13 @@ VF_BEGIN
 #define STACK_TOP ASM::asmcode::MEM_R10, 72
 #define STACK_POINTER ASM::asmcode::MEM_R10, 88
 
+#define DATA_SPACE_POINTER ASM::asmcode::MEM_R10, 112
+#define HERE_POINTER ASM::asmcode::MEM_R10, 120
+
 #define STACK_REGISTER ASM::asmcode::RBP
 #define MEM_STACK_REGISTER ASM::asmcode::MEM_RBP
+
+#define HERE ASM::asmcode::RBX
 
 #define RSP_SAVE ASM::asmcode::MEM_R10, 96
 

@@ -19,7 +19,7 @@ void store_registers(asmcode& code)
   linux: r12, r13, r14, r15, rbx, rsp, rbp should be preserved
   windows: r12, r13, r14, r15, rbx, rsp, rbp, rdi, rsi
   */
-  //code.add(asmcode::MOV, RBX_STORE, asmcode::RBX);
+  code.add(asmcode::MOV, RBX_STORE, asmcode::RBX);
   //code.add(asmcode::MOV, RDI_STORE, asmcode::RDI);
   //code.add(asmcode::MOV, RSI_STORE, asmcode::RSI);
   code.add(asmcode::MOV, RSP_STORE, asmcode::RSP);
@@ -36,7 +36,7 @@ void load_registers(asmcode& code)
   linux: r12, r13, r14, r15, rbx, rsp, rbp should be preserved
   windows: r12, r13, r14, r15, rbx, rsp, rbp, rdi, rsi
   */
-  //code.add(asmcode::MOV, asmcode::RBX, RBX_STORE);
+  code.add(asmcode::MOV, asmcode::RBX, RBX_STORE);
   //code.add(asmcode::MOV, asmcode::RDI, RDI_STORE);
   //code.add(asmcode::MOV, asmcode::RSI, RSI_STORE);
   code.add(asmcode::MOV, asmcode::RSP, RSP_STORE);
@@ -113,33 +113,6 @@ void push_rax(ASM::asmcode& code)
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
   }
 
-/*
-void save_before_foreign_call(asmcode& code)
-  {
-  code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, CELLS(8));
-  code.add(asmcode::MOV, asmcode::MEM_RSP, CELLS(0), asmcode::RBX);
-  code.add(asmcode::MOV, asmcode::MEM_RSP, CELLS(1), asmcode::RCX);
-  code.add(asmcode::MOV, asmcode::MEM_RSP, CELLS(2), asmcode::RDX);
-  code.add(asmcode::MOV, asmcode::MEM_RSP, CELLS(3), asmcode::RSI);
-  code.add(asmcode::MOV, asmcode::MEM_RSP, CELLS(4), asmcode::RDI);
-  code.add(asmcode::MOV, asmcode::MEM_RSP, CELLS(5), asmcode::R8);
-  code.add(asmcode::MOV, asmcode::MEM_RSP, CELLS(6), asmcode::R9);
-  code.add(asmcode::MOV, asmcode::MEM_RSP, CELLS(7), asmcode::R10);
-  }
-
-void restore_after_foreign_call(asmcode& code)
-  {
-  code.add(asmcode::MOV, asmcode::R10, asmcode::MEM_RSP, CELLS(7));
-  code.add(asmcode::MOV, asmcode::R9, asmcode::MEM_RSP, CELLS(6));
-  code.add(asmcode::MOV, asmcode::R8, asmcode::MEM_RSP, CELLS(5));
-  code.add(asmcode::MOV, asmcode::RDI, asmcode::MEM_RSP, CELLS(4));
-  code.add(asmcode::MOV, asmcode::RSI, asmcode::MEM_RSP, CELLS(3));
-  code.add(asmcode::MOV, asmcode::RDX, asmcode::MEM_RSP, CELLS(2));
-  code.add(asmcode::MOV, asmcode::RCX, asmcode::MEM_RSP, CELLS(1));
-  code.add(asmcode::MOV, asmcode::RBX, asmcode::MEM_RSP, CELLS(0));
-  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, CELLS(8));
-  }
-  */
 void align_stack(asmcode& code)
   {
   /*

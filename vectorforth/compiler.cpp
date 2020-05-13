@@ -218,6 +218,8 @@ void compile(asmcode& code, dictionary& d, std::vector<token> words)
 
   code.add(asmcode::MOV, STACK_REGISTER, STACK_POINTER);
 
+  code.add(asmcode::MOV, HERE, HERE_POINTER);
+
   /*
   Align stack with 32 byte boundary
   */

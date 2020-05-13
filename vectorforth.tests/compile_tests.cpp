@@ -30,6 +30,16 @@ namespace
 #endif
     }
 
+  uint64_t get_avx2_u64(__m256i v, int i)
+    {
+#ifdef _WIN32
+    return v.m256i_u64[i];
+#else
+    uint64_t* a = (uint64_t*)&v;
+    return a[i];
+#endif
+    }
+
   float get_avx2_f32(__m256 v, int i)
     {
 #ifdef _WIN32
@@ -65,7 +75,7 @@ namespace
 
     compile_fixture()
       {
-      ctxt = create_context(1024 * 1024);
+      ctxt = create_context(1024 * 1024, 1024 * 1024);
       add_stdlib_to_dictionary(dict);
       }
 
@@ -1177,6 +1187,37 @@ struct begin_while_repeat_tests : public compile_fixture
     }
   };
 
+struct data_space_tests : public compile_fixture
+  {
+  void test()
+    {
+    run("here");
+    auto v = get_last_stack_value_i();
+    uint64_t here_pointer = get_avx2_u64(v, 0);
+    uint64_t ctxt_here_pointer = (uint64_t)(void*)ctxt.here_pointer;
+    TEST_EQ(here_pointer, ctxt_here_pointer);
+    uint64_t ctxt_data_space_pointer = (uint64_t)(void*)ctxt.data_space_pointer;
+    uint64_t here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer);
+
+    run("#32 here #+!");
+    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer+32);
+
+    run("#32 here #-!");
+    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer);
+
+    run("#96 allot");
+    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 96);
+
+    run("#2 cells allot");
+    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 96 + 64);
+    }
+  };
+
 VF_END
 
 void run_all_compile_tests()
@@ -1202,4 +1243,5 @@ void run_all_compile_tests()
   if_tests().test();
   stdlib_tests().test();
   begin_while_repeat_tests().test();
+  data_space_tests().test();
   }

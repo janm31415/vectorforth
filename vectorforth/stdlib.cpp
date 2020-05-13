@@ -45,6 +45,11 @@ void add_stdlib_to_dictionary(dictionary& d)
   register_definition(d, ": pick (  x_u ... x_1 x_0 #u -- x_u ... x_1 x_0 x_u ) #1+ #32 #* sp@ #+ @;");
   register_definition(d, ": true v8 #-1 #-1 #-1 #-1 #-1 #-1 #-1 #-1 ;");
   register_definition(d, ": false 0 ;");
+
+
+  register_definition(d, ": allot here @ swap here #+! ;");
+
+
   /*
   // old definition of within, uses if and thus branching, which is not recommended
   register_definition(d, R"(
