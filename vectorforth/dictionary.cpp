@@ -35,6 +35,7 @@ void register_definition(dictionary& d, std::vector<token>& words)
   assert(words.front().type == token::T_WORD);
   
   dictionary_entry de;
+  de.type = dictionary_entry::T_FUNCTION;
   de.name = words.front().value;
 
   auto it_end = words.rend() - 1;

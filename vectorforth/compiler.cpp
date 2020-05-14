@@ -14,13 +14,51 @@ using namespace ASM;
 
 VF_BEGIN
 
-void compile_primitive(asmcode& code, compile_data& cd, token word)
+void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token word)
   {
   static prim_map pm = generate_primitives_map();
-  auto it = pm.find(word.value);
-  if (it == pm.end())
-    throw std::runtime_error(compile_error_text(VF_ERROR_WORD_UNKNOWN, word.line_nr, word.column_nr, word.value).c_str());
-  it->second(code, cd);
+  if (word.value == "create")
+    {
+    if (cd.create_called)
+      throw std::runtime_error(compile_error_text(VF_ERROR_CREATE_WAS_ALREADY_CALLED, word.line_nr, word.column_nr, word.value).c_str());
+    cd.create_called = true;
+    code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+    if (cd.constant_space_offset)
+      code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.constant_space_offset);
+    code.add(asmcode::MOV, asmcode::RCX, MEM_HERE);
+    code.add(asmcode::MOV, asmcode::MEM_RAX, asmcode::RCX);
+    }
+  else
+    {
+    auto it = pm.find(word.value);
+    if (it == pm.end())
+      {
+      if (cd.create_called)
+        {
+        cd.create_called = false;
+        dictionary_entry de;
+        de.type = dictionary_entry::T_VARIABLE;
+        de.name = word.value;
+        de.address = cd.constant_space_offset;
+        cd.constant_space_offset += 8;
+        push(d, de);
+        return;
+        }
+      else
+        throw std::runtime_error(compile_error_text(VF_ERROR_WORD_UNKNOWN, word.line_nr, word.column_nr, word.value).c_str());
+      }
+    it->second(code, cd);
+    }
+  }
+
+void compile_variable(asmcode& code, uint64_t address)
+  {
+  code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+  if (address)
+    code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
+  code.add(asmcode::MOV, asmcode::RCX, asmcode::MEM_RAX);
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RCX);  
   }
 
 void compile_word(asmcode& code, dictionary& d, compile_data& cd, token word)
@@ -28,11 +66,28 @@ void compile_word(asmcode& code, dictionary& d, compile_data& cd, token word)
   dictionary_entry e;
   if (find(e, d, word.value))
     {
-    compile_words(code, d, cd, e.words);
+    switch (e.type)
+      {
+      case dictionary_entry::T_FUNCTION:
+      {
+      compile_words(code, d, cd, e.words);
+      break;
+      }
+      case dictionary_entry::T_VARIABLE:
+      {
+      compile_variable(code, e.address);
+      break;
+      }
+      default:
+      {
+      throw std::runtime_error("compiler error: not implemented");
+      break;
+      }
+      }
     }
   else
     {
-    compile_primitive(code, cd, word);
+    compile_primitive(code, d, cd, word);
     }
   }
 
@@ -131,7 +186,7 @@ void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<t
       }
       case token::T_PRIMITIVE:
       {
-      compile_primitive(code, cd, word);
+      compile_primitive(code, d, cd, word);
       break;
       }
       case token::T_FLOAT:
@@ -188,11 +243,9 @@ void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<t
     }
   }
 
-void compile(asmcode& code, dictionary& d, std::vector<token> words)
+void compile(asmcode& code, dictionary& d, compile_data& cd, std::vector<token> words)
   {
   std::reverse(words.begin(), words.end());
-
-  compile_data cd = create_compile_data();
 
   code.add(asmcode::GLOBAL, "forth_entry");
 #ifdef _WIN32

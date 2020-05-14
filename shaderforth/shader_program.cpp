@@ -10,6 +10,7 @@
 
 #include <vectorforth/context.h>
 #include <vectorforth/compiler.h>
+#include <vectorforth/compile_data.h>
 #include <vectorforth/dictionary.h>
 #include <vectorforth/tokenize.h>
 #include <vectorforth/stdlib.h>
@@ -84,7 +85,7 @@ bool shader_program::compile(const std::string& script)
 : mw st@ #416 #- @ ;
 )";
 
-  int main_lines = std::count(main.begin(), main.end(), '\n');
+  int main_lines = (int)std::count(main.begin(), main.end(), '\n');
 
   std::string shader = main + script;
 
@@ -92,9 +93,10 @@ bool shader_program::compile(const std::string& script)
     {
     VF::dictionary dict;
     add_stdlib_to_dictionary(dict);
+    VF::compile_data cd = VF::create_compile_data();
     ASM::asmcode code;
     auto words = VF::tokenize(shader);
-    VF::compile(code, dict, words);
+    VF::compile(code, dict, cd, words);
     ASM::first_pass_data d;
 
     _fun = (fun_ptr)assemble(_fun_size, d, code);
@@ -150,7 +152,7 @@ void shader_program::run(image<uint32_t>& im)
     VF::context& ctxt = local_context.local();
 
     if (ctxt.memory_allocated == nullptr)
-      ctxt = VF::create_context(1024 * 1024, 1024 * 1024);
+      ctxt = VF::create_context(1024 * 1024, 256, 1024 * 1024);
 
     const float vrel = (float)y / _input.resolution_y;
     __m256 y_val = _mm256_set1_ps((float)y);

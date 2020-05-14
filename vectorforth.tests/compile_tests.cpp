@@ -5,6 +5,7 @@
 
 #include <vectorforth/context.h>
 #include <vectorforth/compiler.h>
+#include <vectorforth/compile_data.h>
 #include <vectorforth/dictionary.h>
 #include <vectorforth/stdlib.h>
 #include <vectorforth/tokenize.h>
@@ -71,12 +72,14 @@ namespace
     std::vector<std::pair<fun_ptr, uint64_t>> compiled_functions;
     std::string last_error;
     dictionary dict;
+    compile_data cd;
 
 
     compile_fixture()
       {
-      ctxt = create_context(1024 * 1024, 1024 * 1024);
+      ctxt = create_context(1024 * 1024, 256, 1024 * 1024);
       add_stdlib_to_dictionary(dict);
+      cd = create_compile_data();
       }
 
     ~compile_fixture()
@@ -90,7 +93,7 @@ namespace
       {
       asmcode code;
       auto words = tokenize(script);
-      compile(code, dict, words);
+      compile(code, dict, cd, words);
       return code;
       }
 
@@ -1196,7 +1199,7 @@ struct data_space_tests : public compile_fixture
     uint64_t here_pointer = get_avx2_u64(v, 0);
     uint64_t ctxt_here_pointer = (uint64_t)(void*)ctxt.here_pointer;
     TEST_EQ(here_pointer, ctxt_here_pointer);
-    uint64_t ctxt_data_space_pointer = (uint64_t)(void*)ctxt.data_space_pointer;
+    uint64_t ctxt_data_space_pointer = (uint64_t)(void*)ctxt.here_pointer+32;
     uint64_t here_pointer_content = *(uint64_t*)ctxt.here_pointer;
     TEST_EQ(here_pointer_content, ctxt_data_space_pointer);
 
@@ -1230,6 +1233,18 @@ struct data_space_tests : public compile_fixture
     TEST_EQ(101.f, get_avx2_f32(value, 5));
     TEST_EQ(101.f, get_avx2_f32(value, 6));
     TEST_EQ(101.f, get_avx2_f32(value, 7));
+
+    run("create a");
+    TEST_EQ(cd.constant_space_offset, 8);
+    uint64_t a_val = *(uint64_t*)ctxt.constant_space_pointer;
+    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(a_val, here_pointer_content);
+
+    run("1000 a !");
+
+    run("1 2 3 a @");
+    auto f = get_last_stack_value();
+    TEST_EQ(1000.f, get_avx2_f32(f, 0));
     }
   };
 

@@ -33,7 +33,7 @@ struct context
   char* rsp_save; // offset 96
   char* rsp_top; //offset 104
 
-  char* data_space_pointer; // offset 112
+  char* constant_space_pointer; // offset 112
 
   char* here_pointer; // 120
 
@@ -49,7 +49,7 @@ __attribute__ ((aligned (32)))
   ;
 
 
-VECTOR_FORTH_API context create_context(uint64_t stack_size_in_bytes, uint64_t data_space_size_in_bytes);
+VECTOR_FORTH_API context create_context(uint64_t stack_size_in_bytes, uint64_t constant_space_in_bytes, uint64_t data_space_size_in_bytes);
 VECTOR_FORTH_API void destroy_context(const context& ctxt);
 
 VF_END

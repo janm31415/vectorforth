@@ -10,8 +10,16 @@ VF_BEGIN
 
 struct dictionary_entry
   {
+  enum e_type
+    {
+    T_VARIABLE,
+    T_FUNCTION
+    };
+
   std::string name;
   std::vector<token> words;
+  uint64_t address;
+  e_type type;
   size_t dictionary_position;
   };
 

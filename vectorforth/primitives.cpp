@@ -752,7 +752,7 @@ void primitive_store(asmcode& code, compile_data&)
   code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
   }
 
-void primitive_addstorei(ASM::asmcode& code, compile_data& cd)
+void primitive_addstorei(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER); 
   code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER, CELLS(4));
@@ -760,7 +760,7 @@ void primitive_addstorei(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::ADD, asmcode::MEM_RAX, asmcode::RCX);
   }
 
-void primitive_substorei(ASM::asmcode& code, compile_data& cd)
+void primitive_substorei(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
   code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER, CELLS(4));
@@ -768,21 +768,21 @@ void primitive_substorei(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::SUB, asmcode::MEM_RAX, asmcode::RCX);
   }
 
-void primitive_here(ASM::asmcode& code, compile_data& cd)
+void primitive_here(ASM::asmcode& code, compile_data&)
   {
   //code.add(asmcode::MOV, asmcode::RAX, HERE);
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
   code.add(asmcode::MOV, MEM_STACK_REGISTER, HERE);
   }
 
-void primitive_cells(ASM::asmcode& code, compile_data& cd)
+void primitive_cells(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
   code.add(asmcode::SHL, asmcode::RAX, asmcode::NUMBER, 5);
   code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
   }
 
-void primitive_comma(ASM::asmcode& code, compile_data& cd)
+void primitive_comma(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));  
