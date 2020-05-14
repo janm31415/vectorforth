@@ -782,6 +782,16 @@ void primitive_cells(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
   }
 
+void primitive_comma(ASM::asmcode& code, compile_data& cd)
+  {
+  code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));  
+  code.add(asmcode::MOV, asmcode::RAX, MEM_HERE);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
+  code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, 32);
+  code.add(asmcode::MOV, MEM_HERE, asmcode::RAX);
+  }
+
 void primitive_floor(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
@@ -1187,6 +1197,7 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("sp@", &primitive_stack_pointer_fetch));
   pm.insert(std::pair<std::string, prim_fun>("here", &primitive_here));
   pm.insert(std::pair<std::string, prim_fun>("cells", &primitive_cells));
+  pm.insert(std::pair<std::string, prim_fun>(",", &primitive_comma));
 
   pm.insert(std::pair<std::string, prim_fun>("@", &primitive_fetch));
   pm.insert(std::pair<std::string, prim_fun>("!", &primitive_store));

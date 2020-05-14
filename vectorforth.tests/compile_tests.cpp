@@ -1215,6 +1215,21 @@ struct data_space_tests : public compile_fixture
     run("#2 cells allot");
     here_pointer_content = *(uint64_t*)ctxt.here_pointer;
     TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 96 + 64);
+
+    run("101 ,");
+    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 96 + 96);
+    void* ptr = (void*)here_pointer_content; // get the address in the here pointer
+    ptr = ((float*)ptr) - 8; // go back one cell
+    __m256 value = _mm256_loadu_ps((float*)ptr); // load the value
+    TEST_EQ(101.f, get_avx2_f32(value, 0)); // it should be 101
+    TEST_EQ(101.f, get_avx2_f32(value, 1));
+    TEST_EQ(101.f, get_avx2_f32(value, 2));
+    TEST_EQ(101.f, get_avx2_f32(value, 3));
+    TEST_EQ(101.f, get_avx2_f32(value, 4));
+    TEST_EQ(101.f, get_avx2_f32(value, 5));
+    TEST_EQ(101.f, get_avx2_f32(value, 6));
+    TEST_EQ(101.f, get_avx2_f32(value, 7));
     }
   };
 

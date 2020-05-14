@@ -25,6 +25,7 @@ VF_BEGIN
 #define MEM_STACK_REGISTER ASM::asmcode::MEM_RBP
 
 #define HERE ASM::asmcode::RBX
+#define MEM_HERE ASM::asmcode::MEM_RBX
 
 #define RSP_SAVE ASM::asmcode::MEM_R10, 96
 
