@@ -1212,10 +1212,16 @@ struct data_space_tests : public compile_fixture
     TEST_EQ(here_pointer_content, ctxt_data_space_pointer);
 
     run("#96 allot");
+    v = get_last_stack_value_i();
+    uint64_t allot_address = get_avx2_u64(v, 0);
+    TEST_EQ(allot_address, ctxt_data_space_pointer);
     here_pointer_content = *(uint64_t*)ctxt.here_pointer;
     TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 96);
 
     run("#2 cells allot");
+    v = get_last_stack_value_i();
+    allot_address = get_avx2_u64(v, 0);
+    TEST_EQ(allot_address, ctxt_data_space_pointer + 96);
     here_pointer_content = *(uint64_t*)ctxt.here_pointer;
     TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 96 + 64);
 
@@ -1245,6 +1251,12 @@ struct data_space_tests : public compile_fixture
     run("1 2 3 a @");
     auto f = get_last_stack_value();
     TEST_EQ(1000.f, get_avx2_f32(f, 0));
+
+    run("variable x 999 x ! variable y -999 y ! x @ y @");
+    f = get_stack_value(0);
+    TEST_EQ(-999.f, get_avx2_f32(f, 0));
+    f = get_stack_value(1);
+    TEST_EQ(999.f, get_avx2_f32(f, 0));
     }
   };
 
