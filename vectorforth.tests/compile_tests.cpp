@@ -77,7 +77,7 @@ namespace
 
     compile_fixture()
       {
-      ctxt = create_context(1024 * 1024, 256, 1024 * 1024);
+      ctxt = create_context(1024 * 1024, 1024, 1024 * 1024);
       add_stdlib_to_dictionary(dict);
       cd = create_compile_data();
       }
@@ -1240,10 +1240,10 @@ struct data_space_tests : public compile_fixture
     TEST_EQ(101.f, get_avx2_f32(value, 6));
     TEST_EQ(101.f, get_avx2_f32(value, 7));
 
-    run("create a");
-    TEST_EQ(cd.constant_space_offset, 8);
+    run("here @ create a");
+    TEST_EQ(cd.constant_space_offset, 32);
     uint64_t a_val = *(uint64_t*)ctxt.constant_space_pointer;
-    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    here_pointer_content = *(uint64_t*)(ctxt.here_pointer);
     TEST_EQ(a_val, here_pointer_content);
 
     run("1000 a !");
@@ -1252,11 +1252,23 @@ struct data_space_tests : public compile_fixture
     auto f = get_last_stack_value();
     TEST_EQ(1000.f, get_avx2_f32(f, 0));
 
+    
     run("variable x 999 x ! variable y -999 y ! x @ y @");
     f = get_stack_value(0);
     TEST_EQ(-999.f, get_avx2_f32(f, 0));
     f = get_stack_value(1);
     TEST_EQ(999.f, get_avx2_f32(f, 0));
+
+    run("20 , 30 , 40 , x @ y @");    
+    f = get_stack_value(1);
+    TEST_EQ(999.f, get_avx2_f32(f, 0));
+    f = get_stack_value(0);
+    TEST_EQ(-999.f, get_avx2_f32(f, 0));
+    
+    run("20 value val");
+    run("val");
+    f = get_stack_value(0);
+    TEST_EQ(20.f, get_avx2_f32(f, 0));
     }
   };
 

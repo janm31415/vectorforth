@@ -25,8 +25,10 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
     if (cd.constant_space_offset)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.constant_space_offset);
-    code.add(asmcode::MOV, asmcode::RCX, MEM_HERE);
-    code.add(asmcode::MOV, asmcode::MEM_RAX, asmcode::RCX);
+    code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
+    code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+    //code.add(asmcode::MOV, asmcode::RCX, MEM_HERE);    
+    code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
     }
   else
     {
@@ -40,7 +42,7 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
         de.type = dictionary_entry::T_VARIABLE;
         de.name = word.value;
         de.address = cd.constant_space_offset;
-        cd.constant_space_offset += 8;
+        cd.constant_space_offset += 32;
         push(d, de);
         return;
         }

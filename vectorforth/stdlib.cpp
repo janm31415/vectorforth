@@ -51,6 +51,8 @@ void add_stdlib_to_dictionary(dictionary& d)
 
   register_definition(d, ": variable #1 cells allot create ;");
 
+  register_definition(d, ": value create , ;");
+
 
   /*
   // old definition of within, uses if and thus branching, which is not recommended
