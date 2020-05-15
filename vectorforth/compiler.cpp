@@ -26,8 +26,7 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
     if (cd.constant_space_offset)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.constant_space_offset);
     code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
-    code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
-    //code.add(asmcode::MOV, asmcode::RCX, MEM_HERE);    
+    code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));   
     code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
     }
   else
@@ -77,7 +76,18 @@ void compile_word(asmcode& code, dictionary& d, compile_data& cd, token word)
       }
       case dictionary_entry::T_VARIABLE:
       {
-      compile_variable(code, e.address);
+      if (cd.create_called)  // overwriting existing variable
+        {
+        code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+        code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.constant_space_offset);
+        code.add(asmcode::VMOVAPS, asmcode::YMM0, asmcode::MEM_RAX);
+        code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, (cd.constant_space_offset - e.address));
+        code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
+        cd.create_called = false;
+        return;
+        }
+      else
+        compile_variable(code, e.address);
       break;
       }
       default:

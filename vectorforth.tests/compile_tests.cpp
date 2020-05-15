@@ -1246,6 +1246,12 @@ struct data_space_tests : public compile_fixture
     here_pointer_content = *(uint64_t*)(ctxt.here_pointer);
     TEST_EQ(a_val, here_pointer_content);
 
+    run("here @ create a");
+    TEST_EQ(cd.constant_space_offset, 32);
+    uint64_t a_val_2 = *(uint64_t*)ctxt.constant_space_pointer;
+    here_pointer_content = *(uint64_t*)(ctxt.here_pointer);
+    TEST_EQ(a_val_2, here_pointer_content);
+
     run("1000 a !");
 
     run("1 2 3 a @");
@@ -1265,10 +1271,17 @@ struct data_space_tests : public compile_fixture
     f = get_stack_value(0);
     TEST_EQ(-999.f, get_avx2_f32(f, 0));
     
-    run("20 value val");
-    run("val");
+    for (int i = 0; i < 64; ++i) // only 32 variables possible, since constant space equals 1024 in this test, but reusing a variable name will also reuse its memory
+      {
+      run("20 value val");
+      run("val");
+      f = get_stack_value(0);
+      TEST_EQ(20.f, get_avx2_f32(f, 0));
+      }
+
+    run("x @");
     f = get_stack_value(0);
-    TEST_EQ(20.f, get_avx2_f32(f, 0));
+    TEST_EQ(999.f, get_avx2_f32(f, 0));
     }
   };
 
