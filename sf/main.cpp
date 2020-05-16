@@ -108,7 +108,7 @@ std::string adapt_line_number_in_error_message(const std::string& msg, int line_
   return out;
   }
 
-#define SINGLE
+//#define SINGLE
 
 int main(int argc, char** argv)
   {  

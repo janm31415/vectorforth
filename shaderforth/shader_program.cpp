@@ -178,6 +178,10 @@ void shader_program::run(image<uint32_t>& im)
       _mm256_store_ps((float*)(ctxt.aligned_stack_top - 160), u_val);
       ctxt.stack_pointer = ctxt.aligned_stack_top - stack_top_offset;
 
+      // reset "here" pointer
+      char* data_space_pointer = ctxt.here_pointer + 32;
+      *((uint64_t*)ctxt.here_pointer) = (uint64_t)((void*)data_space_pointer);
+
       _fun(&ctxt);
 
       const float* b = (const float*)(ctxt.stack_pointer);
