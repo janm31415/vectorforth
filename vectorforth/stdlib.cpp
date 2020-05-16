@@ -51,7 +51,7 @@ void add_stdlib_to_dictionary(dictionary& d)
 
   register_definition(d, ": variable #1 cells allot create ;");
 
-  register_definition(d, ": value create , ;");
+  register_definition(d, ": value create ;");
 
 
   /*
@@ -227,6 +227,44 @@ r>            (a_x-b_x  a_y-b_y  a_z-a_z &result)
 vec3!
 ;
 )");
+
+  register_definition(d, R"(
+(multiply a vec3 with a scalar (t &v &result => -), where result contains t*v)
+
+: scalarmul3   (t &v &result)
+>r
+2dup        (t &v t &v)
+#64+ @  *   (t &v t*v_z)
+>r 2dup     (t &v t &v)
+#32+ @  *   (t &v t*v_y)
+>r          (t &v)
+@ *         (t*v_x)
+r> r>       (t*v_x t*vy t*vz)
+r> vec3!
+;
+)");
+
+
+  register_definition(d, R"(
+(length of a vec3 (&v => length))
+
+: length3   (&v)
+dup dot3 sqrt
+;
+)");
+
+  register_definition(d, R"(
+(normalize a vec3 (&v &result => -), where result contains the normalized vec3 v)
+
+: normalize3   (&v &result)
+>r             (&v)
+dup length3    (&v le)
+1.0 swap /     (&v 1/le)
+swap r>        (1/le &v &result)
+scalarmul3
+;
+)");
+
   }
 
 VF_END

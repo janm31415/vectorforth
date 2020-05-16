@@ -10,6 +10,7 @@
 #include <vectorforth/context.h>
 #include <vectorforth/compiler.h>
 #include <vectorforth/compile_data.h>
+#include <vectorforth/debug.h>
 #include <vectorforth/dictionary.h>
 #include <vectorforth/tokenize.h>
 #include <vectorforth/stdlib.h>
@@ -106,6 +107,8 @@ std::string adapt_line_number_in_error_message(const std::string& msg, int line_
     }
   return out;
   }
+
+#define SINGLE
 
 int main(int argc, char** argv)
   {  
@@ -214,7 +217,11 @@ int main(int argc, char** argv)
     __m256 time_delta_val = _mm256_set1_ps((float)time_delta);
     __m256 time_val = _mm256_set1_ps((float)time);
 
-    tbb::parallel_for((int)0, h, [&](int y)
+#ifdef SINGLE
+    for (int y = 0; y < h; ++y)
+#else
+    tbb::parallel_for((int)0, h, [&](int y)    
+#endif
       {
 
       uint32_t* p_im = image + y * w;
@@ -248,7 +255,14 @@ int main(int argc, char** argv)
         _mm256_store_ps((float*)(ctxt.aligned_stack_top - 160), u_val);
         ctxt.stack_pointer = ctxt.aligned_stack_top - stack_top_offset;
 
+        // reset "here" pointer
+        char* data_space_pointer = ctxt.here_pointer + 32;
+        *((uint64_t*)ctxt.here_pointer) = (uint64_t)((void*)data_space_pointer);
+
         fun(&ctxt);
+
+        //print_stack(std::cout, ctxt);
+        //print_data_space(std::cout, ctxt);
 
         const float* b = (const float*)(ctxt.stack_pointer);
         const float* g = (const float*)(ctxt.stack_pointer) + 8;
@@ -281,7 +295,10 @@ int main(int argc, char** argv)
           *p_im++ = 0xff000000 | (red << 16) | (green << 8) | blue;
           }
         }
-      });
+      }
+#ifndef SINGLE
+    );
+#endif
     if (!l.quit)
       paint(wh, (const uint8_t*)image, w, -h, 4);
 

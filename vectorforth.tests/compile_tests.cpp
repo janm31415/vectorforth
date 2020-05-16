@@ -108,6 +108,7 @@ namespace
       catch (std::runtime_error e)
         {
         last_error = e.what();
+        std::cout << last_error << std::endl;
         return nullptr;
         }
       first_pass_data d;
@@ -1347,6 +1348,26 @@ struct vec3_tests : public compile_fixture
     TEST_EQ(-4.f, get_avx2_f32(dsv6, 0));
     TEST_EQ(3.f, get_avx2_f32(dsv7, 0));
     TEST_EQ(32.f, get_avx2_f32(dsv8, 0));
+
+    run("100 w result scalarmul3");
+    dsv6 = get_data_space_value(6);
+    dsv7 = get_data_space_value(7);
+    dsv8 = get_data_space_value(8);
+    TEST_EQ(700.f, get_avx2_f32(dsv6, 0));
+    TEST_EQ(800.f, get_avx2_f32(dsv7, 0));
+    TEST_EQ(900.f, get_avx2_f32(dsv8, 0));
+
+    run("w length3");
+    f = get_stack_value(0);
+    TEST_EQ(std::sqrt(49.f+64.f+81.f), get_avx2_f32(f, 0));
+
+    run("w result normalize3");
+    dsv6 = get_data_space_value(6);
+    dsv7 = get_data_space_value(7);
+    dsv8 = get_data_space_value(8);
+    TEST_EQ(7.f/ std::sqrt(49.f + 64.f + 81.f), get_avx2_f32(dsv6, 0));
+    TEST_EQ(8.f/ std::sqrt(49.f + 64.f + 81.f), get_avx2_f32(dsv7, 0));
+    TEST_EQ(9.f/ std::sqrt(49.f + 64.f + 81.f), get_avx2_f32(dsv8, 0));
 
     //print_stack(std::cout, ctxt);
     //print_data_space(std::cout, ctxt);

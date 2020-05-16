@@ -46,7 +46,10 @@ void register_definition(dictionary& d, std::vector<token>& words)
       dictionary_entry e;
       if (find(e, d, it->value))
         {
-        de.words.insert(de.words.end(), e.words.begin(), e.words.end());
+        if (e.type == dictionary_entry::T_FUNCTION)
+          de.words.insert(de.words.end(), e.words.begin(), e.words.end());
+        else
+          de.words.push_back(*it);
         }
       else
         de.words.emplace_back(token::T_PRIMITIVE, it->value, it->line_nr, it->column_nr);

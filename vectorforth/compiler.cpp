@@ -75,9 +75,9 @@ void compile_variable(asmcode& code, compile_data& cd, uint64_t address)
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
     if (address)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
-    code.add(asmcode::MOV, asmcode::RCX, asmcode::MEM_RAX);
+    code.add(asmcode::VMOVAPS, asmcode::YMM0, asmcode::MEM_RAX);
     code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
-    code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RCX);
+    code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, asmcode::YMM0);
     }
   }
 
