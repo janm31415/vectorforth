@@ -1282,6 +1282,11 @@ struct data_space_tests : public compile_fixture
     run("x @");
     f = get_stack_value(0);
     TEST_EQ(999.f, get_avx2_f32(f, 0));
+
+    run("30 to val");
+    run("val");
+    f = get_stack_value(0);
+    TEST_EQ(30.f, get_avx2_f32(f, 0));
     }
   };
 

@@ -13,7 +13,8 @@ enum compile_error
   VF_ERROR_INVALID_DEFINITION_NAME,
   VF_ERROR_WORD_UNKNOWN,
   VF_ERROR_VECTOR8_INVALID_SYNTAX,
-  VF_ERROR_CREATE_WAS_ALREADY_CALLED
+  VF_ERROR_CREATE_WAS_ALREADY_CALLED,
+  VF_ERROR_UNCLEAR_TARGET_FOR_TO
   };
 
 std::string compile_error_text(compile_error err, int line_nr, int column_nr, std::string info = "");

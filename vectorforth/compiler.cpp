@@ -29,6 +29,12 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
     code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));   
     code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
     }
+  else if (word.value == "to")
+    {
+    if (cd.to_called || cd.create_called)
+      throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_TO, word.line_nr, word.column_nr, word.value).c_str());
+    cd.to_called = true;
+    }
   else
     {
     auto it = pm.find(word.value);
@@ -52,14 +58,27 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
     }
   }
 
-void compile_variable(asmcode& code, uint64_t address)
+void compile_variable(asmcode& code, compile_data& cd, uint64_t address)
   {
-  code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
-  if (address)
-    code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
-  code.add(asmcode::MOV, asmcode::RCX, asmcode::MEM_RAX);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
-  code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RCX);  
+  if (cd.to_called)
+    {
+    cd.to_called = false;
+    code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+    if (address)
+      code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
+    code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
+    code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+    code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
+    }
+  else
+    {
+    code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+    if (address)
+      code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
+    code.add(asmcode::MOV, asmcode::RCX, asmcode::MEM_RAX);
+    code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+    code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RCX);
+    }
   }
 
 void compile_word(asmcode& code, dictionary& d, compile_data& cd, token word)
@@ -87,7 +106,7 @@ void compile_word(asmcode& code, dictionary& d, compile_data& cd, token word)
         return;
         }
       else
-        compile_variable(code, e.address);
+        compile_variable(code, cd, e.address);
       break;
       }
       default:
