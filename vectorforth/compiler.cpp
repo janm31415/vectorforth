@@ -20,7 +20,7 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
   if (word.value == "create")
     {
     if (cd.create_called)
-      throw std::runtime_error(compile_error_text(VF_ERROR_CREATE_WAS_ALREADY_CALLED, word.line_nr, word.column_nr, word.value).c_str());
+      throw std::runtime_error(compile_error_text(VF_ERROR_CREATE_WAS_ALREADY_CALLED, word.line_nr, word.column_nr).c_str());
     cd.create_called = true;
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
     if (cd.constant_space_offset)
@@ -32,7 +32,7 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
   else if (word.value == "to")
     {
     if (cd.to_called || cd.create_called)
-      throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_TO, word.line_nr, word.column_nr, word.value).c_str());
+      throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_TO, word.line_nr, word.column_nr).c_str());
     cd.to_called = true;
     }
   else
@@ -276,6 +276,8 @@ void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<t
 
 void compile(asmcode& code, dictionary& d, compile_data& cd, std::vector<token> words)
   {
+  assert(!cd.to_called);
+  assert(!cd.create_called);
   std::reverse(words.begin(), words.end());
 
   code.add(asmcode::GLOBAL, "forth_entry");
@@ -321,6 +323,10 @@ void compile(asmcode& code, dictionary& d, compile_data& cd, std::vector<token> 
   /*Return to the caller*/
   code.add(asmcode::RET);
 
+  if (cd.to_called)
+    throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_TO, -1, -1).c_str());
+  if (cd.create_called)
+    throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_CREATE, -1, -1).c_str());
   }
 
 VF_END
