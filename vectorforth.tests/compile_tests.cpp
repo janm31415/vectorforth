@@ -6,6 +6,7 @@
 #include <vectorforth/context.h>
 #include <vectorforth/compiler.h>
 #include <vectorforth/compile_data.h>
+#include <vectorforth/debug.h>
 #include <vectorforth/dictionary.h>
 #include <vectorforth/stdlib.h>
 #include <vectorforth/tokenize.h>
@@ -134,6 +135,13 @@ namespace
         }
       __m256 sv = _mm256_load_ps(ptr);
       return sv;
+      }
+
+    __m256 get_data_space_value(size_t index) const
+      {
+      char* ptr = ctxt.here_pointer + 32 + index*32;
+      __m256 value = _mm256_load_ps((float*)ptr);
+      return value;
       }
 
     __m256i get_last_stack_value_i() const
@@ -1230,7 +1238,7 @@ struct data_space_tests : public compile_fixture
     TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 96 + 96);
     void* ptr = (void*)here_pointer_content; // get the address in the here pointer
     ptr = ((float*)ptr) - 8; // go back one cell
-    __m256 value = _mm256_loadu_ps((float*)ptr); // load the value
+    __m256 value = _mm256_load_ps((float*)ptr); // load the value
     TEST_EQ(101.f, get_avx2_f32(value, 0)); // it should be 101
     TEST_EQ(101.f, get_avx2_f32(value, 1));
     TEST_EQ(101.f, get_avx2_f32(value, 2));
@@ -1290,6 +1298,61 @@ struct data_space_tests : public compile_fixture
     }
   };
 
+struct vec3_tests : public compile_fixture
+  {
+  void test()
+    {
+    run("vec3 v 1 2 3 v vec3!");    
+    auto dsv0 = get_data_space_value(0);
+    auto dsv1 = get_data_space_value(1);
+    auto dsv2 = get_data_space_value(2);
+    TEST_EQ(1.f, get_avx2_f32(dsv0, 0));
+    TEST_EQ(2.f, get_avx2_f32(dsv1, 0));
+    TEST_EQ(3.f, get_avx2_f32(dsv2, 0));
+
+    run("vec3 w 7 8 9 w vec3!");
+    auto dsv3 = get_data_space_value(3);
+    auto dsv4 = get_data_space_value(4);
+    auto dsv5 = get_data_space_value(5);
+    TEST_EQ(7.f, get_avx2_f32(dsv3, 0));
+    TEST_EQ(8.f, get_avx2_f32(dsv4, 0));
+    TEST_EQ(9.f, get_avx2_f32(dsv5, 0));
+
+    run("v w dot3");
+    auto f = get_stack_value(0);
+    TEST_EQ(50.f, get_avx2_f32(f, 0));
+
+    run("vec3 result");
+
+    run("v w result cross3");
+    auto dsv6 = get_data_space_value(6);
+    auto dsv7 = get_data_space_value(7);
+    auto dsv8 = get_data_space_value(8);
+    TEST_EQ(-6.f, get_avx2_f32(dsv6, 0));
+    TEST_EQ(12.f, get_avx2_f32(dsv7, 0));
+    TEST_EQ(-6.f, get_avx2_f32(dsv8, 0));
+
+    run("v w result add3");
+    dsv6 = get_data_space_value(6);
+    dsv7 = get_data_space_value(7);
+    dsv8 = get_data_space_value(8);
+    TEST_EQ(8.f, get_avx2_f32(dsv6, 0));
+    TEST_EQ(10.f, get_avx2_f32(dsv7, 0));
+    TEST_EQ(12.f, get_avx2_f32(dsv8, 0));
+
+    run("3 11 41 v vec3! v w result sub3");
+    dsv6 = get_data_space_value(6);
+    dsv7 = get_data_space_value(7);
+    dsv8 = get_data_space_value(8);
+    TEST_EQ(-4.f, get_avx2_f32(dsv6, 0));
+    TEST_EQ(3.f, get_avx2_f32(dsv7, 0));
+    TEST_EQ(32.f, get_avx2_f32(dsv8, 0));
+
+    //print_stack(std::cout, ctxt);
+    //print_data_space(std::cout, ctxt);
+    }
+  };
+
 VF_END
 
 void run_all_compile_tests()
@@ -1316,4 +1379,5 @@ void run_all_compile_tests()
   stdlib_tests().test();
   begin_while_repeat_tests().test();
   data_space_tests().test();
+  vec3_tests().test();
   }

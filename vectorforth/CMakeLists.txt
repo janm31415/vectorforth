@@ -7,6 +7,7 @@ compile_data.h
 compile_error.h
 context.h
 context_defs.h
+debug.h
 dictionary.h
 namespace.h
 primitives.h
@@ -21,6 +22,7 @@ avx_mathfun.cpp
 context.cpp
 compiler.cpp
 compile_error.cpp
+debug.cpp
 dictionary.cpp
 primitives.cpp
 stdlib.cpp

@@ -179,13 +179,19 @@ std::vector<token> tokenize(const std::string& str)
       case '(': // treat as multiline comment
       {
       _treat_buffer(buff, tokens, line_nr, column_nr);
-      while (*s && *s != ')')
+      int nesting = 1;
+      ++s; ++column_nr;
+      while (*s && nesting > 0)
         {
         if (*s == '\n')
           {
           ++line_nr;
           column_nr = 0;
           }
+        if (*s == '(')
+          ++nesting;
+        if (*s == ')')
+          --nesting;
         ++s;
         ++column_nr;
         }
