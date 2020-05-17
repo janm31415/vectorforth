@@ -1252,14 +1252,14 @@ struct data_space_tests : public compile_fixture
     TEST_EQ(101.f, get_avx2_f32(value, 7));
 
     run("here @ create a");
-    TEST_EQ(cd.constant_space_offset, 32);
-    uint64_t a_val = *(uint64_t*)ctxt.constant_space_pointer;
+    TEST_EQ(cd.binding_space_offset, 32);
+    uint64_t a_val = *(uint64_t*)ctxt.binding_space_pointer;
     here_pointer_content = *(uint64_t*)(ctxt.here_pointer);
     TEST_EQ(a_val, here_pointer_content);
 
     run("here @ create a");
-    TEST_EQ(cd.constant_space_offset, 32);
-    uint64_t a_val_2 = *(uint64_t*)ctxt.constant_space_pointer;
+    TEST_EQ(cd.binding_space_offset, 32);
+    uint64_t a_val_2 = *(uint64_t*)ctxt.binding_space_pointer;
     here_pointer_content = *(uint64_t*)(ctxt.here_pointer);
     TEST_EQ(a_val_2, here_pointer_content);
 

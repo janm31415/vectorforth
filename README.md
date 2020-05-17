@@ -6,7 +6,7 @@ SIMD vectorized Forth compiler with CPU based shader application
 The memory used by vectorforth is subdivided into 4 batches of memory that each have their own name:
   - the stack
   - the return stack
-  - the variable space
+  - the binding space
   - the data space or heap
   
 The return stack corresponds to the c stack, which, in assembler, is controlled by the rsp register.
@@ -19,7 +19,7 @@ The stack is the workspace for vectorforth. Most operators pop or push values on
 
 The data space is similar to the heap in c. With "allot" data space memory can be allocated and values can be stored here for later reference.
 
-The variable space is used for binding words to data space locations. This memory is controlled by the compiler. With the "create \<name\>" keyword, the "variable <name>" keyword, or the "value <name>" keyword, the compiler will bind a given name to a data space address. Internally a dictionary is kept that binds \<name\> to a location in the variable space. This variable space location will point to the address in the data space memory where the memory was allocated. This means that the number of named variables/words is restricted by the size of variable space. For instance, if the variable space has size 2048 bytes, then 64 variables can be named ( 64 equals 2048 / 32 ).
+The binding space is used for binding words to data space locations. This memory is controlled by the compiler. With the "create \<name\>" keyword, the "variable <name>" keyword, or the "value <name>" keyword, the compiler will bind a given name to a data space address. Internally a dictionary is kept that binds \<name\> to a location in the binding space. This binding space location will point to the address in the data space memory where the memory was allocated. This means that the number of named variables/words is restricted by the size of binding space. For instance, if the binding space has size 2048 bytes, then 64 variables can be named ( 64 equals 2048 / 32 ).
 
 
 ## Glossary

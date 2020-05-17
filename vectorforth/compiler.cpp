@@ -23,8 +23,8 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
       throw std::runtime_error(compile_error_text(VF_ERROR_CREATE_WAS_ALREADY_CALLED, word.line_nr, word.column_nr).c_str());
     cd.create_called = true;
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
-    if (cd.constant_space_offset)
-      code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.constant_space_offset);
+    if (cd.binding_space_offset)
+      code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.binding_space_offset);
     code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
     code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));   
     code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
@@ -46,8 +46,8 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
         dictionary_entry de;
         de.type = dictionary_entry::T_VARIABLE;
         de.name = word.value;
-        de.address = cd.constant_space_offset;
-        cd.constant_space_offset += 32;
+        de.address = cd.binding_space_offset;
+        cd.binding_space_offset += 32;
         push(d, de);
         return;
         }
@@ -98,9 +98,9 @@ void compile_word(asmcode& code, dictionary& d, compile_data& cd, token word)
       if (cd.create_called)  // overwriting existing variable
         {
         code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
-        code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.constant_space_offset);
+        code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.binding_space_offset);
         code.add(asmcode::VMOVAPS, asmcode::YMM0, asmcode::MEM_RAX);
-        code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, (cd.constant_space_offset - e.address));
+        code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, (cd.binding_space_offset - e.address));
         code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
         cd.create_called = false;
         return;
