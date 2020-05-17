@@ -60,7 +60,61 @@ SIMD vectorized Forth compiler with CPU based shader application
 
 `max`    ( a b -- v )  Select the larger value of the top two stack elements.
 
+`sin`    ( a -- v )  Pop the top element of the stack, and put its sine on the stack.
 
+`cos`    ( a -- v )  Pop the top element of the stack, and put its cosine on the stack.
+
+`tan`    ( a -- v )  Pop the top element of the stack, and put its tangent on the stack.
+
+`log`    ( a -- v )  Pop the top element of the stack, and put its logarithm with base e on the stack.
+
+`exp`    ( a -- v )  Pop the top element of the stack, and put its exponential on the stack.
+
+`sqrt`    ( a -- v )  Pop the top element of the stack, and put its square root on the stack.
+
+`abs`    ( a -- v )  Pop the top element of the stack, and put its absolute value on the stack.
+
+`negate`    ( a -- -a )  Pop the top element of the stack, and put its negative value on the stack.
+
+`pow`    ( a b -- a^b )  Pop the top two elements of the stack, and push a to the power b on the stack.
+
+`**`    ( a b -- a^b )  Pop the top two elements of the stack, and push a to the power b on the stack.
+
+`atan2`    ( a b -- v )  Pop the top two elements of the stack and push the arctangent of a/b on the stack.
+
+`fm/mod`    ( a b -- rem quot )  Pop the top two elements a and b of the stack. Divide a by b, giving the floored quotient quot and the remainder rem. Put rem and quot on the stack.
+
+`floor`    ( v -- v )  Round the top element of the stack downward.
+
+`ceil`    ( v -- v )  Round the top element of the stack upward.
+
+`round`    ( v -- v )  Round the top element of the stack to the nearest integer.
+
+`trunc`    ( v -- v )  Truncate the top element of the stack (i.e. round towards zero).
+
+`=`    ( a b -- v ) 0xffffffff if the top elements are equal, else 0x00000000.
+
+`<>`    ( a b -- v ) 0xffffffff if the top elements are not equal, else 0x00000000.
+
+`<`    ( a b -- v ) 0xffffffff if a < b, else 0x00000000.
+
+`>`    ( a b -- v ) 0xffffffff if a > b, else 0x00000000.
+
+`<=`    ( a b -- v ) 0xffffffff if a <= b, else 0x00000000.
+
+`>=`    ( a b -- v ) 0xffffffff if a >= b, else 0x00000000.
+
+`f=`    ( a b -- v )  1.0 if the top elements are equal, else 0.0.
+
+`f<>`    ( a b -- v )  1.0 if the top elements are not equal, else 0.0.
+
+`f<`    ( a b -- v )  1.0 if a < b, else 0.0.
+
+`f>`    ( a b -- v )  1.0 if a > b, else 0.0.
+
+`f<=`    ( a b -- v )  1.0 if a <= b, else 0.0.
+
+`f>=`    ( a b -- v )  1.0 if a >= b, else 0.0.
 
 ### Specific shader forth definitions
 `x`    ( -- x )  Put the current x-coordinate on the stack.
@@ -85,6 +139,6 @@ SIMD vectorized Forth compiler with CPU based shader application
   
 `my`    ( -- my )  Put the mouse y-coordinate on the stack.
 
-`mz`    ( -- mz )  Is negative mx when a mouse button is pressed, otherwise positive mx
+`mz`    ( -- mz )  Is negative mx when a mouse button is pressed, otherwise positive mx.
 
-`mw`    ( -- mw )  Is negative my when a mouse button is pressed, otherwise positive my
+`mw`    ( -- mw )  Is negative my when a mouse button is pressed, otherwise positive my.
