@@ -15,6 +15,8 @@
 
 #include <iostream>
 
+#include <cmath>
+
 using namespace ASM;
 
 VF_BEGIN
