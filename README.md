@@ -6,9 +6,13 @@ SIMD vectorized Forth compiler with CPU based shader application
 ### Core vectorforth
 `: ;`    Define a new word with the syntax `: <word> <definition ...> ;`. Defined words are always inlined.
 
-`@`    ( #a -- v )  Read the value v at memory address #a and put it on the stack.
+`v8 a b c d e f g h`    ( -- v ) Push a vectorized value on the stack with floating point values given by a,...,h.
 
-`!`    ( v #a -- )  Store value v in memory address #a.
+`v8 #a #b #c #d #e #f #g #h`    ( -- v ) Push a vectorized value on the stack with 32-bit integer values given by #a,...,#h.
+
+`@`    ( #a -- v )  Read the value v at 64-bit memory address #a and put it on the stack.
+
+`!`    ( v #a -- )  Store value v in 64-bit memory address #a.
 
 `(`    ( -- )  A multiline comment until the corresponding ).
 
@@ -22,13 +26,13 @@ SIMD vectorized Forth compiler with CPU based shader application
 
 `pop`   ( -- v )  Pop a value v from the return stack and push it on the regular stack.
 
-`rt@`    ( -- #v ) Read the address of the return stack top and put it on the stack.
+`rt@`    ( -- #v ) Read the 64-bit address of the return stack top and put it on the stack.
 
-`rp@`    ( -- #v ) Read the address of the return stack pointer and put it on the stack.
+`rp@`    ( -- #v ) Read the 64-bit address of the return stack pointer and put it on the stack.
 
-`st@`    ( -- #v ) Read the address of the stack top and put it on the stack.
+`st@`    ( -- #v ) Read the 64-bit address of the stack top and put it on the stack.
 
-`sp@`    ( -- #v ) Read the address of the stack pointer and put it on the stack.
+`sp@`    ( -- #v ) Read the 64-bit address of the stack pointer and put it on the stack.
 
 `dup`    ( v -- v v )  Duplicate the value on the top of the stack.
 
@@ -122,13 +126,13 @@ SIMD vectorized Forth compiler with CPU based shader application
 
 `f>=`    ( a b -- v )  1.0 if a >= b, else 0.0.
 
-`#+`    ( #a #b -- #a+#b )  Pop two addresses from the stack, and push their sum on the stack.
+`#+`    ( #a #b -- #a+#b )  Pop two 64-bit addresses from the stack, and push their sum on the stack.
 
-`#-`    ( #a #b -- #a-#b )  Pop two addresses from the stack, and push their difference on the stack.
+`#-`    ( #a #b -- #a-#b )  Pop two 64-bit addresses from the stack, and push their difference on the stack.
 
-`#*`    ( #a #b -- #a*#b )  Pop two addresses from the stack, and push their multiplication on the stack.
+`#*`    ( #a #b -- #a*#b )  Pop two 64-bit addresses from the stack, and push their multiplication on the stack.
 
-`#/`    ( #a #b -- #a*#b )  Pop two addresses from the stack, and push their quotient on the stack.
+`#/`    ( #a #b -- #a*#b )  Pop two 64-bit addresses from the stack, and push their quotient on the stack.
 
 `#1+`    ( #a -- #a+1)  Pop the top item (an address typically) from the stack and add one. Push the result on the stack.
 
@@ -166,21 +170,53 @@ SIMD vectorized Forth compiler with CPU based shader application
 
 `#256-`    ( #a -- #a-256)  Pop the top item (an address typically) from the stack and subtract 256. Push the result on the stack.
 
-`#+!`    ( #v #a -- )  Assumes that address #a points to another address, and adds value #v to this address pointed to by #a. The top two elements on the stack are dropped.
+`#+!`    ( #v #a -- )  Assumes that 64-bit address #a points to another address, and adds 64-bit value #v to this address pointed to by #a. The top two elements on the stack are dropped.
 
-`#-!`    ( #v #a -- )  Assumes that address #a points to another address, and subtracts value #v from this address pointed to by #a. The top two elements on the stack are dropped.
+`#-!`    ( #v #a -- )  Assumes that 64-bit address #a points to another address, and subtracts 64-bit value #v from this address pointed to by #a. The top two elements on the stack are dropped.
 
 `pi`    ( -- 3.1415926535897 )  Puts pi on the stack.
 
-`here`    ( -- #a )  Puts the address of the data space (heap) pointer on the stack.
+`here`    ( -- #a )  Puts the 64-bit address of the data space (heap) pointer on the stack.
 
-`cells`    ( #n -- 32*#n)  Puts the size in bytes on the stack of #n cells.
+`cells`    ( #n -- 32*#n)  Puts the size in bytes on the stack of #n cells as a 64-bit number.
 
 `,`    ( v -- )  Moves the top stack element to the address pointed to by the data space pointer, and updates the data space pointer so that it points to the next available location.
 
 `<test> if <true> else <false> then`    Conditional statement. The test value on the stack should equal 0xffffffff as true or 0x00000000 as false. The true and false branches should be balanced, meaning that both branches should add an equal amount of items on the stack, and any use of the return stack should be balanced. Furthermore it is not allowed in a branch to pop items off the stack that existed before the branch was initiated.
 
 `begin <test> while <loop> repeat`     While loop. The loop is repeated until all vectorized values in the test return false. So it is possible that a vectorized value in the loop already is returning true in the test, but is still going through the loop, as other vectorized values are still returning false.
+
+`fcast`  ( #v -- v )  Pops the top item off the stack, treats this value as 8 vectorized 32-bit integers, casts them to float, and pushes the 8 vectorized float values on the stack.
+
+`icast`  ( v -- #v )  Pops the top item off the stack, treats this value as 8 vectorized 32-bit floats, casts them to a 32-bit integer, and pushes the 8 vectorized 32-bit integers on the stack.
+
+`mod`    ( a b -- rem )  Pop the top two elements a and b of the stack. Divide a by b, giving the floored quotient quot and the remainder rem. Put rem on the stack.
+
+`div`    ( a b -- quot )  Pop the top two elements a and b of the stack. Divide a by b, giving the floored quotient quot and the remainder rem. Put quot on the stack.
+
+`nip`    ( a b -- b )  Drop the first item below the top of the stack.
+
+`tuck`    ( a b -- b a b )  Copy the top stack item below the second stack item.
+
+`pick`    ( x_u ... x_1 x_0 #u -- x_u ... x_1 x_0 x_u )  Remove #u from the stack and copy x_u to the top of the stack.
+
+`true`    ( -- t )  Pushes true on the stack. True is a 256-bit number with all bits equal to 1.
+
+`false`    ( -- f )  Pushes false on the stack. False is a 256-bit number with all bits equal to 0.
+
+`create <name>`    ( #a -- )  Creates a word <name> that returns the address #a.
+
+`allot`    ( #u -- #a )  Allocates #u bytes of memory on the data space (heap). #u should always be a multiple of 32 for correct alignment with the simd addresses. The address of the memory allocated is pushed on the stack.
+
+`variable <name>`    Reserves/allocates 1 cell on the data space (heap). The address of this cell can be obtained by the provided name.
+
+`value <name>`    ( v -- )  Pops the top value off the stack. Assigns this value to the word given by <name>.
+    
+`to <name>`    ( v -- )  The word <name> should be the name of a value previously defined. The top value of the stack is popped, and its value is assigned to the value <name>.
+
+`within`    ( c a b -- <true|false> )  Returns true if a <= c and c < b, false otherwise.
+
+
 
 ### Specific shader forth definitions
 `x`    ( -- x )  Put the current x-coordinate on the stack.
