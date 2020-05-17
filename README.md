@@ -4,9 +4,9 @@ SIMD vectorized Forth compiler with CPU based shader application
 ## Glossary
 
 ### Core vectorforth
-`@`    ( a -- v )  Read the value v at memory address a and put it on the stack.
+`@`    ( #a -- v )  Read the value v at memory address #a and put it on the stack.
 
-`!`    ( v a -- )  Store value v in memory address a.
+`!`    ( v #a -- )  Store value v in memory address #a.
 
 `(`    ( -- )  A multiline comment until the corresponding ).
 
@@ -20,9 +20,13 @@ SIMD vectorized Forth compiler with CPU based shader application
 
 `pop`   ( -- v )  Pop a value v from the return stack and push it on the regular stack.
 
-`rt@`    ( -- v ) Read the address of the return stack top and put it on the stack.
+`rt@`    ( -- #v ) Read the address of the return stack top and put it on the stack.
 
-`rp@`    ( -- v ) Read the address of the return stack pointer and put it on the stack.
+`rp@`    ( -- #v ) Read the address of the return stack pointer and put it on the stack.
+
+`st@`    ( -- #v ) Read the address of the stack top and put it on the stack.
+
+`sp@`    ( -- #v ) Read the address of the stack pointer and put it on the stack.
 
 `dup`    ( v -- v v )  Duplicate the value on the top of the stack.
 
@@ -115,6 +119,62 @@ SIMD vectorized Forth compiler with CPU based shader application
 `f<=`    ( a b -- v )  1.0 if a <= b, else 0.0.
 
 `f>=`    ( a b -- v )  1.0 if a >= b, else 0.0.
+
+`#+`    ( #a #b -- #a+#b )  Pop two addresses from the stack, and push their sum on the stack.
+
+`#-`    ( #a #b -- #a-#b )  Pop two addresses from the stack, and push their difference on the stack.
+
+`#*`    ( #a #b -- #a*#b )  Pop two addresses from the stack, and push their multiplication on the stack.
+
+`#/`    ( #a #b -- #a*#b )  Pop two addresses from the stack, and push their quotient on the stack.
+
+`#1+`    ( #a -- #a+1)  Pop the top item (an address typically) from the stack and add one. Push the result on the stack.
+
+`#1-`    ( #a -- #a-1)  Pop the top item (an address typically) from the stack and subtract one. Push the result on the stack.
+
+`#32+`    ( #a -- #a+32)  Pop the top item (an address typically) from the stack and add 32. Push the result on the stack.
+
+`#32-`    ( #a -- #a-32)  Pop the top item (an address typically) from the stack and subtract 32. Push the result on the stack.
+
+`#64+`    ( #a -- #a+64)  Pop the top item (an address typically) from the stack and add 64. Push the result on the stack.
+
+`#64-`    ( #a -- #a-64)  Pop the top item (an address typically) from the stack and subtract 64. Push the result on the stack.
+
+`#96+`    ( #a -- #a+96)  Pop the top item (an address typically) from the stack and add 96. Push the result on the stack.
+
+`#96-`    ( #a -- #a-96)  Pop the top item (an address typically) from the stack and subtract 96. Push the result on the stack.
+
+`#128+`    ( #a -- #a+128)  Pop the top item (an address typically) from the stack and add 128. Push the result on the stack.
+
+`#128-`    ( #a -- #a-128)  Pop the top item (an address typically) from the stack and subtract 128. Push the result on the stack.
+
+`#160+`    ( #a -- #a+160)  Pop the top item (an address typically) from the stack and add 160. Push the result on the stack.
+
+`#160-`    ( #a -- #a-160)  Pop the top item (an address typically) from the stack and subtract 160. Push the result on the stack.
+
+`#192+`    ( #a -- #a+192)  Pop the top item (an address typically) from the stack and add 192. Push the result on the stack.
+
+`#192-`    ( #a -- #a-192)  Pop the top item (an address typically) from the stack and subtract 192. Push the result on the stack.
+
+`#224+`    ( #a -- #a+224)  Pop the top item (an address typically) from the stack and add 224. Push the result on the stack.
+
+`#224-`    ( #a -- #a-224)  Pop the top item (an address typically) from the stack and subtract 224. Push the result on the stack.
+
+`#256+`    ( #a -- #a+256)  Pop the top item (an address typically) from the stack and add 256. Push the result on the stack.
+
+`#256-`    ( #a -- #a-256)  Pop the top item (an address typically) from the stack and subtract 256. Push the result on the stack.
+
+`#+!`    ( #v #a -- )  Assumes that address #a points to another address, and adds value #v to this address pointed to by #a. The top two elements on the stack are dropped.
+
+`#-!`    ( #v #a -- )  Assumes that address #a points to another address, and subtracts value #v from this address pointed to by #a. The top two elements on the stack are dropped.
+
+`pi`    ( -- 3.1415926535897 )  Puts pi on the stack.
+
+`here`    ( -- #a )  Puts the address of the data space (heap) pointer on the stack.
+
+`cells`    ( #n -- 32*#n)  Puts the size in bytes on the stack of #n cells.
+
+`,`    ( v -- )  Moves the top stack element to the address pointed to by the data space pointer, and updates the data space pointer so that it points to the next available location.
 
 ### Specific shader forth definitions
 `x`    ( -- x )  Put the current x-coordinate on the stack.
