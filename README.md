@@ -226,7 +226,7 @@ SIMD vectorized Forth compiler with CPU based shader application
 
 `mix`    ( x y a -- v )  Pops x y a off the stack. Pushes the glsl function mix(x, y, a) on the stack ( x * (1 - a) + y\*a ).
 
-`vec3 <name>`    ( -- )  Reserves 3 cells on the data space and assigns <name> to this memory.
+`vec3 <name>`    ( -- )  Reserves 3 cells on the data space (heap) and binds \<name\> to this memory.
     
 `vec3!`    ( a b c #v -- )  Moves values a, b, c to the address #v. Typicall #v is obtained by providing a vec3 word.
 
