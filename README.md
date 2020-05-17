@@ -208,7 +208,7 @@ SIMD vectorized Forth compiler with CPU based shader application
 
 `allot`    ( #u -- #a )  Allocates #u bytes of memory on the data space (heap). #u should always be a multiple of 32 for correct alignment with the simd addresses. The address of the memory allocated is pushed on the stack.
 
-`variable <name>`    Reserves/allocates 1 cell on the data space (heap). The address of this cell can be obtained by the provided name.
+`variable <name>`    ( -- )  Reserves/allocates 1 cell on the data space (heap). The address of this cell can be obtained by the provided name.
 
 `value <name>`    ( v -- )  Pops the top value off the stack. Assigns this value to the word given by <name>.
     
@@ -216,7 +216,33 @@ SIMD vectorized Forth compiler with CPU based shader application
 
 `within`    ( c a b -- <true|false> )  Returns true if a <= c and c < b, false otherwise.
 
+`depth`    ( -- #d )  Pushes the depth of the stack on the stack as a 64-bit integer.
 
+`rdepth`    ( -- #d )  Pushes the depth of the return stack on the stack as a 64-bit integer.
+
+`clamp`    ( c a b -- v )  Pops c a b off the stack. Pushes c if a < c and c < b, or a if c < a, or b if c > b on the stack.
+
+`smoothstep`    ( a b x -- v )  Pops a b x off the stack. Pushes the glsl function smoothstep(a, b, x) on the stack.
+
+`mix`    ( x y a -- v )  Pops x y a off the stack. Pushes the glsl function mix(x, y, a) on the stack ( x * (1 - a) + y\*a ).
+
+`vec3 <name>`    ( -- )  Reserves 3 cells on the data space and assigns <name> to this memory.
+    
+`vec3!`    ( a b c #v -- )  Moves values a, b, c to the address #v. Typicall #v is obtained by providing a vec3 word.
+
+`dot3`    ( #a #b -- v )  Computes the dot product of the two vec3 objects whose addresses are given by #a and #b. The dot product is pushed on the stack.
+
+`cross3`    ( #a #b #r -- )  Computes the cross product of the two vec3 objects whose addresses are given by #a and #b. The cross product is saved at memory location #r.
+
+`add3`    ( #a #b #r -- )  Adds two vec3 objects whose addresses are given by #a and #b. The result is saved at memory location #r.
+
+`sub3`    ( #a #b #r -- )  Subtracts two vec3 objects whose addresses are given by #a and #b. The result is saved at memory location #r.
+
+`scalarmul3`    ( t #a #r -- )  Multiplies a vec3 object with address #a with a scalar t. The result is saved at memory location #r.
+
+`length3`    ( #a -- )  Pushes the length of vec3 object with address #a on the stack.
+
+`normalize3`  ( #a #r -- )  Normalizes the vec3 object with address #a and saves the result at memory location #r.
 
 ### Specific shader forth definitions
 `x`    ( -- x )  Put the current x-coordinate on the stack.
