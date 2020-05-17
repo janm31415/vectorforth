@@ -172,6 +172,14 @@ The binding space is used for binding words to data space locations. This memory
 
 `f>=`    ( a b -- v )  1.0 if a >= b, else 0.0.
 
+`and`    ( a b -- v )  bitwise and operator on a and b.
+
+`or`    ( a b -- v ) bitwise or operator on a and b.
+
+`xor`    ( a b -- v ) bitwise xor operator on a and b.
+
+`not`    ( a -- v ) toggle all bits of a.
+
 `#+`    ( #a #b -- #a+#b )  Pop two 64-bit addresses from the stack, and push their sum on the stack.
 
 `#-`    ( #a #b -- #a-#b )  Pop two 64-bit addresses from the stack, and push their difference on the stack.
@@ -271,6 +279,8 @@ The binding space is used for binding words to data space locations. This memory
 `smoothstep`    ( a b x -- v )  Pops a b x off the stack. Pushes the glsl function smoothstep(a, b, x) on the stack.
 
 `mix`    ( x y a -- v )  Pops x y a off the stack. Pushes the glsl function mix(x, y, a) on the stack ( x * (1 - a) + y\*a ).
+
+`step`    ( edge x -- v )  Generates a step function by comparing x to edge. 0 is returned if x < edge, and 1 is returned otherwise. This is similar to f<=.
 
 `vec3 <name>`    ( -- )  Reserves 3 cells on the data space (heap) and binds \<name\> to this memory.
     
