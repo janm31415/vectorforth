@@ -2,11 +2,25 @@
 : py y 2 * ry - ry / ;
 : e 0.0001 ;
 
-vec3 ro    vec3 rd        vec3 pos
-vec3 e1    vec3 e2        vec3 e3
-vec3 norm  vec3 sun_dir
-vec3 col   vec3 sun_col   vec3 sky_col
-vec3 tmp1  vec3 tmp2
+vec3 ro    
+vec3 rd        
+vec3 pos
+vec3 e1    
+vec3 e2        
+vec3 e3
+vec3 norm  
+vec3 sun_dir
+vec3 col   
+vec3 sun_col   
+vec3 sky_col 
+vec3 bounce_col
+vec3 tmp1  
+vec3 tmp2
+vec3 basecol
+vec3 ta
+vec3 uu
+vec3 vv
+vec3 ww
 
 0 value s \ contains output value of castray
 0 value i
@@ -19,10 +33,9 @@ e 0 0 e1 vec3!
 0.8 0.4 0.2 sun_dir vec3!
 sun_dir sun_dir normalize3
 
-1 0.8 0.6 sun_col vec3!
-0 0.05 0.2 sky_col vec3!
-
-0 0 0 col vec3!
+7 4.5 3 sun_col vec3!
+0.5 0.8 0.9 sky_col vec3!
+0.7 0.3 0.2 bounce_col vec3!
 
 : map (in vec3 pos)
   dup
@@ -70,6 +83,8 @@ repeat
 
 2drop (drop ro and rd)
 
+
+(todo: replace if test with floating point test and check speed diff)
 s 20 > (put result on the stack)
 if
 -1
@@ -78,9 +93,34 @@ s
 then
 ;
 
-0.0 0.0 1.0 ro vec3!
-px py -1.5 rd vec3!
+mx 10 * rx /
+
+dup sin 0 rot cos ro vec3!
+
+0 0 0 ta vec3!
+
+ta ro ww sub3 ww ww normalize3
+
+ww here @ 0 , 1 , 0 , uu cross3 uu uu normalize3
+uu ww vv cross3 vv vv normalize3
+
+px uu tmp1 scalarmul3
+py vv tmp2 scalarmul3
+
+tmp1 tmp2 tmp1 add3
+
+1.5 ww tmp2 scalarmul3
+
+tmp1 tmp2 rd add3
+
+\px py -1.5 rd vec3!
 rd rd normalize3
+
+rd #32+ @ dup -0.7 * swap -10 * exp   ( -0.7*rd.y  exp(-10*rd.y)  )
+     over 0.4 +  over 0.7 swap mix 
+-rot over 0.75 + over 0.75 swap mix
+-rot swap 1 + swap 0.8 swap mix  basecol vec3!
+
 
 ro rd castray
 
@@ -96,20 +136,36 @@ norm sun_dir dot3 0 1 clamp over 0 f> *            \ sun diffuse
 0.001 norm tmp2 scalarmul3 pos tmp2 tmp2 add3 
 tmp2 sun_dir castray 0 step *                        \ shadow
 
+0.18 * \ material color
+
 sun_col col scalarmul3
 
 norm #32+ @ 0.5 * 0.5 + 0 1 clamp over 0 f> *      \ sky diffuse
-sky_col norm scalarmul3                            \ reusing norm now as temporary
-col norm col add3
 
+0.18 * \ material color
+
+sky_col tmp2 scalarmul3                            
+col tmp2 col add3
+
+norm #32+ @ -0.5 * 0.5 + 0 1 clamp over 0 f> *      \ bounce diffuse
+
+0.18 * \ material color
+
+bounce_col tmp2 scalarmul3                            
+col tmp2 col add3
 
 else
 
-\ do nothing
+\ do nothing, use basecol
 
 then
 
-drop \ drop raycast value
+(merge basecol and col)
+
+dup 0 f> col col scalarmul3
+dup 0 f<= basecol basecol scalarmul3
+basecol col col add3
+
 
 col @ 0.4545 **
 col #32+ @ 0.4545 ** 
