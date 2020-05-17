@@ -4,6 +4,8 @@ SIMD vectorized Forth compiler with CPU based shader application
 ## Glossary
 
 ### Core vectorforth
+`: ;`    Define a new word with the syntax `: <word> <definition ...> ;`. Defined words are always inlined.
+
 `@`    ( #a -- v )  Read the value v at memory address #a and put it on the stack.
 
 `!`    ( v #a -- )  Store value v in memory address #a.
@@ -175,6 +177,10 @@ SIMD vectorized Forth compiler with CPU based shader application
 `cells`    ( #n -- 32*#n)  Puts the size in bytes on the stack of #n cells.
 
 `,`    ( v -- )  Moves the top stack element to the address pointed to by the data space pointer, and updates the data space pointer so that it points to the next available location.
+
+`<test> if <true> else <false> then`    Conditional statement. The test value on the stack should equal 0xffffffff as true or 0x00000000 as false. The true and false branches should be balanced, meaning that both branches should add an equal amount of items on the stack, and any use of the return stack should be balanced. Furthermore it is not allowed in a branch to pop items off the stack that existed before the branch was initiated.
+
+`begin <test> while <loop> repeat`     While loop. The loop is repeated until all vectorized values in the test return false. So it is possible that a vectorized value in the loop already is returning true in the test, but is still going through the loop, as other vectorized values are still returning false.
 
 ### Specific shader forth definitions
 `x`    ( -- x )  Put the current x-coordinate on the stack.
