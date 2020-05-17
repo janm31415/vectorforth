@@ -1,6 +1,31 @@
 # vectorforth
 SIMD vectorized Forth compiler with CPU based shader application
 
+## Building
+
+I have tested vectorforth on Windows 10 using Visual Studio 2017, and on Ubuntu 18.04.4 with gcc 7.5.0.
+
+Not all external dependencies are delivered with this code. The compiler vectorforth itself should build fine, but the sample applications sf and shaderforth both depend on [Intel's TBB library](https://software.intel.com/content/www/us/en/develop/tools/threading-building-blocks.html), and shaderforth also depends on [SDL2](https://www.libsdl.org/download-2.0.php). Both TBB and SDL2 are not delivered with the code and thus need to be installed by the user.
+
+On Windows you can download TBB's binaries from its website, and install them, preferably, in 
+folder C:\Program Files\TBB. Another folder is also possible, but then you'll need to
+adapt the CMakeLists.txt file and make it point to the correct location.
+On Ubuntu you can simply run 
+
+    sudo apt install libtbb-dev 
+
+to install TBB.
+To install SDL2 on Windows, download its sources from its website, and build with cmake. Next install SDL2 to folder C:\Program Files\SDL2. Again, another folder is fine, but then you'll need to adapt the CMakeLists.txt file. On Ubuntu run
+
+    sudo apt-get install libsdl2-dev
+
+to install SDL2.
+
+Other dependencies, which are delivered with the code, are
+  - Agner Fog's vectorclass (https://github.com/vectorclass/version2)
+  - ocornut's dear imgui (https://github.com/ocornut/imgui)
+  - nlohmann's json (https://github.com/nlohmann/json)
+
 ## Memory
 
 The memory used by vectorforth is subdivided into 4 batches of memory that each have their own name:
