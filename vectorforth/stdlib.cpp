@@ -145,6 +145,12 @@ void add_stdlib_to_dictionary(dictionary& d)
   ;
 )");
 
+  register_definition(d, R"(
+  : step    ( edge x step, returns 0 if x < edge, and 1 otherwise )
+  f<=
+  ;
+)");
+
   register_definition(d, ": vec3 #3 cells allot create ;");
   register_definition(d, R"(
 : vec3! 
