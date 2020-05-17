@@ -17,9 +17,9 @@ The other memories are dynamically aligned on 32 bytes and they are sequential, 
 
 The stack is the workspace for vectorforth. Most operators pop or push values on this stack. The top of the stack resides at the end of the memory batch, as in the scheme above. Adding items on the stack moves the stack pointer to the left, i.e., the addresses have lower values in bytes. 
 
-The data space is similar to the heap in c. With allot data space memory can be allocated and values can be stored here for later reference.
+The data space is similar to the heap in c. With "allot" data space memory can be allocated and values can be stored here for later reference.
 
-The variable space is used for binding words to data space locations. This memory is controlled by the compiler. With the "create \<name\>" keyword the compiler will bind a given name to a data space address. Internally a dictionary is kept that binds \<name\> to a location in the variable space. This variable space location will point to the address in the data space memory where the memory was allocated. This means that the number of named variables/words is restricted by the size of variable space. For instance, if the variable space has size 2048 bytes, then 64 variables can be named ( 64 equals 2048 / 32 ).
+The variable space is used for binding words to data space locations. This memory is controlled by the compiler. With the "create \<name\>" keyword, the "variable <name>" keyword, or the "value <name>" keyword, the compiler will bind a given name to a data space address. Internally a dictionary is kept that binds \<name\> to a location in the variable space. This variable space location will point to the address in the data space memory where the memory was allocated. This means that the number of named variables/words is restricted by the size of variable space. For instance, if the variable space has size 2048 bytes, then 64 variables can be named ( 64 equals 2048 / 32 ).
 
 
 ## Glossary
