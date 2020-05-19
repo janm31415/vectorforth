@@ -119,15 +119,19 @@ repeat
 
 
 (todo: replace if test with floating point test and check speed diff)
-s 20 > (put result on the stack)
-if
--1
-else
-s
-then
+\s 20 > (put result on the stack)
+\if
+\-1
+\else
+\s
+\then
+
+s 20 f>
+negate dup 1 + s * +
+
 ;
 
-mx 10 * rx /
+mw abs 10 * rx /
 
 dup sin 1.5 * 0 rot cos 1.5 * ro vec3!
 

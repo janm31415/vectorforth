@@ -3,6 +3,7 @@
 #include <thread>
 #ifdef _WIN32
 #include <windows.h>
+#include <windowsx.h>
 #include <sstream>
 #include <unordered_map>
 #else
@@ -115,6 +116,39 @@ namespace
     {
     switch (msg)
       {
+      case WM_MOUSEMOVE:
+      {
+      WindowHandle wh = (WindowHandle)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+      if (wh && wh->listener)
+        {
+        int xPos = GET_X_LPARAM(lParam);
+        int yPos = GET_Y_LPARAM(lParam);
+        wh->listener->OnMouseMove(xPos, yPos);
+        }
+      break;
+      }
+      case WM_LBUTTONDOWN:
+      {
+      WindowHandle wh = (WindowHandle)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+      if (wh && wh->listener)
+        {
+        int xPos = GET_X_LPARAM(lParam);
+        int yPos = GET_Y_LPARAM(lParam);
+        wh->listener->OnMouseLeftButtonDown(xPos, yPos);
+        }
+      break;
+      }
+      case WM_LBUTTONUP:
+      {
+      WindowHandle wh = (WindowHandle)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+      if (wh && wh->listener)
+        {
+        int xPos = GET_X_LPARAM(lParam);
+        int yPos = GET_Y_LPARAM(lParam);
+        wh->listener->OnMouseLeftButtonUp(xPos, yPos);
+        }
+      break;
+      }
       case WM_KEYDOWN:
       {
       WindowHandle wh = (WindowHandle)GetWindowLongPtr(hwnd, GWLP_USERDATA);

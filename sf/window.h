@@ -17,6 +17,9 @@ class IWindowListener
     virtual void OnClose() {};
     virtual void OnKeyDown(int) {};
     virtual void OnKeyUp(int) {};
+    virtual void OnMouseMove(int, int) {};
+    virtual void OnMouseLeftButtonDown(int, int) {};
+    virtual void OnMouseLeftButtonUp(int, int) {};
   };
 
 struct WindowHandleData;

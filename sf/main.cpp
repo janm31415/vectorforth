@@ -27,8 +27,9 @@
 struct listener : public IWindowListener
   {
   bool quit;
+  float mx, my, mz, mw;
 
-  listener() : quit(false) {}
+  listener() : quit(false), mx(0.f), my(0.f), mz(0.f), mw(0.f) {}
 
   virtual void OnClose() 
     {
@@ -56,6 +57,33 @@ struct listener : public IWindowListener
       quit = true;
 #endif
     };
+
+  virtual void OnMouseMove(int x, int y)
+    {
+    mx = (float)x;
+    my = (float)y;
+    if (mw > 0)
+      {
+      mw = (float)x;
+      mz = (float)y;
+      }
+    }
+
+  virtual void OnMouseLeftButtonDown(int x, int y)
+    {
+    mx = (float)x;
+    my = (float)y;
+    mw = (float)x;
+    mz = (float)y;
+    }
+
+  virtual void OnMouseLeftButtonUp(int x, int y)
+    {
+    mx = (float)x;
+    my = (float)y;
+    mw = -(float)x;
+    mz = -(float)y;
+    }
   };
 
 void os_restart_line()
@@ -196,11 +224,7 @@ int main(int argc, char** argv)
   const __m256 offset = _mm256_set_ps(7.f, 6.f, 5.f, 4.f, 3.f, 2.f, 1.f, 0.f);
   const float defaults[8] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
   __m256 rx_val = _mm256_set1_ps((float)w);
-  __m256 ry_val = _mm256_set1_ps((float)h);
-  __m256 mx_val = _mm256_set1_ps(0.f);
-  __m256 my_val = _mm256_set1_ps(0.f);
-  __m256 mz_val = _mm256_set1_ps(0.f);
-  __m256 mw_val = _mm256_set1_ps(0.f);
+  __m256 ry_val = _mm256_set1_ps((float)h);  
   int frame = 0;
   auto last_tic = std::chrono::high_resolution_clock::now();
   float time = 0.f;
@@ -209,7 +233,11 @@ int main(int argc, char** argv)
   while (!l.quit)
     {
     __m256 frame_val = _mm256_set1_ps((float)frame);
-    
+    __m256 mx_val = _mm256_set1_ps(l.mx);
+    __m256 my_val = _mm256_set1_ps(l.my);
+    __m256 mz_val = _mm256_set1_ps(l.mz);
+    __m256 mw_val = _mm256_set1_ps(l.mw);
+
     auto tic = std::chrono::high_resolution_clock::now();
     float time_delta = (float)(std::chrono::duration_cast<std::chrono::microseconds>(tic - last_tic).count()) / 1000000.f;
     last_tic = tic;
