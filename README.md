@@ -294,6 +294,10 @@ The binding space is used for binding words to data space locations. This memory
 
 `sub3`    ( #a #b #r -- )  Subtracts two vec3 objects whose addresses are given by #a and #b. The result is saved at memory location #r.
 
+`mul3`    ( #a #b #r -- )  Multiplies two vec3 objects componentwise whose addresses are given by #a and #b. The result is saved at memory location #r.
+
+`div3`    ( #a #b #r -- )  Divides two vec3 objects componentwise whose addresses are given by #a and #b. The result is saved at memory location #r.
+
 `scalarmul3`    ( t #a #r -- )  Multiplies a vec3 object with address #a with a scalar t. The result is saved at memory location #r.
 
 `length3`    ( #a -- )  Pushes the length of vec3 object with address #a on the stack.
