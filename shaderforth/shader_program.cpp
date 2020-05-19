@@ -152,7 +152,7 @@ void shader_program::run(image<uint32_t>& im)
     VF::context& ctxt = local_context.local();
 
     if (ctxt.memory_allocated == nullptr)
-      ctxt = VF::create_context(1024 * 1024, 1024, 1024 * 1024);
+      ctxt = VF::create_context(1024 * 1024, 2048, 1024 * 1024);
 
     const float vrel = (float)y / _input.resolution_y;
     __m256 y_val = _mm256_set1_ps((float)y);

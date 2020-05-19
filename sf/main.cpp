@@ -229,7 +229,7 @@ int main(int argc, char** argv)
       VF::context& ctxt = local_context.local();
 
       if (ctxt.memory_allocated == nullptr)
-        ctxt = VF::create_context(1024 * 1024, 1024, 1024 * 1024);
+        ctxt = VF::create_context(1024 * 1024, 2048, 1024 * 1024);
 
       const float vrel = (float)y / (float)h;
       __m256 y_val = _mm256_set1_ps((float)y);

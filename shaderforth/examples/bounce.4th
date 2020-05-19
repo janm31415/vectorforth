@@ -16,11 +16,14 @@ vec3 sky_col
 vec3 bounce_col
 vec3 tmp1  
 vec3 tmp2
+vec3 tmp3
+vec3 tmp4
 vec3 basecol
 vec3 ta
 vec3 uu
 vec3 vv
 vec3 ww
+vec3 rad
 
 0 value s 
 0 value i
@@ -37,9 +40,40 @@ sun_dir sun_dir normalize3
 0.5 0.8 0.9 sky_col vec3!
 0.7 0.3 0.2 bounce_col vec3!
 
+: fract dup floor - ;
+
+: sdEllipsoid (in vec3 rad, in vec3 pos)
+over (rad pos rad)
+tmp4 div3  (rad)
+tmp4 length3 (rad k0)
+swap tmp4 swap (k0 tmp4 rad)
+tmp4 div3 tmp4 length3 (k0 k1)
+swap dup (k1 k0 k0)
+1 - * swap /
+;
+
+: sdguy (in vec3 pos)
+0
+t fract dup 1 - negate 4 * *
+dup -rot  (save y on the stack)
+0
+tmp3 vec3!
+swap tmp3 tmp3 sub3
+
+\0.25 0.25 0.25 rad vec3!
+0.25 
+swap 0.5 * 0.5 + 0.25 *
+dup 1.0 swap / 0.0625 *
+rad vec3!
+
+rad
+tmp3
+sdEllipsoid
+;
+
 : map (in vec3 pos)
   dup
-  length3 0.25 - 
+  sdguy
   swap
   #32+ @
   0.25 +
@@ -95,9 +129,11 @@ then
 
 mx 10 * rx /
 
-dup sin 0 rot cos ro vec3!
+dup sin 1.5 * 0 rot cos 1.5 * ro vec3!
 
-0 0 0 ta vec3!
+0 0.5 0 ta vec3!
+
+ta ro ro add3
 
 ta ro ww sub3 ww ww normalize3
 
@@ -109,7 +145,7 @@ py vv tmp2 scalarmul3
 
 tmp1 tmp2 tmp1 add3
 
-1.5 ww tmp2 scalarmul3
+1.8 ww tmp2 scalarmul3
 
 tmp1 tmp2 rd add3
 

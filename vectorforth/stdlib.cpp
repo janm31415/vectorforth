@@ -235,6 +235,40 @@ vec3!
 )");
 
   register_definition(d, R"(
+(multiply 2 vec3s componentwise (&a &b &result => -), where result contains a*b)
+
+: mul3   (&a &b &result)
+>r
+2dup     (&a &b &a &b)
+#64+ @ >r #64+ @ r> * (&a &b a_z*b_z)
+>r 2dup       (&a &b &a &b)
+#32+ @ >r #32+ @ r> * (&a &b a_y*b_y)
+>r            (&a &b)
+@ >r @ r> *   (a_x*b_x)
+r> r>         (a_x*b_x  a_y*b_y  a_z*a_z )
+r>            (a_x*b_x  a_y*b_y  a_z*a_z &result)
+vec3!
+;
+)");
+
+  register_definition(d, R"(
+(divide 2 vec3s componentwise (&a &b &result => -), where result contains a/b)
+
+: div3   (&a &b &result)
+>r
+2dup     (&a &b &a &b)
+#64+ @ >r #64+ @ r> / (&a &b a_z/b_z)
+>r 2dup       (&a &b &a &b)
+#32+ @ >r #32+ @ r> / (&a &b a_y/b_y)
+>r            (&a &b)
+@ >r @ r> /   (a_x/b_x)
+r> r>         (a_x/b_x  a_y/b_y  a_z/a_z )
+r>            (a_x/b_x  a_y/b_y  a_z/a_z &result)
+vec3!
+;
+)");
+
+  register_definition(d, R"(
 (multiply a vec3 with a scalar (t &v &result => -), where result contains t*v)
 
 : scalarmul3   (t &v &result)
