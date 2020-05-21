@@ -24,6 +24,54 @@ VF_BEGIN
 namespace
   {
 
+#ifdef AVX512
+
+  int32_t get_avx2_i32(__m512i v, int i)
+    {
+#ifdef _WIN32
+    return v.m512i_i32[i];
+#else
+    int32_t* a = (int32_t*)&v;
+    return a[i];
+#endif
+    }
+
+  uint64_t get_avx2_u64(__m512i v, int i)
+    {
+#ifdef _WIN32
+    return v.m512i_u64[i];
+#else
+    uint64_t* a = (uint64_t*)&v;
+    return a[i];
+#endif
+    }
+
+  float get_avx2_f32(__m512 v, int i)
+    {
+#ifdef _WIN32
+    return v.m512_f32[i];
+#else
+    return v[i];
+#endif
+    }
+
+  int32_t get_avx2_i32(__m512 v, int i)
+    {
+    float f = get_avx2_f32(v, i);
+    return *reinterpret_cast<int32_t*>(&f);
+    }
+
+  uint64_t get_avx2_u64(__m512 v, int i)
+    {
+#ifdef _WIN32    
+    return *reinterpret_cast<uint64_t*>(&v.m512_f32[i]);
+#else
+    return *reinterpret_cast<uint64_t*>(&v[i]);
+#endif
+    }
+
+#else
+
   int32_t get_avx2_i32(__m256i v, int i)
     {
 #ifdef _WIN32
@@ -67,6 +115,8 @@ namespace
     return *reinterpret_cast<uint64_t*>(&v[i]);
 #endif
     }
+
+#endif
 
   struct compile_fixture
     {
@@ -121,6 +171,79 @@ namespace
       return ctxt.stack_pointer;
       }
 
+#ifdef AVX512
+    __m512 get_last_stack_value() const
+      {
+      if (ctxt.stack_pointer >= ctxt.aligned_stack_top)
+        throw std::runtime_error("error: stack is empty");
+      return _mm512_load_ps((const float*)ctxt.stack_pointer);
+      }
+
+    __m512 get_stack_value(size_t index) const
+      {
+      const float* ptr = (const float*)ctxt.stack_pointer + 16 * index;
+      if ((char*)ptr >= ctxt.aligned_stack_top)
+        {
+        std::cout << "error: stack is empty\n";
+        return _mm512_set1_ps(std::numeric_limits<float>::signaling_NaN());
+        }
+      __m512 sv = _mm512_load_ps(ptr);
+      return sv;
+      }
+
+    __m512 get_data_space_value(size_t index) const
+      {
+      char* ptr = ctxt.here_pointer + 64 + index * 64;
+      __m512 value = _mm512_load_ps((float*)ptr);
+      return value;
+      }
+
+    __m512i get_last_stack_value_i() const
+      {
+      if (ctxt.stack_pointer >= ctxt.aligned_stack_top)
+        throw std::runtime_error("error: stack is empty");
+      __m512 v = _mm512_load_ps((const float*)ctxt.stack_pointer);
+      __m512i out = _mm512_castps_si512(v);
+      return out;
+      }
+
+    float get_stack_valuef(size_t index) const
+      {
+      const float* ptr = (const float*)ctxt.stack_pointer + 16 * index;
+      if ((char*)ptr >= ctxt.aligned_stack_top)
+        {
+        std::cout << "error: stack is empty\n";
+        return std::numeric_limits<float>::signaling_NaN();
+        }
+      __m512 sv = _mm512_load_ps(ptr);
+      return get_avx2_f32(sv, 0);
+      }
+
+    uint32_t get_stack_valuei(size_t index) const
+      {
+      const float* ptr = (const float*)ctxt.stack_pointer + 16 * index;
+      if ((char*)ptr >= ctxt.aligned_stack_top)
+        {
+        std::cout << "error: stack is empty\n";
+        return 0xffffffff;
+        }
+      __m512 sv = _mm512_load_ps(ptr);
+      //return *reinterpret_cast<uint32_t*>(&sget_avx2_f32(v, 0));
+      return (uint32_t)get_avx2_i32(sv, 0);
+      }
+
+    uint64_t get_stack_valuef_uint64(size_t index) const
+      {
+      const float* ptr = (const float*)ctxt.stack_pointer + 16 * index;
+      if ((char*)ptr >= ctxt.aligned_stack_top)
+        {
+        std::cout << "error: stack is empty\n";
+        return 0xffffffffffffffff;
+        }
+      __m512 sv = _mm512_load_ps(ptr);
+      return get_avx2_u64(sv, 0);
+      }
+#else
     __m256 get_last_stack_value() const
       {
       if (ctxt.stack_pointer >= ctxt.aligned_stack_top)
@@ -192,6 +315,8 @@ namespace
       __m256 sv = _mm256_load_ps(ptr);
       return get_avx2_u64(sv, 0);
       }
+
+#endif
     };
   }
 
@@ -205,6 +330,68 @@ struct empty_program : public compile_fixture
 
 struct floats : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    TEST_EQ(ctxt.aligned_stack_top - 64, run("3.14"));
+    
+    auto v = get_last_stack_value();
+    TEST_EQ(3.14f, get_avx2_f32(v, 0));
+    TEST_EQ(3.14f, get_avx2_f32(v, 1));
+    TEST_EQ(3.14f, get_avx2_f32(v, 2));
+    TEST_EQ(3.14f, get_avx2_f32(v, 3));
+    TEST_EQ(3.14f, get_avx2_f32(v, 4));
+    TEST_EQ(3.14f, get_avx2_f32(v, 5));
+    TEST_EQ(3.14f, get_avx2_f32(v, 6));
+    TEST_EQ(3.14f, get_avx2_f32(v, 7));
+    TEST_EQ(3.14f, get_avx2_f32(v, 8));
+    TEST_EQ(3.14f, get_avx2_f32(v, 9));
+    TEST_EQ(3.14f, get_avx2_f32(v, 10));
+    TEST_EQ(3.14f, get_avx2_f32(v, 11));
+    TEST_EQ(3.14f, get_avx2_f32(v, 12));
+    TEST_EQ(3.14f, get_avx2_f32(v, 13));
+    TEST_EQ(3.14f, get_avx2_f32(v, 14));
+    TEST_EQ(3.14f, get_avx2_f32(v, 15));
+
+    TEST_EQ(ctxt.aligned_stack_top - 128, run("54"));
+    v = get_last_stack_value();
+    TEST_EQ(54.f, get_avx2_f32(v, 0));
+    TEST_EQ(54.f, get_avx2_f32(v, 1));
+    TEST_EQ(54.f, get_avx2_f32(v, 2));
+    TEST_EQ(54.f, get_avx2_f32(v, 3));
+    TEST_EQ(54.f, get_avx2_f32(v, 4));
+    TEST_EQ(54.f, get_avx2_f32(v, 5));
+    TEST_EQ(54.f, get_avx2_f32(v, 6));
+    TEST_EQ(54.f, get_avx2_f32(v, 7));
+    TEST_EQ(54.f, get_avx2_f32(v, 8));
+    TEST_EQ(54.f, get_avx2_f32(v, 9));
+    TEST_EQ(54.f, get_avx2_f32(v, 10));
+    TEST_EQ(54.f, get_avx2_f32(v, 11));
+    TEST_EQ(54.f, get_avx2_f32(v, 12));
+    TEST_EQ(54.f, get_avx2_f32(v, 13));
+    TEST_EQ(54.f, get_avx2_f32(v, 14));
+    TEST_EQ(54.f, get_avx2_f32(v, 15));
+
+    TEST_EQ(ctxt.aligned_stack_top - 256, run("100 20.45"));
+    v = get_last_stack_value();
+    TEST_EQ(20.45f, get_avx2_f32(v, 0));
+    TEST_EQ(20.45f, get_avx2_f32(v, 1));
+    TEST_EQ(20.45f, get_avx2_f32(v, 2));
+    TEST_EQ(20.45f, get_avx2_f32(v, 3));
+    TEST_EQ(20.45f, get_avx2_f32(v, 4));
+    TEST_EQ(20.45f, get_avx2_f32(v, 5));
+    TEST_EQ(20.45f, get_avx2_f32(v, 6));
+    TEST_EQ(20.45f, get_avx2_f32(v, 7));
+    TEST_EQ(20.45f, get_avx2_f32(v, 8));
+    TEST_EQ(20.45f, get_avx2_f32(v, 9));
+    TEST_EQ(20.45f, get_avx2_f32(v, 10));
+    TEST_EQ(20.45f, get_avx2_f32(v, 11));
+    TEST_EQ(20.45f, get_avx2_f32(v, 12));
+    TEST_EQ(20.45f, get_avx2_f32(v, 13));
+    TEST_EQ(20.45f, get_avx2_f32(v, 14));
+    TEST_EQ(20.45f, get_avx2_f32(v, 15));
+    }
+#else
   void test()
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.14"));
@@ -240,11 +427,41 @@ struct floats : public compile_fixture
     TEST_EQ(20.45f, get_avx2_f32(v, 6));
     TEST_EQ(20.45f, get_avx2_f32(v, 7));
     }
+#endif
   };
 
 
 struct definitions : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    TEST_EQ(ctxt.aligned_stack_top, run(": pi 3.14;"));
+    dictionary_entry e;
+    TEST_ASSERT(find(e, dict, "pi"));
+    TEST_ASSERT(e.words.size() == 1);
+    TEST_ASSERT(e.words.front().type == token::T_FLOAT);
+    TEST_ASSERT(e.words.front().value == "3.14");
+    TEST_EQ(ctxt.aligned_stack_top - 64, run("pi"));
+    auto v = get_last_stack_value();
+    TEST_EQ(3.14f, get_avx2_f32(v, 0));
+    TEST_EQ(3.14f, get_avx2_f32(v, 1));
+    TEST_EQ(3.14f, get_avx2_f32(v, 2));
+    TEST_EQ(3.14f, get_avx2_f32(v, 3));
+    TEST_EQ(3.14f, get_avx2_f32(v, 4));
+    TEST_EQ(3.14f, get_avx2_f32(v, 5));
+    TEST_EQ(3.14f, get_avx2_f32(v, 6));
+    TEST_EQ(3.14f, get_avx2_f32(v, 7));
+    TEST_EQ(3.14f, get_avx2_f32(v, 8));
+    TEST_EQ(3.14f, get_avx2_f32(v, 9));
+    TEST_EQ(3.14f, get_avx2_f32(v, 10));
+    TEST_EQ(3.14f, get_avx2_f32(v, 11));
+    TEST_EQ(3.14f, get_avx2_f32(v, 12));
+    TEST_EQ(3.14f, get_avx2_f32(v, 13));
+    TEST_EQ(3.14f, get_avx2_f32(v, 14));
+    TEST_EQ(3.14f, get_avx2_f32(v, 15));
+    }
+#else
   void test()
     {
     TEST_EQ(ctxt.aligned_stack_top, run(": pi 3.14;"));
@@ -264,10 +481,26 @@ struct definitions : public compile_fixture
     TEST_EQ(3.14f, get_avx2_f32(v, 6));
     TEST_EQ(3.14f, get_avx2_f32(v, 7));
     }
+#endif
   };
 
 struct add : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    TEST_EQ(ctxt.aligned_stack_top - 64, run("3.1 2.4 +"));
+    auto v = get_last_stack_value();
+    TEST_EQ(5.5f, get_avx2_f32(v, 0));
+    TEST_EQ(5.5f, get_avx2_f32(v, 1));
+    TEST_EQ(5.5f, get_avx2_f32(v, 2));
+    TEST_EQ(5.5f, get_avx2_f32(v, 3));
+    TEST_EQ(5.5f, get_avx2_f32(v, 4));
+    TEST_EQ(5.5f, get_avx2_f32(v, 5));
+    TEST_EQ(5.5f, get_avx2_f32(v, 6));
+    TEST_EQ(5.5f, get_avx2_f32(v, 7));
+    }
+#else
   void test()
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 +"));
@@ -281,10 +514,26 @@ struct add : public compile_fixture
     TEST_EQ(5.5f, get_avx2_f32(v, 6));
     TEST_EQ(5.5f, get_avx2_f32(v, 7));
     }
+#endif
   };
 
 struct sub : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    TEST_EQ(ctxt.aligned_stack_top - 64, run("3.1 2.4 -"));
+    auto v = get_last_stack_value();
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 0), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 1), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 2), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 3), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 4), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 7), 1e-6f);
+    }
+#else
   void test()
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 -"));
@@ -298,10 +547,26 @@ struct sub : public compile_fixture
     TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 6), 1e-6f);
     TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 7), 1e-6f);
     }
+#endif
   };
 
 struct mul : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    TEST_EQ(ctxt.aligned_stack_top - 64, run("3.1 2.4 *"));
+    auto v = get_last_stack_value();
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 0), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 1), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 2), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 3), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 4), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 7), 1e-6f);
+    }
+#else
   void test()
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 *"));
@@ -315,10 +580,26 @@ struct mul : public compile_fixture
     TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 6), 1e-6f);
     TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 7), 1e-6f);
     }
+#endif
   };
 
 struct division : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    TEST_EQ(ctxt.aligned_stack_top - 64, run("3.1 2.4 /"));
+    auto v = get_last_stack_value();
+    TEST_EQ_CLOSE(3.1f / 2.4f, get_avx2_f32(v, 0), 1e-6f);
+    TEST_EQ_CLOSE(3.1f / 2.4f, get_avx2_f32(v, 1), 1e-6f);
+    TEST_EQ_CLOSE(3.1f / 2.4f, get_avx2_f32(v, 2), 1e-6f);
+    TEST_EQ_CLOSE(3.1f / 2.4f, get_avx2_f32(v, 3), 1e-6f);
+    TEST_EQ_CLOSE(3.1f / 2.4f, get_avx2_f32(v, 4), 1e-6f);
+    TEST_EQ_CLOSE(3.1f / 2.4f, get_avx2_f32(v, 5), 1e-6f);
+    TEST_EQ_CLOSE(3.1f / 2.4f, get_avx2_f32(v, 6), 1e-6f);
+    TEST_EQ_CLOSE(3.1f / 2.4f, get_avx2_f32(v, 7), 1e-6f);
+    }
+#else
   void test()
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 /"));
@@ -332,10 +613,16 @@ struct division : public compile_fixture
     TEST_EQ_CLOSE(3.1f/2.4f, get_avx2_f32(v, 6), 1e-6f);
     TEST_EQ_CLOSE(3.1f/2.4f, get_avx2_f32(v, 7), 1e-6f);
     }
+#endif
   };
 
 struct v8 : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     // ymm0 = x7 / x6 / x5 / x4 / x3 / x2 / x1 / x0
@@ -350,10 +637,16 @@ struct v8 : public compile_fixture
     TEST_EQ(7.f, get_avx2_f32(v, 1));
     TEST_EQ(8.f, get_avx2_f32(v, 0));
     }
+#endif
   };
 
 struct avx_mathfun : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.14159265359 sin"));
@@ -433,10 +726,16 @@ struct avx_mathfun : public compile_fixture
     TEST_EQ_CLOSE(7.f, get_avx2_f32(v, 1), 1e-5f);
     TEST_EQ_CLOSE(8.f, get_avx2_f32(v, 0), 1e-5f);    
     }
+#endif
   };
 
 struct prim_test : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     run("1 2 3 drop");
@@ -490,10 +789,16 @@ struct prim_test : public compile_fixture
     TEST_EQ(12.f, get_stack_valuef(2));
     TEST_EQ(11.f, get_stack_valuef(3));   
     }
+#endif
   };
 
 struct integers : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     run("#123");
@@ -571,10 +876,16 @@ struct integers : public compile_fixture
     run("#-70 #10 #/");
     TEST_EQ(-7, get_stack_valuei(0));
     }
+#endif
   };
 
 struct comparisons : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 =");
@@ -710,10 +1021,16 @@ struct comparisons : public compile_fixture
     TEST_EQ(0.f, get_avx2_f32(f, 1));
     TEST_EQ(1.f, get_avx2_f32(f, 0));
     }
+#endif
   };
 
 struct address : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     char* ptr = run("12345 2 3 4 5 st@ sp@");
@@ -744,10 +1061,16 @@ struct address : public compile_fixture
     TEST_EQ(101.f, get_avx2_f32(v, 1));
     TEST_EQ(101.f, get_avx2_f32(v, 0));
     }
+#endif
   };
 
 struct prim : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     run("v8 -1 2 -3 4 5 -6 7 -8 abs");
@@ -912,10 +1235,16 @@ struct prim : public compile_fixture
     TEST_EQ(7.f, get_avx2_f32(v, 1));
     TEST_EQ(8.f, get_avx2_f32(v, 0));
     }
+#endif
   };
 
 struct complex : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     run("3 4 -1 2 z*");
@@ -930,10 +1259,16 @@ struct complex : public compile_fixture
     TEST_EQ(4.f, get_stack_valuef(1));
     TEST_EQ(2.f, get_stack_valuef(0));
     }
+#endif
   };
 
 struct return_stack : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     run("1 2 3 push + pop *");
@@ -944,17 +1279,23 @@ struct return_stack : public compile_fixture
 
     run("1 >r 2 3 r@");
     TEST_EQ(1.f, get_stack_valuef(0));
-
+     
     run("1 >r 2 3 r@ + + pop +");
     TEST_EQ(7.f, get_stack_valuef(0));
 
     run("0.5 push 0 sin pop");
     TEST_EQ(0.5f, get_stack_valuef(0));
     }
+#endif
   };
 
 struct redefine_primitives : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     run(": sin 3.1415926535 2 * * sin ; 0.1 sin");
@@ -963,18 +1304,24 @@ struct redefine_primitives : public compile_fixture
     run(": sin cos ; 5 sin 5 cos");
     TEST_EQ(get_stack_valuef(1), get_stack_valuef(0));
     }
+#endif
   };
 
 struct if_tests : public compile_fixture
   {
+#ifdef AVX512
   void test()
     {
-    /*
-    if <true> else <false> then should be balanced:
-    - both branches should add equally amount on the stack
-    - any usage of the return stack should be balanced
-    - no branch is allowed to pop from the stack that existed before the branch
-    */
+    }
+#else
+  void test()
+    {
+    
+    //if <true> else <false> then should be balanced:
+    //- both branches should add equally amount on the stack
+    //- any usage of the return stack should be balanced
+    //- no branch is allowed to pop from the stack that existed before the branch
+    
     run("v8 1 2 3 4 5 6 7 8 4 > if 2 else 3 then");
     auto v = get_stack_value(0);
     TEST_EQ(3.f, get_avx2_f32(v, 7));
@@ -1066,10 +1413,16 @@ struct if_tests : public compile_fixture
     TEST_EQ(2.f, get_avx2_f32(v, 1));
     TEST_EQ(2.f, get_avx2_f32(v, 0));
     }
+#endif
   };
 
 struct stdlib_tests : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     run("3 4 5 nip");
@@ -1160,10 +1513,16 @@ struct stdlib_tests : public compile_fixture
     TEST_EQ(3.f, get_avx2_f32(v, 1));
     TEST_EQ(3.f, get_avx2_f32(v, 0));
     }
+#endif
   };
 
 struct begin_while_repeat_tests : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     run("v8 1 2 3 4 5 6 7 8 begin dup 10 > while 1 + repeat");
@@ -1199,10 +1558,16 @@ struct begin_while_repeat_tests : public compile_fixture
     TEST_EQ(19.f, get_avx2_f32(v, 1));
     TEST_EQ(20.f, get_avx2_f32(v, 0));
     }
+#endif
   };
 
 struct data_space_tests : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     run("here");
@@ -1299,10 +1664,16 @@ struct data_space_tests : public compile_fixture
     f = get_stack_value(0);
     TEST_EQ(30.f, get_avx2_f32(f, 0));
     }
+#endif
   };
 
 struct vec3_tests : public compile_fixture
   {
+#ifdef AVX512
+  void test()
+    {
+    }
+#else
   void test()
     {
     run("vec3 v 1 2 3 v vec3!");    
@@ -1374,6 +1745,7 @@ struct vec3_tests : public compile_fixture
     //print_stack(std::cout, ctxt);
     //print_data_space(std::cout, ctxt);
     }
+#endif
   };
 
 VF_END
@@ -1383,6 +1755,7 @@ void run_all_compile_tests()
   using namespace VF;  
   empty_program().test();
   floats().test();
+  
   definitions().test();
   add().test();
   sub().test();
@@ -1403,4 +1776,5 @@ void run_all_compile_tests()
   begin_while_repeat_tests().test();
   data_space_tests().test();
   vec3_tests().test();
+  
   }

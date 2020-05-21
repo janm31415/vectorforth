@@ -26,7 +26,7 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
     if (cd.binding_space_offset)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.binding_space_offset);
     code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-    code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));   
+    code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
     code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
     }
   else if (word.value == "to")
@@ -67,7 +67,7 @@ void compile_variable(asmcode& code, compile_data& cd, uint64_t address)
     if (address)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
     code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-    code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+    code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
     code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
     }
   else
@@ -76,7 +76,7 @@ void compile_variable(asmcode& code, compile_data& cd, uint64_t address)
     if (address)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
     code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
-    code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+    code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
     code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
     }
   }
@@ -134,7 +134,13 @@ void compile_float(asmcode& code, token word)
   code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(2), asmcode::RAX);
   code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(3), asmcode::RAX);
   code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(4), asmcode::RAX);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+#ifdef AVX512
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(5), asmcode::RAX);
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(6), asmcode::RAX);
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(7), asmcode::RAX);
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(8), asmcode::RAX);
+#endif
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
 
 void compile_integer(asmcode& code, token word)
@@ -145,8 +151,8 @@ void compile_integer(asmcode& code, token word)
   int64_t v;
   ss >> v;
   code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v);
-  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(4), asmcode::RAX);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::RAX);
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
 
 void compile_vector8(asmcode& code, const std::vector<token>& words)
@@ -190,7 +196,7 @@ void compile_vector8(asmcode& code, const std::vector<token>& words)
     code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v);
     code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(i + 1), asmcode::RAX);
     }
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
 
 void compile_definition(dictionary& d, std::vector<token>& words, int line_nr, int column_nr)

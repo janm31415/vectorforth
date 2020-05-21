@@ -46,6 +46,7 @@ endif (UNIX)
 # general build definitions
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+add_definitions(-DAVX512)
 
 add_library(vectorforth SHARED ${HDRS} ${SRCS})
 source_group("Header Files" FILES ${hdrs})

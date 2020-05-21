@@ -31,6 +31,7 @@ add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 add_definitions(-DMEMORY_LEAK_TRACKING)
+add_definitions(-DAVX512)
 
 add_executable(vectorforth.tests ${HDRS} ${SRCS})
 source_group("Header Files" FILES ${hdrs})

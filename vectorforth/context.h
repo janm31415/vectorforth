@@ -37,9 +37,9 @@ struct context
 
   char* here_pointer; // 120
 
-  uint64_t signbit[4]; // offset 128
-  uint64_t not_signbit[4]; // offset 160
-  uint64_t all_bits[4]; // offset 192
+  uint64_t signbit[8]; // offset 128
+  uint64_t not_signbit[8]; // offset 192
+  uint64_t all_bits[8]; // offset 256
 
   char* memory_allocated;  
   }

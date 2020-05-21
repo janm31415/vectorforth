@@ -14,38 +14,38 @@ VF_BEGIN
 void primitive_addi(asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::R11, MEM_STACK_REGISTER);
-  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::ADD, asmcode::RAX, asmcode::R11);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);  
   }
 
 void primitive_subi(asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::R11, MEM_STACK_REGISTER);
-  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::SUB, asmcode::RAX, asmcode::R11);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
   }
 
 void primitive_muli(asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::R11, MEM_STACK_REGISTER);
-  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::IMUL, asmcode::R11);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
   }
 
 void primitive_divi(asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::R11, MEM_STACK_REGISTER);
-  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::XOR, asmcode::RDX, asmcode::RDX);
   code.add(asmcode::CQO);
   code.add(asmcode::IDIV, asmcode::R11);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
   }
 
@@ -53,9 +53,9 @@ void primitive_add(asmcode& code, compile_data&)
   {  
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -63,9 +63,9 @@ void primitive_sub(asmcode& code, compile_data&)
   {  
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -73,9 +73,9 @@ void primitive_mul(asmcode& code, compile_data&)
   {
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -86,15 +86,15 @@ void primitive_complex_add(asmcode& code, compile_data&)
   // result y0 + y2  y1 + y3
 
   code.add(asmcode::VMOVAPS, AVX_REG3, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, CELLS(4));
-  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, CELLS(8));
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(12));
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(3));
 
   code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG2);
   code.add(asmcode::VADDPS, AVX_REG1, AVX_REG1, AVX_REG3);
 
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(8));
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(4), AVX_REG0);
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(1), AVX_REG0);
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG1);
   }
 
@@ -106,15 +106,15 @@ void primitive_complex_sub(asmcode& code, compile_data&)
   // result y0 - y2  y1 - y3
 
   code.add(asmcode::VMOVAPS, AVX_REG3, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, CELLS(4));
-  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, CELLS(8));
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(12));
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(3));
 
   code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG2);
   code.add(asmcode::VSUBPS, AVX_REG1, AVX_REG1, AVX_REG3);
 
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(8));
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(4), AVX_REG0);
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(1), AVX_REG0);
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG1);
   }
 
@@ -125,9 +125,9 @@ void primitive_complex_mul(asmcode& code, compile_data&)
   // result y0y2 - y1y3  y0y3 + y1y2
 
   code.add(asmcode::VMOVAPS, AVX_REG3, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, CELLS(4));
-  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, CELLS(8));
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(12));
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(3));
     
   code.add(asmcode::VMULPS, asmcode::YMM4, AVX_REG0, AVX_REG2); //y0y2
   code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG3); //y0y3
@@ -137,8 +137,8 @@ void primitive_complex_mul(asmcode& code, compile_data&)
   code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1); //y0y3 + y1y2
   code.add(asmcode::VSUBPS, AVX_REG1, asmcode::YMM4, asmcode::YMM5); //y0y2 - y1y3
   
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(8));
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(4), AVX_REG1);
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(1), AVX_REG1);
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -146,39 +146,39 @@ void primitive_div(asmcode& code, compile_data&)
   {
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
 void primitive_drop(asmcode& code, compile_data&)
   {
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
 
 void primitive_swap(asmcode& code, compile_data&)
   {
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
 
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(4), AVX_REG1);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(1), AVX_REG1);
 
   }
 
 void primitive_dup(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);  
   }
 
 void primitive_over(asmcode& code, compile_data&)
   {
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -187,11 +187,11 @@ void primitive_rot(asmcode& code, compile_data&)
   // a b c >> b c a
 
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, CELLS(4));
-  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, CELLS(8));
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, AVX_CELLS(2));
 
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(8), AVX_REG1);
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(4), AVX_REG0);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(2), AVX_REG1);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(1), AVX_REG0);
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG2);
 
   }
@@ -200,41 +200,41 @@ void primitive_minrot(asmcode& code, compile_data&)
   {
 
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, CELLS(4));
-  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, CELLS(8));
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, AVX_CELLS(2));
 
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(8), AVX_REG0);
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(4), AVX_REG2);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(2), AVX_REG0);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(1), AVX_REG2);
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG1);
   }
 
 void primitive_twodrop(asmcode& code, compile_data&)
   {
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(8));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
   }
 
 void primitive_twodup(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1));
 
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -CELLS(4), AVX_REG1);
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -CELLS(8), AVX_REG0);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(8));
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(1), AVX_REG1);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(2), AVX_REG0);
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
   }
 
 void primitive_twoswap(asmcode& code, compile_data&)
   {
 
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, CELLS(4));
-  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, CELLS(8));
-  code.add(asmcode::VMOVAPS, AVX_REG3, MEM_STACK_REGISTER, CELLS(12));
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG3, MEM_STACK_REGISTER, AVX_CELLS(3));
 
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG2);
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(4), AVX_REG3);
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(8), AVX_REG0);
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(12), AVX_REG1);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(1), AVX_REG3);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(2), AVX_REG0);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(3), AVX_REG1);
 
   }
 
@@ -485,7 +485,7 @@ void primitive_pow(asmcode& code, compile_data&)
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
@@ -501,7 +501,7 @@ void primitive_pow(asmcode& code, compile_data&)
   code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, 32);
 #endif
 
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -510,7 +510,7 @@ void primitive_atan2(asmcode& code, compile_data&)
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
@@ -526,7 +526,7 @@ void primitive_atan2(asmcode& code, compile_data&)
   code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, 32);
 #endif
 
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -557,27 +557,27 @@ void primitive_negate(asmcode& code, compile_data&)
 void primitive_and(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
 void primitive_or(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VORPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
 void primitive_xor(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -593,9 +593,9 @@ void primitive_equ(asmcode& code, compile_data&)
   {
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
 
   }
@@ -605,9 +605,9 @@ void primitive_nequ(asmcode& code, compile_data&)
 
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 4);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -615,9 +615,9 @@ void primitive_lt(asmcode& code, compile_data&)
   {
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -625,9 +625,9 @@ void primitive_gt(asmcode& code, compile_data&)
   {
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG1, AVX_REG0, asmcode::NUMBER, 1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -635,9 +635,9 @@ void primitive_le(asmcode& code, compile_data&)
   {
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 2);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -645,9 +645,9 @@ void primitive_ge(asmcode& code, compile_data&)
   {
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -655,12 +655,12 @@ void primitive_fequ(asmcode& code, compile_data&)
   {
   //1.f if a is equal to b, else 0.f
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -668,12 +668,12 @@ void primitive_fnequ(asmcode& code, compile_data&)
   {
   //1.f if a is not equal to b, else 0.f
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 4);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -681,12 +681,12 @@ void primitive_flt(asmcode& code, compile_data&)
   {
   //1.f if a is less than b, else 0.f
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 1);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -694,12 +694,12 @@ void primitive_fgt(asmcode& code, compile_data&)
   {
   //1.f if a is greater than b, else 0.f
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG1, AVX_REG0, asmcode::NUMBER, 1);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -707,12 +707,12 @@ void primitive_fle(asmcode& code, compile_data&)
   {
   //1.f if a is less than or equal to b, else 0.f
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 2);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
@@ -720,26 +720,26 @@ void primitive_fge(asmcode& code, compile_data&)
   {
   //1.f if a is greater than or equal to b, else 0.f
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
 void primitive_stack_top_fetch(asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, STACK_TOP);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
   }
 
 void primitive_stack_pointer_fetch(asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, STACK_REGISTER);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
   }
 
@@ -754,31 +754,31 @@ void primitive_fetch(asmcode& code, compile_data&)
 void primitive_store(asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(8));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
   code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
   }
 
 void primitive_addstorei(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER); 
-  code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER, CELLS(4));
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(8));
+  code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
   code.add(asmcode::ADD, asmcode::MEM_RAX, asmcode::RCX);
   }
 
 void primitive_substorei(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
-  code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER, CELLS(4));
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(8));
+  code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
   code.add(asmcode::SUB, asmcode::MEM_RAX, asmcode::RCX);
   }
 
 void primitive_here(ASM::asmcode& code, compile_data&)
   {
   //code.add(asmcode::MOV, asmcode::RAX, HERE);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::MOV, MEM_STACK_REGISTER, HERE);
   }
 
@@ -792,7 +792,7 @@ void primitive_cells(ASM::asmcode& code, compile_data&)
 void primitive_comma(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));  
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));  
   code.add(asmcode::MOV, asmcode::RAX, MEM_HERE);
   code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
   code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, 32);
@@ -850,69 +850,69 @@ void primitive_fmod(asmcode& code, compile_data&)
   */
 
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER); // n1
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4)); // d1
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1)); // d1
   code.add(asmcode::VDIVPS, AVX_REG2, AVX_REG0, AVX_REG1); // quotient
   code.add(asmcode::VROUNDPS, AVX_REG2, AVX_REG2, asmcode::NUMBER, 1); // floored quotient n3
   code.add(asmcode::VMULPS, AVX_REG1, AVX_REG2, AVX_REG1); // floored quotient n3 times n1
   code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1); // remainder n2
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, CELLS(4), AVX_REG0);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(1), AVX_REG0);
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG2);
   }
 
 void primitive_min(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VMINPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
 void primitive_max(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
   code.add(asmcode::VMAXPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
 void primitive_return_stack_push(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
-  code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, asmcode::MEM_RSP, AVX_REG0);
   }
 
 void primitive_return_stack_pop(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RSP);
-  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, CELLS(4));
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
 void primitive_return_stack_top(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, RSP_TOP);
-  code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
 void primitive_return_stack_top_fetch(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, RSP_TOP);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
   }
 
 void primitive_return_stack_pointer_fetch(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, asmcode::RSP);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
   }
 
@@ -928,9 +928,9 @@ void primitive_if(ASM::asmcode& code, compile_data& cd)
 
   // push test condition to return stack
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
-  code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, CELLS(8));
-  code.add(asmcode::VMOVAPS, asmcode::MEM_RSP, CELLS(4), AVX_REG0);
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RSP, AVX_CELLS(1), AVX_REG0);
   // push stack register on return stack
   code.add(asmcode::MOV, asmcode::MEM_RSP, STACK_REGISTER);
 
@@ -951,8 +951,8 @@ void primitive_then(ASM::asmcode& code, compile_data& cd)
   auto loop_end = label_to_string(cd.label++);
   
   code.add(asmcode::MOV, asmcode::RCX, asmcode::MEM_RSP); // address of stack register before branch
-  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RSP, CELLS(4)); // test condition
-  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, CELLS(8));
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RSP, AVX_CELLS(1)); // test condition
+  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(2));
 
   code.add(asmcode::VMOVMSKPS, asmcode::RAX, AVX_REG1); // if rax == 0, then all conditions are false, if rax == 255, all conditions are true
   code.add(asmcode::TEST, asmcode::RAX, asmcode::RAX);
@@ -977,8 +977,8 @@ void primitive_then(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::VORPS, AVX_REG0, AVX_REG3, asmcode::YMM4);
   code.add(asmcode::VMOVAPS, asmcode::MEM_RDX, AVX_REG0);
 
-  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, CELLS(4));
-  code.add(asmcode::ADD, asmcode::RDX, asmcode::NUMBER, CELLS(4));  
+  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::ADD, asmcode::RDX, asmcode::NUMBER, AVX_CELLS(1));  
   code.add(asmcode::JMPS, loop);
   code.add(asmcode::LABEL, loop_end);
 
@@ -998,8 +998,8 @@ void primitive_else(ASM::asmcode& code, compile_data& cd)
 
   code.add(asmcode::MOV, asmcode::RCX, asmcode::MEM_RSP); // address of stack register before branch
   code.add(asmcode::MOV, asmcode::RDX, asmcode::RCX); // save in rdx for further reference
-  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RSP, CELLS(4)); // test condition
-  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, CELLS(8));
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RSP, AVX_CELLS(1)); // test condition
+  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(2));
 
   code.add(asmcode::VMOVMSKPS, asmcode::RAX, AVX_REG1); // if rax == 0, then all conditions are false, if rax == 255, all conditions are true
   code.add(asmcode::CMP, asmcode::RAX, asmcode::NUMBER, 255); 
@@ -1010,15 +1010,15 @@ void primitive_else(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::SHR, asmcode::RCX, asmcode::NUMBER, 5); // divide rcx by 32: now rcx contains number of items added on the stack  
 
   code.add(asmcode::MOV, STACK_REGISTER, asmcode::RDX); // the stack should point to the same location as before we did the if branch
-  code.add(asmcode::SUB, asmcode::RDX, asmcode::NUMBER, CELLS(4)); // rdx now points to first item added to the stack by the if branch
+  code.add(asmcode::SUB, asmcode::RDX, asmcode::NUMBER, AVX_CELLS(1)); // rdx now points to first item added to the stack by the if branch
 
   code.add(asmcode::LABEL, loop);
   code.add(asmcode::TEST, asmcode::RCX, asmcode::RCX);  
   code.add(asmcode::JES, loop_end);
   code.add(asmcode::DEC, asmcode::RCX);
   code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RDX); // save stack item pointed to by rdx on the return stack 
-  code.add(asmcode::SUB, asmcode::RDX, asmcode::NUMBER, CELLS(4));
-  code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::SUB, asmcode::RDX, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, asmcode::MEM_RSP, AVX_REG0);  
   code.add(asmcode::JMPS, loop);
   code.add(asmcode::LABEL, loop_end);
@@ -1026,8 +1026,8 @@ void primitive_else(ASM::asmcode& code, compile_data& cd)
 
   // stack is now as before the if branch. Data is temporarily stored on the return stack
 
-  code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, CELLS(8));
-  code.add(asmcode::VMOVAPS, asmcode::MEM_RSP, CELLS(4), AVX_REG1); // test condition
+  code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RSP, AVX_CELLS(1), AVX_REG1); // test condition
   // push stack register on return stack
   code.add(asmcode::MOV, asmcode::MEM_RSP, STACK_REGISTER); // stack address 
 
@@ -1046,7 +1046,7 @@ void primitive_begin(ASM::asmcode& code, compile_data& cd)
 void primitive_while(ASM::asmcode& code, compile_data& cd)
   {
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER); // pop ymm0 from stack
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
 
   /*
   The begin while repeat test only fails if it fails for all values in the simd vector

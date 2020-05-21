@@ -1305,6 +1305,9 @@ namespace
     code.add(asmcode::VMOVAPS, asmcode::MEM_RCX, 1024, asmcode::YMM0);
     code.add(asmcode::VMOVAPS, asmcode::MEM_RSP, -8, asmcode::YMM7);
 
+    code.add(asmcode::VMOVAPS, asmcode::ZMM1, asmcode::MEM_RBP);
+    code.add(asmcode::VMOVAPS, asmcode::ZMM0, asmcode::MEM_RBP, 64);
+
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC5, 0xFC, 0x29, 0xC8 });
@@ -1316,6 +1319,10 @@ namespace
     _check_buffer(buffer, size, { 0xC5, 0xFC, 0x29, 0x81, 0x00, 0x04, 0x00, 0x00 });
     size = code.get_instructions_list().front()[4].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC5, 0xFC, 0x29, 0x7C, 0x24, 0xF8 });
+    size = code.get_instructions_list().front()[5].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF1, 0x7C, 0x48, 0x28, 0x4D, 0x00 });
+    size = code.get_instructions_list().front()[6].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF1, 0x7C, 0x48, 0x28, 0x45, 0x01 });
     }
 
   void asmcode_vsqrtps()
