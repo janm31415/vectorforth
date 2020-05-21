@@ -1210,6 +1210,7 @@ namespace
     code.add(asmcode::VADDPS, asmcode::ZMM1, asmcode::ZMM2, asmcode::ZMM3);
     code.add(asmcode::VADDPS, asmcode::ZMM1, asmcode::ZMM2, asmcode::MEM_RSP, -256);
     code.add(asmcode::VADDPS, asmcode::ZMM0, asmcode::ZMM7, asmcode::MEM_RAX, 64);
+    code.add(asmcode::VADDPS, asmcode::ZMM0, asmcode::ZMM7, asmcode::MEM_RAX, 64000);
 
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
@@ -1224,7 +1225,9 @@ namespace
     size = code.get_instructions_list().front()[4].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0x62, 0xF1, 0x6C, 0x48, 0x58, 0x8C, 0x24, 0x00, 0xFF, 0xFF, 0xFF });
     size = code.get_instructions_list().front()[5].fill_opcode(buffer);
-    _check_buffer(buffer, size, { 0x62, 0xF1, 0x44, 0x48, 0x58, 0x40, 0x40 });
+    _check_buffer(buffer, size, { 0x62, 0xF1, 0x44, 0x48, 0x58, 0x40, 0x01 });
+    size = code.get_instructions_list().front()[6].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF1, 0x44, 0x48, 0x58, 0x80, 0x00, 0xFA, 0x00, 0x00 });
     }
 
   void asmcode_vsubps()

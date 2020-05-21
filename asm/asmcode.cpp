@@ -2761,7 +2761,7 @@ namespace
     {
     opcode_table t;
     //VEX.256.66.0F3A.WIG 08 /r ib VROUNDPS ymm1, ymm2 / m256, imm8
-    t.add_opcode(make_vex_opcode("VROUNDPS", opcode::_256, opcode::_66, opcode::_0F3A, opcode::WIG, 0x08, opcode::r | opcode::ib, opcode::ymm, opcode::ymm_m256, opcode::imm8));    
+    t.add_opcode(make_vex_opcode("VROUNDPS", opcode::_256, opcode::_66, opcode::_0F3A, opcode::WIG, 0x08, opcode::r | opcode::ib, opcode::ymm, opcode::ymm_m256, opcode::imm8));
     return t;
     }
 
@@ -2802,7 +2802,7 @@ namespace
     //VEX.256.0F.WIG 50 /r VMOVMSKPS reg, ymm2
 
     //HACK: actually the last opcode should be ymm instead of ymm_m256, but then the modrm byte is wrong. So to make the rule work, I replaced ymm by ymm_m256
-    t.add_opcode(make_vex_opcode("VMOVMSKPS", opcode::_256, opcode::_0F, opcode::WIG, 0x50, opcode::r, opcode::r64, opcode::ymm_m256));    
+    t.add_opcode(make_vex_opcode("VMOVMSKPS", opcode::_256, opcode::_0F, opcode::WIG, 0x50, opcode::r, opcode::r64, opcode::ymm_m256));
     return t;
     }
 
@@ -2940,7 +2940,7 @@ namespace
     opcode_table t;
     //VEX.NDS.256.66.0F3A.W0 06 /r ib VPERM2F128 ymm1, ymm2, ymm3 / m256, imm8
     t.add_opcode(make_vex_opcode("VPERM2F128", opcode::NDS, opcode::_256, opcode::_66, opcode::_0F3A, opcode::W0, 0x06, opcode::r | opcode::ib, opcode::ymm, opcode::ymm, opcode::ymm_m256, opcode::imm8));
-    
+
     return t;
     }
 
@@ -3993,13 +3993,22 @@ namespace
     return stream - opcode_stream;
     }
 
-  uint64_t fill_evex(uint8_t* opcode_stream, const asmcode::instruction& code, opcode o, opcode::opcode_operand_type op1d, opcode::opcode_operand_type op2d, opcode::opcode_operand_type op3d, opcode::opcode_operand_type op4d)
+  uint64_t get_compressed_displacement(const asmcode::instruction& code, opcode o, opcode::opcode_operand_type op1d, opcode::opcode_operand_type op2d, opcode::opcode_operand_type op3d, opcode::opcode_operand_type op4d)
+    {
+    code; o; op1d; op2d; op3d; op4d;
+    /*
+    Table 2-34 and 2-35 in Intel guide. Todo
+    */
+    return 64;
+    }
+
+  uint64_t fill_evex(uint8_t* opcode_stream, asmcode::instruction code, opcode o, opcode::opcode_operand_type op1d, opcode::opcode_operand_type op2d, opcode::opcode_operand_type op3d, opcode::opcode_operand_type op4d)
     {
     //four bytes
     //
     // not complete
 
-    uint8_t* stream = opcode_stream;    
+    uint8_t* stream = opcode_stream;
 
     uint8_t vex_V_quote = 1;
     uint8_t vvvv = 15;
@@ -4106,22 +4115,17 @@ namespace
 
     push1byte(stream, o.opcode_id);
 
-    /*
-    if (two_byte)
-      {
-      push1byte(stream, 0xC5);
-      push1byte(stream, make_2byte_vex(vex_r, vvvv, vex_l, vex_pp));
-      push1byte(stream, o.opcode_id);
-      }
-    else
-      {
-      push1byte(stream, 0xC4);
-      push1byte(stream, make_3byte_vex_1(vex_r, vex_x, vex_b, mmmmm));
-      push1byte(stream, make_3byte_vex_2(vex_w, vvvv, vex_l, vex_pp));
-      push1byte(stream, o.opcode_id);
-      }
-      */
+    /*disp8 compression mode for evex instructions*/
+    uint64_t N = get_compressed_displacement(code, o, op1d, op2d, op3d, op4d);
 
+    if (is_8_bit(code.operand1_mem / N))
+      code.operand1_mem = code.operand1_mem / N;
+
+    if (is_8_bit(code.operand2_mem / N))
+      code.operand2_mem = code.operand2_mem / N;
+
+    if (is_8_bit(code.operand3_mem / N))
+      code.operand3_mem = code.operand3_mem / N;
 
     if (use_modrm)
       push1byte(stream, modrm);
@@ -4234,7 +4238,7 @@ namespace
       case opcode::VEX: return fill_vex(opcode_stream, code, o, op1d, op2d, op3d, op4d);
       case opcode::EVEX: return fill_evex(opcode_stream, code, o, op1d, op2d, op3d, op4d);
       default: return fill_default(opcode_stream, code, o, op1d, op2d, op3d);
-      }   
+      }
     }
 
   std::map<std::string, opcode_table> g_table = make_opcode_table();
