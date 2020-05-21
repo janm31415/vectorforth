@@ -367,7 +367,6 @@ void primitive_decr256i(asmcode& code, compile_data&)
 
 void primitive_sin(asmcode& code, compile_data&)
   {
-  align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
@@ -382,14 +381,16 @@ void primitive_sin(asmcode& code, compile_data&)
   code.add(asmcode::CALL, asmcode::R11);
 
   code.add(asmcode::MOV, CONTEXT, asmcode::R15); // restore context
-  restore_stack(code);
+
+#ifdef _WIN32
+  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, 32);
+#endif
 
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, asmcode::YMM0);
   }
 
 void primitive_cos(asmcode& code, compile_data&)
   {
-  align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
@@ -404,14 +405,15 @@ void primitive_cos(asmcode& code, compile_data&)
   code.add(asmcode::CALL, asmcode::R11);
 
   code.add(asmcode::MOV, CONTEXT, asmcode::R15); // restore context
-  restore_stack(code);
+#ifdef _WIN32
+  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, 32);
+#endif
 
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, asmcode::YMM0);
   }
 
 void primitive_tan(asmcode& code, compile_data&)
   {
-  align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
@@ -426,14 +428,15 @@ void primitive_tan(asmcode& code, compile_data&)
   code.add(asmcode::CALL, asmcode::R11);
 
   code.add(asmcode::MOV, CONTEXT, asmcode::R15); // restore context
-  restore_stack(code);
+#ifdef _WIN32
+  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, 32);
+#endif
 
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, asmcode::YMM0);
   }
 
 void primitive_exp(asmcode& code, compile_data&)
   {
-  align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
@@ -448,14 +451,15 @@ void primitive_exp(asmcode& code, compile_data&)
   code.add(asmcode::CALL, asmcode::R11);
 
   code.add(asmcode::MOV, CONTEXT, asmcode::R15); // restore context
-  restore_stack(code);
+#ifdef _WIN32
+  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, 32);
+#endif
 
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, asmcode::YMM0);
   }
 
 void primitive_log(asmcode& code, compile_data&)
   {
-  align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
   code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
@@ -470,14 +474,14 @@ void primitive_log(asmcode& code, compile_data&)
   code.add(asmcode::CALL, asmcode::R11);
 
   code.add(asmcode::MOV, CONTEXT, asmcode::R15); // restore context
-  restore_stack(code);
-
+#ifdef _WIN32
+  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, 32);
+#endif
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, asmcode::YMM0);
   }
 
 void primitive_pow(asmcode& code, compile_data&)
   {
-  align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
   code.add(asmcode::VMOVAPS, asmcode::YMM1, MEM_STACK_REGISTER);
@@ -493,7 +497,9 @@ void primitive_pow(asmcode& code, compile_data&)
   code.add(asmcode::CALL, asmcode::R11);
 
   code.add(asmcode::MOV, CONTEXT, asmcode::R15); // restore context
-  restore_stack(code);
+#ifdef _WIN32
+  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, 32);
+#endif
 
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, asmcode::YMM0);
@@ -501,7 +507,6 @@ void primitive_pow(asmcode& code, compile_data&)
 
 void primitive_atan2(asmcode& code, compile_data&)
   {
-  align_stack(code);
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
   code.add(asmcode::VMOVAPS, asmcode::YMM1, MEM_STACK_REGISTER);
@@ -517,7 +522,9 @@ void primitive_atan2(asmcode& code, compile_data&)
   code.add(asmcode::CALL, asmcode::R11);
 
   code.add(asmcode::MOV, CONTEXT, asmcode::R15); // restore context
-  restore_stack(code);
+#ifdef _WIN32
+  code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, 32);
+#endif
 
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, asmcode::YMM0);
