@@ -1856,6 +1856,29 @@ namespace
     return o;
     }
 
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_2 f2, opcode::vex_field_4 f4, opcode::vex_field_5 f5, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = opcode::none;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = opcode::vvvv_must_be_1111;
+    o.vex_2 = f2;
+    o.vex_3 = opcode::NO_PREFIX;
+    o.vex_4 = f4;
+    o.vex_5 = f5;
+    o.vex_6 = opcode::NO_WIG;
+    return o;
+    }
+
   opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_2 f2, opcode::vex_field_4 f4, opcode::vex_field_6 f6, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2)
     {
     opcode o;
@@ -1876,6 +1899,30 @@ namespace
     o.vex_4 = f4;
     o.vex_5 = opcode::W0;
     o.vex_6 = f6;
+    return o;
+    }
+
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_1 f1, opcode::vex_field_2 f2, opcode::vex_field_4 f4, opcode::vex_field_5 f5, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2, opcode::opcode_operand_type op3, opcode::opcode_operand_type op4)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = op3;
+    o.operand_4 = op4;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = f1;
+    o.vex_2 = f2;
+    o.vex_3 = opcode::NO_PREFIX;
+    o.vex_4 = f4;
+    o.vex_5 = f5;
+    o.vex_6 = opcode::NO_WIG;
     return o;
     }
 
@@ -2675,7 +2722,7 @@ namespace
     //VEX.NDS.256.0F 54 /r VANDPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VANDPS", opcode::NDS, opcode::_256, opcode::_0F, 0x54, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
 
-    t.add_opcode(make_evex_opcode("VANDPS", opcode::NDS, opcode::_512, opcode::_0F, 0x54, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VANDPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0x54, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2685,7 +2732,7 @@ namespace
     //VEX.NDS.256.0F 55 /r VANDNPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VANDNPS", opcode::NDS, opcode::_256, opcode::_0F, 0x55, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
 
-    t.add_opcode(make_evex_opcode("VANDNPS", opcode::NDS, opcode::_512, opcode::_0F, 0x55, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VANDNPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0x55, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2695,7 +2742,7 @@ namespace
     //VEX.NDS.256.0F 56 /r VORPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VORPS", opcode::NDS, opcode::_256, opcode::_0F, 0x56, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
 
-    t.add_opcode(make_evex_opcode("VORPS", opcode::NDS, opcode::_512, opcode::_0F, 0x56, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VORPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0x56, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2705,7 +2752,7 @@ namespace
     //VEX.NDS.256.0F.WIG C2 /r ib VCMPPS ymm1, ymm2, ymm3 / m256, imm8
     t.add_opcode(make_vex_opcode("VCMPPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0xC2, opcode::r | opcode::ib, opcode::ymm, opcode::ymm, opcode::ymm_m256, opcode::imm8));
 
-    t.add_opcode(make_evex_opcode("VCMPPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0xC2, opcode::r | opcode::ib, opcode::zmm, opcode::zmm, opcode::zmm_m512, opcode::imm8));
+    t.add_opcode(make_evex_opcode("VCMPPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0xC2, opcode::r | opcode::ib, opcode::zmm, opcode::zmm, opcode::zmm_m512, opcode::imm8));
     return t;
     }
 
@@ -2714,9 +2761,7 @@ namespace
     {
     opcode_table t;
     //VEX.256.66.0F3A.WIG 08 /r ib VROUNDPS ymm1, ymm2 / m256, imm8
-    t.add_opcode(make_vex_opcode("VROUNDPS", opcode::_256, opcode::_66, opcode::_0F3A, opcode::WIG, 0x08, opcode::r | opcode::ib, opcode::ymm, opcode::ymm_m256, opcode::imm8));
-
-    t.add_opcode(make_evex_opcode("VROUNDPS", opcode::_512, opcode::_66, opcode::_0F3A, opcode::WIG, 0x08, opcode::r | opcode::ib, opcode::zmm, opcode::zmm_m512, opcode::imm8));
+    t.add_opcode(make_vex_opcode("VROUNDPS", opcode::_256, opcode::_66, opcode::_0F3A, opcode::WIG, 0x08, opcode::r | opcode::ib, opcode::ymm, opcode::ymm_m256, opcode::imm8));    
     return t;
     }
 
@@ -2726,7 +2771,7 @@ namespace
     //VEX.NDS.256.0F.WIG 5C /r VSUBPS ymm1, ymm2, ymm3/m256
     t.add_opcode(make_vex_opcode("VSUBPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x5C, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
 
-    t.add_opcode(make_evex_opcode("VSUBPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0x5C, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VSUBPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0x5C, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2737,7 +2782,7 @@ namespace
     //VEX.NDS.256.0F.WIG 59 /r VMULPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VMULPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x59, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
 
-    t.add_opcode(make_evex_opcode("VMULPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0x59, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VMULPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0x59, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2757,9 +2802,7 @@ namespace
     //VEX.256.0F.WIG 50 /r VMOVMSKPS reg, ymm2
 
     //HACK: actually the last opcode should be ymm instead of ymm_m256, but then the modrm byte is wrong. So to make the rule work, I replaced ymm by ymm_m256
-    t.add_opcode(make_vex_opcode("VMOVMSKPS", opcode::_256, opcode::_0F, opcode::WIG, 0x50, opcode::r, opcode::r64, opcode::ymm_m256));
-
-    t.add_opcode(make_evex_opcode("VMOVMSKPS", opcode::_512, opcode::_0F, opcode::WIG, 0x50, opcode::r, opcode::r64, opcode::zmm_m512));
+    t.add_opcode(make_vex_opcode("VMOVMSKPS", opcode::_256, opcode::_0F, opcode::WIG, 0x50, opcode::r, opcode::r64, opcode::ymm_m256));    
     return t;
     }
 
@@ -2779,7 +2822,7 @@ namespace
     //VEX.NDS.256.0F.WIG 5E /r VDIVPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VDIVPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x5E, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
 
-    t.add_opcode(make_evex_opcode("VDIVPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0x5E, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VDIVPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0x5E, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2798,7 +2841,7 @@ namespace
     //VEX.256.0F.WIG 5B /r VCVTDQ2PS ymm1, ymm2 / m256
     t.add_opcode(make_vex_opcode("VCVTDQ2PS", opcode::_256, opcode::_0F, opcode::WIG, 0x5B, opcode::r, opcode::ymm, opcode::ymm_m256));
 
-    t.add_opcode(make_evex_opcode("VCVTDQ2PS", opcode::_512, opcode::_0F, opcode::WIG, 0x5B, opcode::r, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VCVTDQ2PS", opcode::_512, opcode::_0F, opcode::W0, 0x5B, opcode::r, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2824,7 +2867,7 @@ namespace
     //VEX.256.66.0F.WIG 5B /r VCVTPS2DQ ymm1, ymm2 / m256
     t.add_opcode(make_vex_opcode("VCVTPS2DQ", opcode::_256, opcode::_66, opcode::_0F, opcode::WIG, 0x5B, opcode::r, opcode::ymm, opcode::ymm_m256));
 
-    t.add_opcode(make_evex_opcode("VCVTPS2DQ", opcode::_512, opcode::_66, opcode::_0F, opcode::WIG, 0x5B, opcode::r, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VCVTPS2DQ", opcode::_512, opcode::_66, opcode::_0F, opcode::W0, 0x5B, opcode::r, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2834,7 +2877,7 @@ namespace
     // VEX.NDS.256.0F.WIG 5D / r VMINPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VMINPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x5D, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
 
-    t.add_opcode(make_evex_opcode("VMINPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0x5D, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VMINPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0x5D, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2844,7 +2887,7 @@ namespace
     //VEX.NDS.256.0F.WIG 5F /r VMAXPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VMAXPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x5F, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
 
-    t.add_opcode(make_evex_opcode("VMAXPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0x5F, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VMAXPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0x5F, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2854,7 +2897,7 @@ namespace
     //VEX.256.0F.WIG 51/r VSQRTPS ymm1, ymm2 / m256
     t.add_opcode(make_vex_opcode("VSQRTPS", opcode::_256, opcode::_0F, opcode::WIG, 0x51, opcode::r, opcode::ymm, opcode::ymm_m256));
 
-    t.add_opcode(make_evex_opcode("VSQRTPS", opcode::_512, opcode::_0F, opcode::WIG, 0x51, opcode::r, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VSQRTPS", opcode::_512, opcode::_0F, opcode::W0, 0x51, opcode::r, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2866,7 +2909,7 @@ namespace
     //VEX.NDS.256.0F.WIG C6 /r ib VSHUFPS ymm1, ymm2, ymm3 / m256, imm8
     t.add_opcode(make_vex_opcode("VSHUFPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0xC6, opcode::r | opcode::ib, opcode::ymm, opcode::ymm, opcode::ymm_m256, opcode::imm8));
 
-    t.add_opcode(make_evex_opcode("VSHUFPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0xC6, opcode::r | opcode::ib, opcode::zmm, opcode::zmm, opcode::zmm_m512, opcode::imm8));
+    t.add_opcode(make_evex_opcode("VSHUFPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0xC6, opcode::r | opcode::ib, opcode::zmm, opcode::zmm, opcode::zmm_m512, opcode::imm8));
     return t;
     }
 
@@ -2887,8 +2930,8 @@ namespace
     //VEX.256.0F.WIG 29 /r VMOVAPS ymm2 / m256, ymm1
     t.add_opcode(make_vex_opcode("VMOVAPS", opcode::_256, opcode::_0F, opcode::WIG, 0x29, opcode::r, opcode::ymm_m256, opcode::ymm));
 
-    t.add_opcode(make_evex_opcode("VMOVAPS", opcode::_512, opcode::_0F, opcode::WIG, 0x28, opcode::r, opcode::zmm, opcode::zmm_m512));
-    t.add_opcode(make_evex_opcode("VMOVAPS", opcode::_512, opcode::_0F, opcode::WIG, 0x29, opcode::r, opcode::zmm_m512, opcode::zmm));
+    t.add_opcode(make_evex_opcode("VMOVAPS", opcode::_512, opcode::_0F, opcode::W0, 0x28, opcode::r, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VMOVAPS", opcode::_512, opcode::_0F, opcode::W0, 0x29, opcode::r, opcode::zmm_m512, opcode::zmm));
     return t;
     }
 
@@ -2897,8 +2940,7 @@ namespace
     opcode_table t;
     //VEX.NDS.256.66.0F3A.W0 06 /r ib VPERM2F128 ymm1, ymm2, ymm3 / m256, imm8
     t.add_opcode(make_vex_opcode("VPERM2F128", opcode::NDS, opcode::_256, opcode::_66, opcode::_0F3A, opcode::W0, 0x06, opcode::r | opcode::ib, opcode::ymm, opcode::ymm, opcode::ymm_m256, opcode::imm8));
-
-    t.add_opcode(make_evex_opcode("VPERM2F128", opcode::NDS, opcode::_512, opcode::_66, opcode::_0F3A, opcode::W0, 0x06, opcode::r | opcode::ib, opcode::zmm, opcode::zmm, opcode::zmm_m512, opcode::imm8));
+    
     return t;
     }
 
