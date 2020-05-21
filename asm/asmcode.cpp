@@ -389,6 +389,14 @@ namespace
       case asmcode::YMM5: return "ymm5";
       case asmcode::YMM6: return "ymm6";
       case asmcode::YMM7: return "ymm7";
+      case asmcode::ZMM0: return "zmm0";
+      case asmcode::ZMM1: return "zmm1";
+      case asmcode::ZMM2: return "zmm2";
+      case asmcode::ZMM3: return "zmm3";
+      case asmcode::ZMM4: return "zmm4";
+      case asmcode::ZMM5: return "zmm5";
+      case asmcode::ZMM6: return "zmm6";
+      case asmcode::ZMM7: return "zmm7";
       case asmcode::NUMBER: return uint64_to_hex(mem);
       case asmcode::MEM_EAX: return mem ? "[eax+" + _to_string(mem) + "]" : "[eax]";
       case asmcode::MEM_EBX: return mem ? "[ebx+" + _to_string(mem) + "]" : "[ebx]";
@@ -697,6 +705,21 @@ namespace
     return (w << 7) | (v << 3) | (l << 2) | p;
     }
 
+  uint8_t make_evex_p0(uint8_t r, uint8_t x, uint8_t b, uint8_t rq, uint8_t mm)
+    {
+    return (r << 7) | (x << 6) | (b << 5) | (rq << 4) | mm;
+    }
+
+  uint8_t make_evex_p1(uint8_t w, uint8_t vvvv, uint8_t pp)
+    {
+    return (w << 7) | (vvvv << 3) | (1 << 2) | pp;
+    }
+
+  uint8_t make_evex_p2(uint8_t z, uint8_t Lq, uint8_t L, uint8_t b, uint8_t Vq, uint8_t aaa)
+    {
+    return (z << 7) | (Lq << 6) | (L << 5) | (b << 4) | (Vq << 3) | aaa;
+    }
+
   uint8_t make_modrm_byte(uint8_t mod, uint8_t reg, uint8_t rm)
     {
     assert(mod < 4);
@@ -750,41 +773,49 @@ namespace
     bool zero = target_offset == 0;
     switch (target)
       {
+      case asmcode::ZMM0:
       case asmcode::YMM0:
       case asmcode::XMM0:
       case asmcode::EAX:
       case asmcode::AL:
       case asmcode::RAX: mod = 3; rm = 0;  break;
+      case asmcode::ZMM1:
       case asmcode::YMM1:
       case asmcode::XMM1:
       case asmcode::ECX:
       case asmcode::CL:
       case asmcode::RCX: mod = 3; rm = 1;  break;
+      case asmcode::ZMM2:
       case asmcode::YMM2:
       case asmcode::XMM2:
       case asmcode::EDX:
       case asmcode::DL:
       case asmcode::RDX: mod = 3; rm = 2;  break;
+      case asmcode::ZMM3:
       case asmcode::YMM3:
       case asmcode::XMM3:
       case asmcode::EBX:
       case asmcode::BL:
       case asmcode::RBX: mod = 3; rm = 3;  break;
+      case asmcode::ZMM4:
       case asmcode::YMM4:
       case asmcode::XMM4:
       case asmcode::ESP:
       case asmcode::AH:
       case asmcode::RSP: mod = 3; rm = 4;  break;
+      case asmcode::ZMM5:
       case asmcode::YMM5:
       case asmcode::XMM5:
       case asmcode::EBP:
       case asmcode::CH:
       case asmcode::RBP: mod = 3; rm = 5;  break;
+      case asmcode::ZMM6:
       case asmcode::YMM6:
       case asmcode::XMM6:
       case asmcode::ESI:
       case asmcode::DH:
       case asmcode::RSI: mod = 3; rm = 6;  break;
+      case asmcode::ZMM7:
       case asmcode::YMM7:
       case asmcode::XMM7:
       case asmcode::EDI:
@@ -874,41 +905,49 @@ namespace
     bool zero = target_offset == 0;
     switch (target)
       {
+      case asmcode::ZMM0:
       case asmcode::YMM0:
       case asmcode::XMM0:
       case asmcode::EAX:
       case asmcode::AL:
       case asmcode::RAX: mod = 3; rm = 0;  break;
+      case asmcode::ZMM1:
       case asmcode::YMM1:
       case asmcode::XMM1:
       case asmcode::ECX:
       case asmcode::CL:
       case asmcode::RCX: mod = 3; rm = 1;  break;
+      case asmcode::ZMM2:
       case asmcode::YMM2:
       case asmcode::XMM2:
       case asmcode::EDX:
       case asmcode::DL:
       case asmcode::RDX: mod = 3; rm = 2;  break;
+      case asmcode::ZMM3:
       case asmcode::YMM3:
       case asmcode::XMM3:
       case asmcode::EBX:
       case asmcode::BL:
       case asmcode::RBX: mod = 3; rm = 3;  break;
+      case asmcode::ZMM4:
       case asmcode::YMM4:
       case asmcode::XMM4:
       case asmcode::ESP:
       case asmcode::AH:
       case asmcode::RSP: mod = 3; rm = 4;  break;
+      case asmcode::ZMM5:
       case asmcode::YMM5:
       case asmcode::XMM5:
       case asmcode::EBP:
       case asmcode::CH:
       case asmcode::RBP: mod = 3; rm = 5;  break;
+      case asmcode::ZMM6:
       case asmcode::YMM6:
       case asmcode::XMM6:
       case asmcode::ESI:
       case asmcode::DH:
       case asmcode::RSI: mod = 3; rm = 6;  break;
+      case asmcode::ZMM7:
       case asmcode::YMM7:
       case asmcode::XMM7:
       case asmcode::EDI:
@@ -991,38 +1030,46 @@ namespace
       case asmcode::AL:
       case asmcode::XMM0:
       case asmcode::YMM0:
+      case asmcode::ZMM0:
       case asmcode::EAX:
       case asmcode::RAX: reg = 0;  break;
+      case asmcode::ZMM1:
       case asmcode::YMM1:
       case asmcode::XMM1:
       case asmcode::ECX:
       case asmcode::CL:
       case asmcode::RCX: reg = 1;  break;
+      case asmcode::ZMM2:
       case asmcode::YMM2:
       case asmcode::XMM2:
       case asmcode::EDX:
       case asmcode::DL:
       case asmcode::RDX: reg = 2;  break;
+      case asmcode::ZMM3:
       case asmcode::YMM3:
       case asmcode::XMM3:
       case asmcode::EBX:
       case asmcode::BL:
       case asmcode::RBX: reg = 3;  break;
+      case asmcode::ZMM4:
       case asmcode::YMM4:
       case asmcode::XMM4:
       case asmcode::ESP:
       case asmcode::AH:
       case asmcode::RSP: reg = 4;  break;
+      case asmcode::ZMM5:
       case asmcode::YMM5:
       case asmcode::XMM5:
       case asmcode::EBP:
       case asmcode::CH:
       case asmcode::RBP: reg = 5;  break;
+      case asmcode::ZMM6:
       case asmcode::YMM6:
       case asmcode::XMM6:
       case asmcode::ESI:
       case asmcode::DH:
       case asmcode::RSI: reg = 6;  break;
+      case asmcode::ZMM7:
       case asmcode::YMM7:
       case asmcode::XMM7:
       case asmcode::EDI:
@@ -1094,21 +1141,66 @@ namespace
     switch (op)
       {
       case asmcode::XMM0:
-      case asmcode::YMM0: return 15;
+      case asmcode::YMM0:
+      case asmcode::ZMM0: return 15;
       case asmcode::XMM1:
-      case asmcode::YMM1: return 14;
+      case asmcode::YMM1:
+      case asmcode::ZMM1: return 14;
       case asmcode::XMM2:
-      case asmcode::YMM2: return 13;
+      case asmcode::YMM2:
+      case asmcode::ZMM2: return 13;
       case asmcode::XMM3:
-      case asmcode::YMM3: return 12;
+      case asmcode::YMM3:
+      case asmcode::ZMM3: return 12;
       case asmcode::XMM4:
-      case asmcode::YMM4: return 11;
+      case asmcode::YMM4:
+      case asmcode::ZMM4: return 11;
       case asmcode::XMM5:
-      case asmcode::YMM5: return 10;
+      case asmcode::YMM5:
+      case asmcode::ZMM5: return 10;
       case asmcode::XMM6:
-      case asmcode::YMM6: return 9;
+      case asmcode::YMM6:
+      case asmcode::ZMM6: return 9;
       case asmcode::XMM7:
-      case asmcode::YMM7: return 8;
+      case asmcode::YMM7:
+      case asmcode::ZMM7: return 8;
+      default: throw std::logic_error("encode_vex_register: this register is not implemented");
+      }
+    }
+
+  uint8_t encode_vex_register(uint8_t& vquote, const asmcode::operand& op)
+    {
+    if (op >= asmcode::ZMM0 || op <= asmcode::ZMM7)
+      vquote = 1;
+    else
+      vquote = 0;
+
+    switch (op)
+      {
+      case asmcode::XMM0:
+      case asmcode::YMM0:
+      case asmcode::ZMM0: return 15;
+      case asmcode::XMM1:
+      case asmcode::YMM1:
+      case asmcode::ZMM1: return 14;
+      case asmcode::XMM2:
+      case asmcode::YMM2:
+      case asmcode::ZMM2: return 13;
+      case asmcode::XMM3:
+      case asmcode::YMM3:
+      case asmcode::ZMM3: return 12;
+      case asmcode::XMM4:
+      case asmcode::YMM4:
+      case asmcode::ZMM4: return 11;
+      case asmcode::XMM5:
+      case asmcode::YMM5:
+      case asmcode::ZMM5: return 10;
+      case asmcode::XMM6:
+      case asmcode::YMM6:
+      case asmcode::ZMM6: return 9;
+      case asmcode::XMM7:
+      case asmcode::YMM7:
+      case asmcode::ZMM7: return 8;
       default: throw std::logic_error("encode_vex_register: this register is not implemented");
       }
     }
@@ -1173,7 +1265,10 @@ namespace
       ymm_m256 = 0xC0008,
       al = 0x100010,
       cl = 0x200010,
-      moffs64 = 0x400000
+      moffs64 = 0x400000,
+      m512 = 0x800000,
+      zmm = 0x1000000,
+      zmm_m512 = 0x1800008
       };
 
     enum opcode_flags
@@ -1214,6 +1309,7 @@ namespace
       {
       _128,
       _256,
+      _512,
       LIG
       };
 
@@ -1254,7 +1350,14 @@ namespace
     opcode_operand_type operand_1, operand_2, operand_3, operand_4;
     std::string mnemonic;
 
-    bool vex;
+    enum e_vex_type
+      {
+      VEX_NONE,
+      VEX,
+      EVEX
+      };
+
+    e_vex_type vex_type;
     vex_field_1 vex_1;
     vex_field_2 vex_2;
     vex_field_3 vex_3;
@@ -1277,7 +1380,7 @@ namespace
     o.operand_3 = opcode::none;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = false;
+    o.vex_type = opcode::VEX_NONE;
     return o;
     }
 
@@ -1295,7 +1398,7 @@ namespace
     o.operand_3 = opcode::none;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = false;
+    o.vex_type = opcode::VEX_NONE;
     return o;
     }
 
@@ -1313,7 +1416,7 @@ namespace
     o.operand_4 = opcode::none;
     o.use_postfix = true;
     o.postfix = postfix;
-    o.vex = false;
+    o.vex_type = opcode::VEX_NONE;
     return o;
     }
 
@@ -1330,7 +1433,7 @@ namespace
     o.operand_3 = opcode::none;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = false;
+    o.vex_type = opcode::VEX_NONE;
     return o;
     }
 
@@ -1347,7 +1450,7 @@ namespace
     o.operand_3 = op3;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = false;
+    o.vex_type = opcode::VEX_NONE;
     return o;
     }
 
@@ -1364,7 +1467,7 @@ namespace
     o.operand_3 = opcode::none;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = false;
+    o.vex_type = opcode::VEX_NONE;
     return o;
     }
 
@@ -1381,7 +1484,7 @@ namespace
     o.operand_3 = opcode::none;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = false;
+    o.vex_type = opcode::VEX_NONE;
     return o;
     }
 
@@ -1398,7 +1501,7 @@ namespace
     o.operand_3 = op3;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = true;
+    o.vex_type = opcode::VEX;
     o.vex_1 = f1;
     o.vex_2 = f2;
     o.vex_3 = opcode::NO_PREFIX;
@@ -1421,7 +1524,7 @@ namespace
     o.operand_3 = op3;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = true;
+    o.vex_type = opcode::VEX;
     o.vex_1 = f1;
     o.vex_2 = f2;
     o.vex_3 = opcode::NO_PREFIX;
@@ -1444,7 +1547,7 @@ namespace
     o.operand_3 = opcode::none;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = true;
+    o.vex_type = opcode::VEX;
     o.vex_1 = opcode::vvvv_must_be_1111;
     o.vex_2 = f2;
     o.vex_3 = f3;
@@ -1467,7 +1570,7 @@ namespace
     o.operand_3 = op3;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = true;
+    o.vex_type = opcode::VEX;
     o.vex_1 = opcode::vvvv_must_be_1111;
     o.vex_2 = f2;
     o.vex_3 = f3;
@@ -1490,7 +1593,7 @@ namespace
     o.operand_3 = opcode::none;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = true;
+    o.vex_type = opcode::VEX;
     o.vex_1 = opcode::vvvv_must_be_1111;
     o.vex_2 = f2;
     o.vex_3 = f3;
@@ -1513,7 +1616,7 @@ namespace
     o.operand_3 = opcode::none;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = true;
+    o.vex_type = opcode::VEX;
     o.vex_1 = opcode::vvvv_must_be_1111;
     o.vex_2 = f2;
     o.vex_3 = opcode::NO_PREFIX;
@@ -1536,7 +1639,7 @@ namespace
     o.operand_3 = op3;
     o.operand_4 = op4;
     o.use_postfix = false;
-    o.vex = true;
+    o.vex_type = opcode::VEX;
     o.vex_1 = f1;
     o.vex_2 = f2;
     o.vex_3 = opcode::NO_PREFIX;
@@ -1559,7 +1662,7 @@ namespace
     o.operand_3 = op3;
     o.operand_4 = op4;
     o.use_postfix = false;
-    o.vex = true;
+    o.vex_type = opcode::VEX;
     o.vex_1 = f1;
     o.vex_2 = f2;
     o.vex_3 = f3;
@@ -1582,7 +1685,7 @@ namespace
     o.operand_3 = op3;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = true;
+    o.vex_type = opcode::VEX;
     o.vex_1 = f1;
     o.vex_2 = f2;
     o.vex_3 = f3;
@@ -1605,7 +1708,260 @@ namespace
     o.operand_3 = op3;
     o.operand_4 = opcode::none;
     o.use_postfix = false;
-    o.vex = true;
+    o.vex_type = opcode::VEX;
+    o.vex_1 = f1;
+    o.vex_2 = f2;
+    o.vex_3 = f3;
+    o.vex_4 = f4;
+    o.vex_5 = opcode::W0;
+    o.vex_6 = f6;
+    return o;
+    }
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_1 f1, opcode::vex_field_2 f2, opcode::vex_field_4 f4, opcode::vex_field_5 f5, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2, opcode::opcode_operand_type op3)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = op3;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = f1;
+    o.vex_2 = f2;
+    o.vex_3 = opcode::NO_PREFIX;
+    o.vex_4 = f4;
+    o.vex_5 = f5;
+    o.vex_6 = opcode::NO_WIG;
+    return o;
+    }
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_1 f1, opcode::vex_field_2 f2, opcode::vex_field_4 f4, opcode::vex_field_6 f6, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2, opcode::opcode_operand_type op3)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = op3;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = f1;
+    o.vex_2 = f2;
+    o.vex_3 = opcode::NO_PREFIX;
+    o.vex_4 = f4;
+    o.vex_5 = opcode::W0;
+    o.vex_6 = f6;
+    return o;
+    }
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_1 f1, opcode::vex_field_2 f2, opcode::vex_field_4 f4, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2, opcode::opcode_operand_type op3)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = op3;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = f1;
+    o.vex_2 = f2;
+    o.vex_3 = opcode::NO_PREFIX;
+    o.vex_4 = f4;
+    o.vex_5 = opcode::W0;
+    o.vex_6 = opcode::NO_WIG;
+    return o;
+    }
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_2 f2, opcode::vex_field_3 f3, opcode::vex_field_4 f4, opcode::vex_field_6 f6, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = opcode::none;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = opcode::vvvv_must_be_1111;
+    o.vex_2 = f2;
+    o.vex_3 = f3;
+    o.vex_4 = f4;
+    o.vex_5 = opcode::W0;
+    o.vex_6 = f6;
+    return o;
+    }
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_2 f2, opcode::vex_field_3 f3, opcode::vex_field_4 f4, opcode::vex_field_6 f6, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2, opcode::opcode_operand_type op3)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = op3;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = opcode::vvvv_must_be_1111;
+    o.vex_2 = f2;
+    o.vex_3 = f3;
+    o.vex_4 = f4;
+    o.vex_5 = opcode::W0;
+    o.vex_6 = f6;
+    return o;
+    }
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_2 f2, opcode::vex_field_3 f3, opcode::vex_field_4 f4, opcode::vex_field_5 f5, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = opcode::none;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = opcode::vvvv_must_be_1111;
+    o.vex_2 = f2;
+    o.vex_3 = f3;
+    o.vex_4 = f4;
+    o.vex_5 = f5;
+    o.vex_6 = opcode::NO_WIG;
+    return o;
+    }
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_2 f2, opcode::vex_field_4 f4, opcode::vex_field_6 f6, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = opcode::none;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = opcode::vvvv_must_be_1111;
+    o.vex_2 = f2;
+    o.vex_3 = opcode::NO_PREFIX;
+    o.vex_4 = f4;
+    o.vex_5 = opcode::W0;
+    o.vex_6 = f6;
+    return o;
+    }
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_1 f1, opcode::vex_field_2 f2, opcode::vex_field_4 f4, opcode::vex_field_6 f6, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2, opcode::opcode_operand_type op3, opcode::opcode_operand_type op4)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = op3;
+    o.operand_4 = op4;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = f1;
+    o.vex_2 = f2;
+    o.vex_3 = opcode::NO_PREFIX;
+    o.vex_4 = f4;
+    o.vex_5 = opcode::W0;
+    o.vex_6 = f6;
+    return o;
+    }
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_1 f1, opcode::vex_field_2 f2, opcode::vex_field_3 f3, opcode::vex_field_4 f4, opcode::vex_field_5 f5, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2, opcode::opcode_operand_type op3, opcode::opcode_operand_type op4)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = op3;
+    o.operand_4 = op4;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = f1;
+    o.vex_2 = f2;
+    o.vex_3 = f3;
+    o.vex_4 = f4;
+    o.vex_5 = f5;
+    o.vex_6 = opcode::NO_WIG;
+    return o;
+    }
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_1 f1, opcode::vex_field_2 f2, opcode::vex_field_3 f3, opcode::vex_field_4 f4, opcode::vex_field_5 f5, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2, opcode::opcode_operand_type op3)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = op3;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = f1;
+    o.vex_2 = f2;
+    o.vex_3 = f3;
+    o.vex_4 = f4;
+    o.vex_5 = f5;
+    o.vex_6 = opcode::NO_WIG;
+    return o;
+    }
+
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_1 f1, opcode::vex_field_2 f2, opcode::vex_field_3 f3, opcode::vex_field_4 f4, opcode::vex_field_6 f6, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2, opcode::opcode_operand_type op3)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = op3;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
     o.vex_1 = f1;
     o.vex_2 = f2;
     o.vex_3 = f3;
@@ -1676,12 +2032,12 @@ namespace
 
   bool is_memory_operand_type(opcode::opcode_operand_type op)
     {
-    return (op == opcode::m8 || op == opcode::m16 || op == opcode::m32 || op == opcode::m64 || op == opcode::m128 || op == opcode::m256);
+    return (op == opcode::m8 || op == opcode::m16 || op == opcode::m32 || op == opcode::m64 || op == opcode::m128 || op == opcode::m256 || op == opcode::m512);
     }
 
   bool is_rm_operand_type(opcode::opcode_operand_type op)
     {
-    return (op == opcode::rm8 || op == opcode::rm16 || op == opcode::rm32 || op == opcode::rm64 || op == opcode::xmm_m32 || op == opcode::xmm_m64 || op == opcode::xmm_m128 || op == opcode::ymm_m256);
+    return (op == opcode::rm8 || op == opcode::rm16 || op == opcode::rm32 || op == opcode::rm64 || op == opcode::xmm_m32 || op == opcode::xmm_m64 || op == opcode::xmm_m128 || op == opcode::ymm_m256 || op == opcode::zmm_m512);
     }
 
   bool is_immediate_operand_type(opcode::opcode_operand_type op)
@@ -2297,6 +2653,8 @@ namespace
     opcode_table t;
     //VEX.NDS.256.0F.WIG 57 /r VXORPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VXORPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x57, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VXORPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0x57, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2305,6 +2663,9 @@ namespace
     opcode_table t;
     //VEX.NDS.256.0F.WIG 58 /r VADDPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VADDPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x58, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
+
+    //EVEX.NDS.512.0F.W0 58 /r
+    t.add_opcode(make_evex_opcode("VADDPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0x58, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2313,6 +2674,8 @@ namespace
     opcode_table t;
     //VEX.NDS.256.0F 54 /r VANDPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VANDPS", opcode::NDS, opcode::_256, opcode::_0F, 0x54, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VANDPS", opcode::NDS, opcode::_512, opcode::_0F, 0x54, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2321,6 +2684,8 @@ namespace
     opcode_table t;
     //VEX.NDS.256.0F 55 /r VANDNPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VANDNPS", opcode::NDS, opcode::_256, opcode::_0F, 0x55, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VANDNPS", opcode::NDS, opcode::_512, opcode::_0F, 0x55, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2329,6 +2694,8 @@ namespace
     opcode_table t;
     //VEX.NDS.256.0F 56 /r VORPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VORPS", opcode::NDS, opcode::_256, opcode::_0F, 0x56, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VORPS", opcode::NDS, opcode::_512, opcode::_0F, 0x56, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2337,6 +2704,8 @@ namespace
     opcode_table t;
     //VEX.NDS.256.0F.WIG C2 /r ib VCMPPS ymm1, ymm2, ymm3 / m256, imm8
     t.add_opcode(make_vex_opcode("VCMPPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0xC2, opcode::r | opcode::ib, opcode::ymm, opcode::ymm, opcode::ymm_m256, opcode::imm8));
+
+    t.add_opcode(make_evex_opcode("VCMPPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0xC2, opcode::r | opcode::ib, opcode::zmm, opcode::zmm, opcode::zmm_m512, opcode::imm8));
     return t;
     }
 
@@ -2346,6 +2715,8 @@ namespace
     opcode_table t;
     //VEX.256.66.0F3A.WIG 08 /r ib VROUNDPS ymm1, ymm2 / m256, imm8
     t.add_opcode(make_vex_opcode("VROUNDPS", opcode::_256, opcode::_66, opcode::_0F3A, opcode::WIG, 0x08, opcode::r | opcode::ib, opcode::ymm, opcode::ymm_m256, opcode::imm8));
+
+    t.add_opcode(make_evex_opcode("VROUNDPS", opcode::_512, opcode::_66, opcode::_0F3A, opcode::WIG, 0x08, opcode::r | opcode::ib, opcode::zmm, opcode::zmm_m512, opcode::imm8));
     return t;
     }
 
@@ -2354,6 +2725,8 @@ namespace
     opcode_table t;
     //VEX.NDS.256.0F.WIG 5C /r VSUBPS ymm1, ymm2, ymm3/m256
     t.add_opcode(make_vex_opcode("VSUBPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x5C, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VSUBPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0x5C, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2363,6 +2736,8 @@ namespace
     opcode_table t;
     //VEX.NDS.256.0F.WIG 59 /r VMULPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VMULPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x59, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VMULPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0x59, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2383,6 +2758,8 @@ namespace
 
     //HACK: actually the last opcode should be ymm instead of ymm_m256, but then the modrm byte is wrong. So to make the rule work, I replaced ymm by ymm_m256
     t.add_opcode(make_vex_opcode("VMOVMSKPS", opcode::_256, opcode::_0F, opcode::WIG, 0x50, opcode::r, opcode::r64, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VMOVMSKPS", opcode::_512, opcode::_0F, opcode::WIG, 0x50, opcode::r, opcode::r64, opcode::zmm_m512));
     return t;
     }
 
@@ -2401,6 +2778,8 @@ namespace
     opcode_table t;
     //VEX.NDS.256.0F.WIG 5E /r VDIVPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VDIVPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x5E, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VDIVPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0x5E, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2418,6 +2797,8 @@ namespace
     opcode_table t;
     //VEX.256.0F.WIG 5B /r VCVTDQ2PS ymm1, ymm2 / m256
     t.add_opcode(make_vex_opcode("VCVTDQ2PS", opcode::_256, opcode::_0F, opcode::WIG, 0x5B, opcode::r, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VCVTDQ2PS", opcode::_512, opcode::_0F, opcode::WIG, 0x5B, opcode::r, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2442,6 +2823,8 @@ namespace
     opcode_table t;
     //VEX.256.66.0F.WIG 5B /r VCVTPS2DQ ymm1, ymm2 / m256
     t.add_opcode(make_vex_opcode("VCVTPS2DQ", opcode::_256, opcode::_66, opcode::_0F, opcode::WIG, 0x5B, opcode::r, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VCVTPS2DQ", opcode::_512, opcode::_66, opcode::_0F, opcode::WIG, 0x5B, opcode::r, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2450,6 +2833,8 @@ namespace
     opcode_table t;
     // VEX.NDS.256.0F.WIG 5D / r VMINPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VMINPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x5D, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VMINPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0x5D, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2458,6 +2843,8 @@ namespace
     opcode_table t;
     //VEX.NDS.256.0F.WIG 5F /r VMAXPS ymm1, ymm2, ymm3 / m256
     t.add_opcode(make_vex_opcode("VMAXPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0x5F, opcode::r, opcode::ymm, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VMAXPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0x5F, opcode::r, opcode::zmm, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2466,6 +2853,8 @@ namespace
     opcode_table t;
     //VEX.256.0F.WIG 51/r VSQRTPS ymm1, ymm2 / m256
     t.add_opcode(make_vex_opcode("VSQRTPS", opcode::_256, opcode::_0F, opcode::WIG, 0x51, opcode::r, opcode::ymm, opcode::ymm_m256));
+
+    t.add_opcode(make_evex_opcode("VSQRTPS", opcode::_512, opcode::_0F, opcode::WIG, 0x51, opcode::r, opcode::zmm, opcode::zmm_m512));
     return t;
     }
 
@@ -2476,6 +2865,8 @@ namespace
     t.add_opcode(make_vex_opcode("VSHUFPS", opcode::NDS, opcode::_128, opcode::_0F, opcode::WIG, 0xC6, opcode::r | opcode::ib, opcode::xmm, opcode::xmm, opcode::xmm_m128, opcode::imm8));
     //VEX.NDS.256.0F.WIG C6 /r ib VSHUFPS ymm1, ymm2, ymm3 / m256, imm8
     t.add_opcode(make_vex_opcode("VSHUFPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0xC6, opcode::r | opcode::ib, opcode::ymm, opcode::ymm, opcode::ymm_m256, opcode::imm8));
+
+    t.add_opcode(make_evex_opcode("VSHUFPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::WIG, 0xC6, opcode::r | opcode::ib, opcode::zmm, opcode::zmm, opcode::zmm_m512, opcode::imm8));
     return t;
     }
 
@@ -2495,6 +2886,9 @@ namespace
 
     //VEX.256.0F.WIG 29 /r VMOVAPS ymm2 / m256, ymm1
     t.add_opcode(make_vex_opcode("VMOVAPS", opcode::_256, opcode::_0F, opcode::WIG, 0x29, opcode::r, opcode::ymm_m256, opcode::ymm));
+
+    t.add_opcode(make_evex_opcode("VMOVAPS", opcode::_512, opcode::_0F, opcode::WIG, 0x28, opcode::r, opcode::zmm, opcode::zmm_m512));
+    t.add_opcode(make_evex_opcode("VMOVAPS", opcode::_512, opcode::_0F, opcode::WIG, 0x29, opcode::r, opcode::zmm_m512, opcode::zmm));
     return t;
     }
 
@@ -2504,6 +2898,7 @@ namespace
     //VEX.NDS.256.66.0F3A.W0 06 /r ib VPERM2F128 ymm1, ymm2, ymm3 / m256, imm8
     t.add_opcode(make_vex_opcode("VPERM2F128", opcode::NDS, opcode::_256, opcode::_66, opcode::_0F3A, opcode::W0, 0x06, opcode::r | opcode::ib, opcode::ymm, opcode::ymm, opcode::ymm_m256, opcode::imm8));
 
+    t.add_opcode(make_evex_opcode("VPERM2F128", opcode::NDS, opcode::_512, opcode::_66, opcode::_0F3A, opcode::W0, 0x06, opcode::r | opcode::ib, opcode::zmm, opcode::zmm, opcode::zmm_m512, opcode::imm8));
     return t;
     }
 
@@ -3150,6 +3545,14 @@ namespace
       case asmcode::YMM5: return opcode::ymm;
       case asmcode::YMM6: return opcode::ymm;
       case asmcode::YMM7: return opcode::ymm;
+      case asmcode::ZMM0: return opcode::zmm;
+      case asmcode::ZMM1: return opcode::zmm;
+      case asmcode::ZMM2: return opcode::zmm;
+      case asmcode::ZMM3: return opcode::zmm;
+      case asmcode::ZMM4: return opcode::zmm;
+      case asmcode::ZMM5: return opcode::zmm;
+      case asmcode::ZMM6: return opcode::zmm;
+      case asmcode::ZMM7: return opcode::zmm;
       case asmcode::VARIABLE: return opcode::imm64;
       case asmcode::LABELADDRESS: return opcode::imm64;
       }
@@ -3548,6 +3951,234 @@ namespace
     return stream - opcode_stream;
     }
 
+  uint64_t fill_evex(uint8_t* opcode_stream, const asmcode::instruction& code, opcode o, opcode::opcode_operand_type op1d, opcode::opcode_operand_type op2d, opcode::opcode_operand_type op3d, opcode::opcode_operand_type op4d)
+    {
+    //four bytes
+    //
+    // not complete
+
+    uint8_t* stream = opcode_stream;    
+
+    uint8_t vex_V_quote = 1;
+    uint8_t vvvv = 15;
+    if (o.vex_1 == opcode::NDS)
+      {
+      vvvv = encode_vex_register(vex_V_quote, code.operand2);
+      }
+    else if (o.vex_1 == opcode::NDD)
+      {
+      vvvv = encode_vex_register(vex_V_quote, code.operand1);
+      }
+    else if (o.vex_1 == opcode::DDS)
+      {
+      vvvv = encode_vex_register(vex_V_quote, code.operand3);
+      }
+
+    uint8_t vex_pp = 0;
+    if (o.vex_3 == opcode::_66)
+      vex_pp = 1;
+    else if (o.vex_3 == opcode::_F3)
+      vex_pp = 2;
+    else if (o.vex_3 == opcode::_F2)
+      vex_pp = 3;
+
+    uint8_t mmmmm = 0;
+    if (o.vex_4 == opcode::_0F)
+      mmmmm = 1;
+    else if (o.vex_4 == opcode::_0F38)
+      mmmmm = 2;
+    else if (o.vex_4 == opcode::_0F3A)
+      mmmmm = 3;
+
+
+    uint8_t vex_w = 0;
+    if (o.vex_5 == opcode::W1)
+      {
+      vex_w = 1;
+      }
+
+    uint8_t rex = 0;
+    uint8_t modrm = 0;
+    uint8_t sib = 0;
+
+    bool use_modrm = false;
+
+    if (o.flags & opcode::r)
+      {
+      if (o.vex_1 == opcode::NDS)
+        {
+        if (is_rm_operand_type(o.operand_3))
+          modrm = get_modrm_byte(code.operand3, code.operand1, rex, code.operand3_mem);
+        else
+          modrm = get_modrm_byte(code.operand1, code.operand3, rex, code.operand1_mem);
+        }
+      else if (o.vex_1 == opcode::vvvv_must_be_1111)
+        {
+        if (is_rm_operand_type(o.operand_2) || is_memory_operand_type(o.operand_2))
+          modrm = get_modrm_byte(code.operand2, code.operand1, rex, code.operand2_mem);
+        else
+          modrm = get_modrm_byte(code.operand1, code.operand2, rex, code.operand1_mem);
+        }
+      else
+        throw std::logic_error("fill_vex: not implemented");
+      use_modrm = true;
+      }
+
+    if (use_modrm)
+      {
+      if ((get_rm(modrm) == 4) && (get_mod(modrm) != 3))
+        {
+        sib = make_sib_byte(0, 4, 4);
+        }
+      }
+
+    uint8_t vex_R = get_vex_r_from_rex(rex);
+    uint8_t vex_X = get_vex_x_from_rex(rex);
+    uint8_t vex_B = get_vex_b_from_rex(rex);
+
+    uint8_t vex_r_quote = use_modrm && vex_R ? 1 : 0; // not sure this is correct
+
+    uint8_t vex_z = 0; // todo
+    uint8_t vex_b = 0; // todo
+    uint8_t aaa = 0; // todo
+
+    // vector length
+    uint8_t vex_L_quote = 1;
+    uint8_t vex_L = 0;
+    if (o.vex_2 == opcode::_128 || o.vex_2 == opcode::LIG)
+      {
+      vex_L_quote = 0;
+      vex_L = 0;
+      }
+    if (o.vex_2 == opcode::_256)
+      {
+      vex_L_quote = 0;
+      vex_L = 1;
+      }
+
+    push1byte(stream, 0x62); // first byte is always 0x62
+    push1byte(stream, make_evex_p0(vex_R, vex_X, vex_B, vex_r_quote, mmmmm));
+    push1byte(stream, make_evex_p1(vex_w, vvvv, vex_pp));
+    push1byte(stream, make_evex_p2(vex_z, vex_L_quote, vex_L, vex_b, vex_V_quote, aaa));
+
+
+    push1byte(stream, o.opcode_id);
+
+    /*
+    if (two_byte)
+      {
+      push1byte(stream, 0xC5);
+      push1byte(stream, make_2byte_vex(vex_r, vvvv, vex_l, vex_pp));
+      push1byte(stream, o.opcode_id);
+      }
+    else
+      {
+      push1byte(stream, 0xC4);
+      push1byte(stream, make_3byte_vex_1(vex_r, vex_x, vex_b, mmmmm));
+      push1byte(stream, make_3byte_vex_2(vex_w, vvvv, vex_l, vex_pp));
+      push1byte(stream, o.opcode_id);
+      }
+      */
+
+
+    if (use_modrm)
+      push1byte(stream, modrm);
+    if (sib)
+      push1byte(stream, sib);
+
+    if (is_immediate_operand_type(op3d))
+      {
+      switch (o.operand_3)
+        {
+        case opcode::rm8:
+        case opcode::imm8: push1byte(stream, (uint8_t)code.operand3_mem); break;
+        case opcode::rm16:
+        case opcode::imm16: push2byte(stream, (uint16_t)code.operand3_mem); break;
+        case opcode::rm32:
+        case opcode::imm32: push4byte(stream, (uint32_t)code.operand3_mem); break;
+        case opcode::moffs64:
+        case opcode::rm64:
+        case opcode::imm64: push8byte(stream, (uint64_t)code.operand3_mem); break;
+        }
+      }
+    else if (is_memory_operand_type(op3d))
+      {
+      if (code.operand3_mem || code.operand3 == asmcode::MEM_RBP) // [rbp] is exception 
+        {
+        if (is_8_bit(code.operand3_mem))
+          push1byte(stream, (uint8_t)code.operand3_mem);
+        else
+          push4byte(stream, (uint32_t)code.operand3_mem);
+        }
+      }
+    else if (is_immediate_operand_type(op2d))
+      {
+      switch (o.operand_2)
+        {
+        case opcode::rm8:
+        case opcode::imm8: push1byte(stream, (uint8_t)code.operand2_mem); break;
+        case opcode::rm16:
+        case opcode::imm16: push2byte(stream, (uint16_t)code.operand2_mem); break;
+        case opcode::rm32:
+        case opcode::imm32: push4byte(stream, (uint32_t)code.operand2_mem); break;
+        case opcode::moffs64:
+        case opcode::rm64:
+        case opcode::imm64: push8byte(stream, (uint64_t)code.operand2_mem); break;
+        }
+      }
+    else if (is_memory_operand_type(op2d))
+      {
+      if (code.operand2_mem || code.operand2 == asmcode::MEM_RBP) // [rbp] is exception 
+        {
+        if (is_8_bit(code.operand2_mem))
+          push1byte(stream, (uint8_t)code.operand2_mem);
+        else
+          push4byte(stream, (uint32_t)code.operand2_mem);
+        }
+      }
+    else if (is_memory_operand_type(op1d))
+      {
+      if (code.operand1_mem || code.operand1 == asmcode::MEM_RBP) // [rbp] is exception 
+        {
+        if (is_8_bit(code.operand1_mem))
+          push1byte(stream, (uint8_t)code.operand1_mem);
+        else
+          push4byte(stream, (uint32_t)code.operand1_mem);
+        }
+      }
+    else if (is_immediate_operand_type(op1d))
+      {
+      switch (o.operand_1)
+        {
+        case opcode::rm8:
+        case opcode::imm8: push1byte(stream, (uint8_t)code.operand1_mem); break;
+        case opcode::rm16:
+        case opcode::imm16: push2byte(stream, (uint16_t)code.operand1_mem); break;
+        case opcode::rm32:
+        case opcode::imm32: push4byte(stream, (uint32_t)code.operand1_mem); break;
+        case opcode::moffs64:
+        case opcode::rm64:
+        case opcode::imm64: push8byte(stream, (uint64_t)code.operand1_mem); break;
+        }
+      }
+    if (is_immediate_operand_type(op4d))
+      {
+      switch (o.operand_4)
+        {
+        case opcode::rm8:
+        case opcode::imm8: push1byte(stream, (uint8_t)code.operand4_mem); break;
+        case opcode::rm16:
+        case opcode::imm16: push2byte(stream, (uint16_t)code.operand4_mem); break;
+        case opcode::rm32:
+        case opcode::imm32: push4byte(stream, (uint32_t)code.operand4_mem); break;
+        case opcode::moffs64:
+        case opcode::rm64:
+        case opcode::imm64: push8byte(stream, (uint64_t)code.operand4_mem); break;
+        }
+      }
+    return stream - opcode_stream;
+    }
+
   uint64_t fill(uint8_t* opcode_stream, const asmcode::instruction& code, const opcode_table& table)
     {
     auto op1d = get_opcode_operand_type(code.operand1, code.operand1_mem);
@@ -3556,10 +4187,12 @@ namespace
     auto op4d = get_opcode_operand_type(code.operand4, code.operand4_mem);
     auto o = table.find_opcode(op1d, op2d, op3d, op4d);
 
-    if (!o.vex)
-      return fill_default(opcode_stream, code, o, op1d, op2d, op3d);
-    else
-      return fill_vex(opcode_stream, code, o, op1d, op2d, op3d, op4d);
+    switch (o.vex_type)
+      {
+      case opcode::VEX: return fill_vex(opcode_stream, code, o, op1d, op2d, op3d, op4d);
+      case opcode::EVEX: return fill_evex(opcode_stream, code, o, op1d, op2d, op3d, op4d);
+      default: return fill_default(opcode_stream, code, o, op1d, op2d, op3d);
+      }   
     }
 
   std::map<std::string, opcode_table> g_table = make_opcode_table();

@@ -1207,6 +1207,9 @@ namespace
     code.add(asmcode::VADDPS, asmcode::YMM1, asmcode::YMM2, asmcode::MEM_RSP, -256);
     code.add(asmcode::VADDPS, asmcode::YMM0, asmcode::YMM7, asmcode::MEM_RAX, 64);
 
+    code.add(asmcode::VADDPS, asmcode::ZMM1, asmcode::ZMM2, asmcode::ZMM3);
+    code.add(asmcode::VADDPS, asmcode::ZMM1, asmcode::ZMM2, asmcode::MEM_RSP, -256);
+    code.add(asmcode::VADDPS, asmcode::ZMM0, asmcode::ZMM7, asmcode::MEM_RAX, 64);
 
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
@@ -1216,6 +1219,12 @@ namespace
     size = code.get_instructions_list().front()[2].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC5, 0xC4, 0x58, 0x40, 0x40 });
 
+    size = code.get_instructions_list().front()[3].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF1, 0x6C, 0x48, 0x58, 0xCB });
+    size = code.get_instructions_list().front()[4].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF1, 0x6C, 0x48, 0x58, 0x8C, 0x24, 0x00, 0xFF, 0xFF, 0xFF });
+    size = code.get_instructions_list().front()[5].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF1, 0x44, 0x48, 0x58, 0x40, 0x40 });
     }
 
   void asmcode_vsubps()
@@ -1339,10 +1348,13 @@ namespace
     {
     asmcode code; uint8_t buffer[255];
     code.add(asmcode::VXORPS, asmcode::YMM0, asmcode::YMM1, asmcode::YMM2);
+    code.add(asmcode::VXORPS, asmcode::ZMM0, asmcode::ZMM1, asmcode::ZMM2);
 
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC5, 0xF4, 0x57, 0xC2 });
+    size = code.get_instructions_list().front()[1].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF1, 0x74, 0x48, 0x57, 0xC2 });
     }
 
 

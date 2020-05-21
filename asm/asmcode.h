@@ -286,7 +286,15 @@ class asmcode
       YMM4,
       YMM5,
       YMM6,
-      YMM7
+      YMM7,
+      ZMM0,
+      ZMM1,
+      ZMM2,
+      ZMM3,
+      ZMM4,
+      ZMM5,
+      ZMM6,
+      ZMM7
       };
 
     struct instruction
