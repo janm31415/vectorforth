@@ -22,7 +22,11 @@ struct token
     T_FLOAT,
     T_COLON,
     T_SEMICOLON,
+#ifdef AVX512
+    T_VECTOR16
+#else
     T_VECTOR8
+#endif
     };
 
   e_type type;

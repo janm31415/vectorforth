@@ -4008,6 +4008,18 @@ namespace
     //
     // not complete
 
+    /*disp8 compression mode for evex instructions*/
+    uint64_t N = get_compressed_displacement(code, o, op1d, op2d, op3d, op4d);
+
+    if (is_8_bit((int64_t)code.operand1_mem / (int64_t)N))
+      code.operand1_mem = (int64_t)code.operand1_mem / (int64_t)N;
+
+    if (is_8_bit((int64_t)code.operand2_mem / (int64_t)N))
+      code.operand2_mem = (int64_t)code.operand2_mem / (int64_t)N;
+
+    if (is_8_bit((int64_t)code.operand3_mem / (int64_t)N))
+      code.operand3_mem = (int64_t)code.operand3_mem / (int64_t)N;
+
     uint8_t* stream = opcode_stream;
 
     uint8_t vex_V_quote = 1;
@@ -4113,19 +4125,7 @@ namespace
     push1byte(stream, make_evex_p2(vex_z, vex_L_quote, vex_L, vex_b, vex_V_quote, aaa));
 
 
-    push1byte(stream, o.opcode_id);
-
-    /*disp8 compression mode for evex instructions*/
-    uint64_t N = get_compressed_displacement(code, o, op1d, op2d, op3d, op4d);
-
-    if (is_8_bit(code.operand1_mem / N))
-      code.operand1_mem = code.operand1_mem / N;
-
-    if (is_8_bit(code.operand2_mem / N))
-      code.operand2_mem = code.operand2_mem / N;
-
-    if (is_8_bit(code.operand3_mem / N))
-      code.operand3_mem = code.operand3_mem / N;
+    push1byte(stream, o.opcode_id);    
 
     if (use_modrm)
       push1byte(stream, modrm);

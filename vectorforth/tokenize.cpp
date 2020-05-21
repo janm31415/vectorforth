@@ -120,8 +120,13 @@ namespace
         }
         case 'v':
         {
+#ifdef AVX512
+        if (buff == "v16")
+          tokens.emplace_back(token::T_VECTOR16, buff, line_nr, column_nr - (int)buff.length());
+#else
         if (buff == "v8")
           tokens.emplace_back(token::T_VECTOR8, buff, line_nr, column_nr - (int)buff.length());
+#endif
         else
           tokens.emplace_back(token::T_WORD, buff, line_nr, column_nr - (int)buff.length());
         break;
