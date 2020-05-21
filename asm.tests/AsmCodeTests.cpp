@@ -1565,9 +1565,15 @@ namespace
     {
     asmcode code; uint8_t buffer[255];
     code.add(asmcode::VCMPPS, asmcode::YMM0, asmcode::YMM0, asmcode::YMM1, asmcode::NUMBER, 255);
+
+    code.add(asmcode::VCMPPS, asmcode::ZMM0, asmcode::ZMM0, asmcode::ZMM1, asmcode::NUMBER, 0);
+
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC5, 0xFC, 0xC2, 0xC1, 0xFF });
+
+    size = code.get_instructions_list().front()[1].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF1, 0x7C, 0x48, 0xC2, 0xC1, 0x00 });
     }
 
   void asmcode_vlogicps()
