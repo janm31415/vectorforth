@@ -155,6 +155,51 @@ void compile_integer(asmcode& code, token word)
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
 
+#ifdef AVX512
+void compile_vector16(asmcode& code, const std::vector<token>& words)
+  {
+  assert(words.size() == 16);
+  for (int i = 0; i < 8; ++i)
+    {
+    assert(words[2 * i].type == token::T_FLOAT || words[2 * i].type == token::T_INTEGER);
+    assert(words[2 * i + 1].type == token::T_FLOAT || words[2 * i + 1].type == token::T_INTEGER);
+    uint64_t v1_64, v2_64;
+    if (words[2 * i].type == token::T_FLOAT)
+      {
+      float f = to_float(words[i * 2].value.c_str());
+      uint32_t v = *(reinterpret_cast<uint32_t*>(&f));
+      v1_64 = (uint64_t)v;
+      }
+    else
+      {
+      std::stringstream ss;
+      ss << words[i * 2].value;
+      uint32_t v;
+      ss >> v;
+      v1_64 = (uint64_t)v;
+      }
+
+    if (words[2 * i + 1].type == token::T_FLOAT)
+      {
+      float f = to_float(words[i * 2 + 1].value.c_str());
+      uint32_t v = *(reinterpret_cast<uint32_t*>(&f));
+      v2_64 = (uint64_t)v;
+      }
+    else
+      {
+      std::stringstream ss;
+      ss << words[i * 2 + 1].value;
+      uint32_t v;
+      ss >> v;
+      v2_64 = (uint64_t)v;
+      }
+    uint64_t v = (v1_64 << 32) | v2_64;
+    code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v);
+    code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(i + 1), asmcode::RAX);
+    }
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  }
+#else
 void compile_vector8(asmcode& code, const std::vector<token>& words)
   {
   assert(words.size() == 8);
@@ -198,6 +243,7 @@ void compile_vector8(asmcode& code, const std::vector<token>& words)
     }
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
+#endif
 
 void compile_definition(dictionary& d, std::vector<token>& words, int line_nr, int column_nr)
   {
@@ -231,6 +277,23 @@ void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<t
       compile_float(code, word);
       break;
       }
+#ifdef AVX512
+      case token::T_VECTOR16:
+      {
+      std::vector<token> vector_words;
+      if (words.size() < 16)
+        throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR16_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
+      for (int i = 0; i < 16; ++i)
+        {
+        vector_words.push_back(words.back());
+        if (vector_words.back().type != token::T_FLOAT && vector_words.back().type != token::T_INTEGER)
+          throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR16_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
+        words.pop_back();
+        }
+      compile_vector16(code, vector_words);
+      break;
+      }
+#else
       case token::T_VECTOR8:
       {
       std::vector<token> vector_words;
@@ -246,6 +309,7 @@ void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<t
       compile_vector8(code, vector_words);
       break;
       }
+#endif
       case token::T_COLON:
       {
       std::vector<token> definition_words;
