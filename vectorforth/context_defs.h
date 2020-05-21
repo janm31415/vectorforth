@@ -36,6 +36,17 @@ VF_BEGIN
 #define NOT_SIGN_BIT ASM::asmcode::MEM_R10, 160
 #define ALL_BITS ASM::asmcode::MEM_R10, 192
 
+#ifdef AVX512
+#define CELLS(n) (n)*16
+#define AVX_REG0 ASM::asmcode::ZMM0
+#define AVX_REG1 ASM::asmcode::ZMM1
+#define AVX_REG2 ASM::asmcode::ZMM2
+#define AVX_REG3 ASM::asmcode::ZMM3
+#else
 #define CELLS(n) (n)*8
-
+#define AVX_REG0 ASM::asmcode::YMM0
+#define AVX_REG1 ASM::asmcode::YMM1
+#define AVX_REG2 ASM::asmcode::YMM2
+#define AVX_REG3 ASM::asmcode::YMM3
+#endif
 VF_END

@@ -25,9 +25,9 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
     if (cd.binding_space_offset)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.binding_space_offset);
-    code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
+    code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
     code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));   
-    code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
+    code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
     }
   else if (word.value == "to")
     {
@@ -66,18 +66,18 @@ void compile_variable(asmcode& code, compile_data& cd, uint64_t address)
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
     if (address)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
-    code.add(asmcode::VMOVAPS, asmcode::YMM0, MEM_STACK_REGISTER);
+    code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
     code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
-    code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
+    code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
     }
   else
     {
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
     if (address)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
-    code.add(asmcode::VMOVAPS, asmcode::YMM0, asmcode::MEM_RAX);
+    code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
     code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, CELLS(4));
-    code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, asmcode::YMM0);
+    code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
     }
   }
 
@@ -99,9 +99,9 @@ void compile_word(asmcode& code, dictionary& d, compile_data& cd, token word)
         {
         code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
         code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.binding_space_offset);
-        code.add(asmcode::VMOVAPS, asmcode::YMM0, asmcode::MEM_RAX);
+        code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
         code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, (cd.binding_space_offset - e.address));
-        code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, asmcode::YMM0);
+        code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
         cd.create_called = false;
         return;
         }
