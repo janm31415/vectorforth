@@ -1625,10 +1625,13 @@ namespace
     {
     asmcode code; uint8_t buffer[255];
     code.add(asmcode::VROUNDPS, asmcode::YMM0, asmcode::YMM1, asmcode::NUMBER, 8);
+    code.add(asmcode::VRNDSCALEPS, asmcode::ZMM0, asmcode::ZMM1, asmcode::NUMBER, 8);
     
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC4, 0xE3, 0x7D, 0x08, 0xC1, 0x08 });
+    size = code.get_instructions_list().front()[1].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF3, 0x7D, 0x48, 0x08, 0xC1, 0x08 });
     }
 
   void asmcode_vcvtps2dq()

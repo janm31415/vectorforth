@@ -158,6 +158,7 @@ class asmcode
       VMOVAPS,
       VPERM2F128,
       VROUNDPS,
+      VRNDSCALEPS,
       VSHUFPS,
       VXORPS,
       XOR,
