@@ -1048,7 +1048,8 @@ void primitive_if(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::VMOVAPS, AVX_REG1, NO_BITS);
   code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
   code.add(asmcode::KMOVW, asmcode::EAX, asmcode::K1);
-  code.add(asmcode::TEST, asmcode::EAX, asmcode::EAX);
+  //code.add(asmcode::TEST, asmcode::EAX, asmcode::EAX);
+  code.add(asmcode::CMP, asmcode::EAX, asmcode::NUMBER, 0xffff);
 #else
   code.add(asmcode::VMOVMSKPS, asmcode::RAX, AVX_REG0); // if rax == 0, then all conditions are false, if rax == 255, all conditions are true
   code.add(asmcode::TEST, asmcode::RAX, asmcode::RAX);
@@ -1074,7 +1075,8 @@ void primitive_then(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::VMOVAPS, AVX_REG2, NO_BITS);
   code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG1, AVX_REG2, asmcode::NUMBER, 0);
   code.add(asmcode::KMOVW, asmcode::EAX, asmcode::K1);
-  code.add(asmcode::TEST, asmcode::EAX, asmcode::EAX);
+  //code.add(asmcode::TEST, asmcode::EAX, asmcode::EAX);
+  code.add(asmcode::CMP, asmcode::EAX, asmcode::NUMBER, 0xffff);
 #else
   code.add(asmcode::VMOVMSKPS, asmcode::RAX, AVX_REG1); // if rax == 0, then all conditions are false, if rax == 255, all conditions are true
   code.add(asmcode::TEST, asmcode::RAX, asmcode::RAX);

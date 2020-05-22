@@ -1820,8 +1820,8 @@ struct if_tests : public compile_fixture
     TEST_EQ(2.f, get_avx2_f32(v, 2));
     TEST_EQ(2.f, get_avx2_f32(v, 1));
     TEST_EQ(2.f, get_avx2_f32(v, 0));
-    /*
-    run("v8 1 2 3 4 5 6 7 8 2 fm/mod drop 0 = if 10 12 else 11 13 then");
+    
+    run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 2 fm/mod drop 0 = if 10 12 else 11 13 then");
     v = get_stack_value(0);
     TEST_EQ(13.f, get_avx2_f32(v, 7));
     TEST_EQ(12.f, get_avx2_f32(v, 6));
@@ -1840,7 +1840,7 @@ struct if_tests : public compile_fixture
     TEST_EQ(10.f, get_avx2_f32(v, 2));
     TEST_EQ(11.f, get_avx2_f32(v, 1));
     TEST_EQ(10.f, get_avx2_f32(v, 0));
-
+    
     run("1 2 > if 3 else 5 then");
     v = get_stack_value(0);
     TEST_EQ(5.f, get_avx2_f32(v, 7));
@@ -1851,7 +1851,7 @@ struct if_tests : public compile_fixture
     TEST_EQ(5.f, get_avx2_f32(v, 2));
     TEST_EQ(5.f, get_avx2_f32(v, 1));
     TEST_EQ(5.f, get_avx2_f32(v, 0));
-
+    
     run("1 2 < if 3 else 5 then");
     v = get_stack_value(0);
     TEST_EQ(3.f, get_avx2_f32(v, 7));
@@ -1862,12 +1862,12 @@ struct if_tests : public compile_fixture
     TEST_EQ(3.f, get_avx2_f32(v, 2));
     TEST_EQ(3.f, get_avx2_f32(v, 1));
     TEST_EQ(3.f, get_avx2_f32(v, 0));
-
+    
     run("1 2 < if 3 2 1 else 5 6 7 then");
     for (int i = 0; i < 3; ++i)
       {
       v = get_stack_value(i);
-      for (int j = 0; j < 8; ++j)
+      for (int j = 0; j < 16; ++j)
         TEST_EQ(i == 0 ? 1.f : i == 1 ? 2.f : 3.f, get_avx2_f32(v, j));
       }
 
@@ -1875,11 +1875,11 @@ struct if_tests : public compile_fixture
     for (int i = 0; i < 3; ++i)
       {
       v = get_stack_value(i);
-      for (int j = 0; j < 8; ++j)
+      for (int j = 0; j < 16; ++j)
         TEST_EQ(i == 0 ? 7.f : i == 1 ? 6.f : 5.f, get_avx2_f32(v, j));
       }
-
-    run("v8 1 2 3 4 5 6 7 8 dup 2 fm/mod drop 0 = if dup 4 > if 40 else 39 then else  dup 2 < if 11 else 27 then then");
+    
+    run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 dup 2 fm/mod drop 0 = if dup 4 > if 40 else 39 then else  dup 2 < if 11 else 27 then then");
     v = get_stack_value(0);
     TEST_EQ(11.f, get_avx2_f32(v, 7));
     TEST_EQ(39.f, get_avx2_f32(v, 6));
@@ -1899,7 +1899,7 @@ struct if_tests : public compile_fixture
     TEST_EQ(2.f, get_avx2_f32(v, 3));
     TEST_EQ(2.f, get_avx2_f32(v, 2));
     TEST_EQ(2.f, get_avx2_f32(v, 1));
-    TEST_EQ(2.f, get_avx2_f32(v, 0));*/
+    TEST_EQ(2.f, get_avx2_f32(v, 0));
     }
 #else
   void test()
