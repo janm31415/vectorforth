@@ -1086,7 +1086,7 @@ struct comparisons : public compile_fixture
     TEST_EQ(0, get_avx2_i32(v, 1));
     TEST_EQ(-1, get_avx2_i32(v, 0));
 
-    /*
+    
     run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 v16 1 2 0 0 8 8 8 8 1 2 0 0 8 8 8 8 f=");
     auto f = get_last_stack_value();
     TEST_EQ(1.f, get_avx2_f32(f, 7));
@@ -1097,7 +1097,7 @@ struct comparisons : public compile_fixture
     TEST_EQ(0.f, get_avx2_f32(f, 2));
     TEST_EQ(0.f, get_avx2_f32(f, 1));
     TEST_EQ(1.f, get_avx2_f32(f, 0));
-
+    
     run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 v16 1 2 0 0 8 8 8 8 1 2 0 0 8 8 8 8 f<>");
     f = get_last_stack_value();
     TEST_EQ(0.f, get_avx2_f32(f, 7));
@@ -1151,7 +1151,7 @@ struct comparisons : public compile_fixture
     TEST_EQ(0.f, get_avx2_f32(f, 3));
     TEST_EQ(0.f, get_avx2_f32(f, 2));
     TEST_EQ(0.f, get_avx2_f32(f, 1));
-    TEST_EQ(1.f, get_avx2_f32(f, 0));*/
+    TEST_EQ(1.f, get_avx2_f32(f, 0));
     }
     
 #else

@@ -10,7 +10,7 @@ VF_BEGIN
 
 
 #ifdef _WIN32
-__declspec(align(32)) // windows alignment
+__declspec(align(64)) // windows alignment
 #endif
 struct context
   {
@@ -41,11 +41,12 @@ struct context
   uint64_t not_signbit[8]; // offset 192
   uint64_t all_bits[8]; // offset 256
   uint64_t no_bits[8]; // offset 320
+  uint64_t onef_bits[8]; // offset 384
 
   char* memory_allocated;  
   }
 #ifndef _WIN32 // linux alignment in gcc
-__attribute__ ((aligned (32)))
+__attribute__ ((aligned (64)))
 #endif
   ;
 
