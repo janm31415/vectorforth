@@ -305,11 +305,25 @@ class asmcode
       K7
       };
 
+    enum optional_modifier
+      {
+      z,
+      k0,
+      k1,
+      k2,
+      k3,
+      k4,
+      k5,
+      k6,
+      k7
+      };
+
     struct instruction
       {
       operation oper;
       operand operand1, operand2, operand3, operand4;
       uint64_t operand1_mem, operand2_mem, operand3_mem, operand4_mem;
+      optional_modifier opt1;
       std::string text;
 
       ASSEMBLER_API instruction();
@@ -317,10 +331,13 @@ class asmcode
       ASSEMBLER_API instruction(operation op);
       ASSEMBLER_API instruction(operation op, operand op1);
       ASSEMBLER_API instruction(operation op, operand op1, operand op2);
+      ASSEMBLER_API instruction(operation op, operand op1, optional_modifier m, operand op2);
       ASSEMBLER_API instruction(operation op, operand op1, operand op2, operand op3);
       ASSEMBLER_API instruction(operation op, operand op1, uint64_t op1_mem);
       ASSEMBLER_API instruction(operation op, operand op1, uint64_t op1_mem, operand op2);
+      ASSEMBLER_API instruction(operation op, operand op1, uint64_t op1_mem, optional_modifier m, operand op2);
       ASSEMBLER_API instruction(operation op, operand op1, uint64_t op1_mem, operand op2, uint64_t op2_mem);
+      ASSEMBLER_API instruction(operation op, operand op1, optional_modifier m, operand op2, uint64_t op2_mem);
       ASSEMBLER_API instruction(operation op, operand op1, operand op2, uint64_t op2_mem);
       ASSEMBLER_API instruction(operation op, operand op1, operand op2, operand op3, uint64_t op3_mem);
       ASSEMBLER_API instruction(operation op, operand op1, operand op2, operand op3, operand op4, uint64_t op4_mem);

@@ -93,92 +93,107 @@ void asmcode::stream(std::ostream& out) const
     }
   }
 
-asmcode::instruction::instruction() : oper(NOP), operand1(EMPTY), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction() : oper(NOP), operand1(EMPTY), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
   }
 
-asmcode::instruction::instruction(const std::string& txt) : oper(COMMENT), operand1(EMPTY), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(const std::string& txt) : oper(COMMENT), operand1(EMPTY), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
   }
 
-asmcode::instruction::instruction(operation op) : oper(op), operand1(EMPTY), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op) : oper(op), operand1(EMPTY), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
   }
 
-asmcode::instruction::instruction(operation op, operand op1) : oper(op), operand1(op1), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0)
-  {
-
-  }
-
-asmcode::instruction::instruction(operation op, operand op1, operand op2) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, operand op1) : oper(op), operand1(op1), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
 
   }
 
-asmcode::instruction::instruction(operation op, operand op1, operand op2, operand op3) : oper(op), operand1(op1), operand2(op2), operand3(op3), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, operand op1, operand op2) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
 
   }
 
-asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem) : oper(op), operand1(op1), operand2(EMPTY), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, operand op1, optional_modifier m, operand op2) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(m)
   {
 
   }
 
-asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem, operand op2) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, operand op1, operand op2, operand op3) : oper(op), operand1(op1), operand2(op2), operand3(op3), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
 
   }
 
-asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem, operand op2, uint64_t op2_mem) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(op2_mem), operand3_mem(0), operand4(EMPTY), operand4_mem(0)
-  {
-  }
-
-asmcode::instruction::instruction(operation op, operand op1, operand op2, uint64_t op2_mem) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(0), operand2_mem(op2_mem), operand3_mem(0), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem) : oper(op), operand1(op1), operand2(EMPTY), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
 
   }
 
-asmcode::instruction::instruction(operation op, operand op1, operand op2, operand op3, uint64_t op3_mem) : oper(op), operand1(op1), operand2(op2), operand3(op3), operand1_mem(0), operand2_mem(0), operand3_mem(op3_mem), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem, operand op2) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
 
   }
 
-asmcode::instruction::instruction(operation op, operand op1, operand op2, operand op3, operand op4, uint64_t op4_mem) : oper(op), operand1(op1), operand2(op2), operand3(op3), operand4(op4), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4_mem(op4_mem)
+asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem, optional_modifier m, operand op2) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(0), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(m)
   {
 
   }
 
-asmcode::instruction::instruction(operation op, const std::string& txt) : oper(op), operand1(EMPTY), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem, operand op2, uint64_t op2_mem) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(op2_mem), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
   }
 
-asmcode::instruction::instruction(operation op, operand op1, const std::string& txt) : oper(op), operand1(op1), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0)
-  {
-
-  }
-
-asmcode::instruction::instruction(operation op, operand op1, operand op2, const std::string& txt) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, operand op1, optional_modifier m, operand op2, uint64_t op2_mem) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(0), operand2_mem(op2_mem), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(m)
   {
 
   }
 
-asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem, const std::string& txt) : oper(op), operand1(op1), operand2(EMPTY), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, operand op1, operand op2, uint64_t op2_mem) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(0), operand2_mem(op2_mem), operand3_mem(0), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
 
   }
 
-asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem, operand op2, const std::string& txt) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, operand op1, operand op2, operand op3, uint64_t op3_mem) : oper(op), operand1(op1), operand2(op2), operand3(op3), operand1_mem(0), operand2_mem(0), operand3_mem(op3_mem), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
 
   }
 
-asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem, operand op2, uint64_t op2_mem, const std::string& txt) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(op2_mem), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, operand op1, operand op2, operand op3, operand op4, uint64_t op4_mem) : oper(op), operand1(op1), operand2(op2), operand3(op3), operand4(op4), operand1_mem(0), operand2_mem(0), operand3_mem(0), operand4_mem(op4_mem), opt1(k0)
   {
 
   }
 
-asmcode::instruction::instruction(operation op, operand op1, operand op2, uint64_t op2_mem, const std::string& txt) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(0), operand2_mem(op2_mem), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0)
+asmcode::instruction::instruction(operation op, const std::string& txt) : oper(op), operand1(EMPTY), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0), opt1(k0)
+  {
+  }
+
+asmcode::instruction::instruction(operation op, operand op1, const std::string& txt) : oper(op), operand1(op1), operand2(EMPTY), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0), opt1(k0)
+  {
+
+  }
+
+asmcode::instruction::instruction(operation op, operand op1, operand op2, const std::string& txt) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(0), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0), opt1(k0)
+  {
+
+  }
+
+asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem, const std::string& txt) : oper(op), operand1(op1), operand2(EMPTY), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0), opt1(k0)
+  {
+
+  }
+
+asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem, operand op2, const std::string& txt) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(0), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0), opt1(k0)
+  {
+
+  }
+
+asmcode::instruction::instruction(operation op, operand op1, uint64_t op1_mem, operand op2, uint64_t op2_mem, const std::string& txt) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(op1_mem), operand2_mem(op2_mem), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0), opt1(k0)
+  {
+
+  }
+
+asmcode::instruction::instruction(operation op, operand op1, operand op2, uint64_t op2_mem, const std::string& txt) : oper(op), operand1(op1), operand2(op2), operand3(EMPTY), operand1_mem(0), operand2_mem(op2_mem), operand3_mem(0), text(txt), operand4(EMPTY), operand4_mem(0), opt1(k0)
   {
 
   }
@@ -190,6 +205,23 @@ namespace
     std::stringstream str;
     str << mem;
     return str.str();
+    }
+
+  std::string _to_string(asmcode::optional_modifier m)
+    {
+    switch (m)
+      {
+      case asmcode::k0: return "{k0}";
+      case asmcode::k1: return "{k1}";
+      case asmcode::k2: return "{k2}";
+      case asmcode::k3: return "{k3}";
+      case asmcode::k4: return "{k4}";
+      case asmcode::k5: return "{k5}";
+      case asmcode::k6: return "{k6}";
+      case asmcode::k7: return "{k7}";
+      case asmcode::z: return "{z}";
+      }
+    return "";
     }
 
   std::string _to_string_signed(int64_t mem)
@@ -325,7 +357,7 @@ namespace
     return "";
     }
 
-  std::string _operand2string(asmcode::operand op, uint64_t mem, const std::string& text)
+  std::string _operand2string(asmcode::operand op, uint64_t mem, asmcode::optional_modifier m, const std::string& text)
     {
     switch (op)
       {
@@ -389,14 +421,14 @@ namespace
       case asmcode::YMM5: return "ymm5";
       case asmcode::YMM6: return "ymm6";
       case asmcode::YMM7: return "ymm7";
-      case asmcode::ZMM0: return "zmm0";
-      case asmcode::ZMM1: return "zmm1";
-      case asmcode::ZMM2: return "zmm2";
-      case asmcode::ZMM3: return "zmm3";
-      case asmcode::ZMM4: return "zmm4";
-      case asmcode::ZMM5: return "zmm5";
-      case asmcode::ZMM6: return "zmm6";
-      case asmcode::ZMM7: return "zmm7";
+      case asmcode::ZMM0: return m == asmcode::k0 ? "zmm0" : "zmm0"+ _to_string(m);
+      case asmcode::ZMM1: return m == asmcode::k0 ? "zmm1" : "zmm1"+ _to_string(m);
+      case asmcode::ZMM2: return m == asmcode::k0 ? "zmm2" : "zmm2"+ _to_string(m);
+      case asmcode::ZMM3: return m == asmcode::k0 ? "zmm3" : "zmm3"+ _to_string(m);
+      case asmcode::ZMM4: return m == asmcode::k0 ? "zmm4" : "zmm4"+ _to_string(m);
+      case asmcode::ZMM5: return m == asmcode::k0 ? "zmm5" : "zmm5"+ _to_string(m);
+      case asmcode::ZMM6: return m == asmcode::k0 ? "zmm6" : "zmm6"+ _to_string(m);
+      case asmcode::ZMM7: return m == asmcode::k0 ? "zmm7" : "zmm7"+ _to_string(m);
       case asmcode::K0: return "k0";
       case asmcode::K1: return "k1";
       case asmcode::K2: return "k2";
@@ -521,7 +553,7 @@ void asmcode::instruction::stream(std::ostream& out) const
     out << "\tcall";
     if (operand1 != asmcode::EMPTY)
       {
-      out << " " << _operand2string(operand1, operand1_mem, text);
+      out << " " << _operand2string(operand1, operand1_mem, opt1, text);
       }
     else
       out << " " << text;
@@ -533,7 +565,7 @@ void asmcode::instruction::stream(std::ostream& out) const
     out << "\tjmp";
     if (operand1 != asmcode::EMPTY)
       {
-      out << " " << _operand2string(operand1, operand1_mem, text);
+      out << " " << _operand2string(operand1, operand1_mem, opt1, text);
       }
     else
       out << " " << text;
@@ -630,15 +662,15 @@ void asmcode::instruction::stream(std::ostream& out) const
     out << "\t" << _operation2string(oper);
     if (operand1 != asmcode::EMPTY)
       {
-      out << " " << _operand2string(operand1, operand1_mem, text);
+      out << " " << _operand2string(operand1, operand1_mem, opt1, text);
       }
     if (operand2 != asmcode::EMPTY)
       {
-      out << ", " << _operand2string(operand2, operand2_mem, text);
+      out << ", " << _operand2string(operand2, operand2_mem, asmcode::k0, text);
       }
     if (operand3 != asmcode::EMPTY)
       {
-      out << ", " << _operand2string(operand3, operand3_mem, text);
+      out << ", " << _operand2string(operand3, operand3_mem, asmcode::k0, text);
       }
     out << std::endl;
     break;
@@ -1174,35 +1206,35 @@ namespace
       {
       case asmcode::XMM0:
       case asmcode::YMM0:
-      return 15;
+        return 15;
       case asmcode::XMM1:
       case asmcode::YMM1:
-      return 14;
+        return 14;
       case asmcode::XMM2:
       case asmcode::YMM2:
-      return 13;
+        return 13;
       case asmcode::XMM3:
       case asmcode::YMM3:
-      return 12;
+        return 12;
       case asmcode::XMM4:
       case asmcode::YMM4:
-      return 11;
+        return 11;
       case asmcode::XMM5:
       case asmcode::YMM5:
-      return 10;
+        return 10;
       case asmcode::XMM6:
       case asmcode::YMM6:
-      return 9;
+        return 9;
       case asmcode::XMM7:
       case asmcode::YMM7:
-      return 8;
+        return 8;
       default: throw std::logic_error("encode_vex_register: this register is not implemented");
       }
     }
 
   uint8_t encode_evex_register(uint8_t& vquote, const asmcode::operand& op)
     {
-    if (op >= asmcode::ZMM0 && op <= asmcode::ZMM7) 
+    if (op >= asmcode::ZMM0 && op <= asmcode::ZMM7)
       vquote = 1;
     else
       vquote = 0;
@@ -4150,9 +4182,11 @@ namespace
 
     uint8_t vex_r_quote = use_modrm && vex_R ? 1 : 0; // not sure this is correct
 
-    uint8_t vex_z = 0; // todo
+    uint8_t vex_z = code.opt1 == asmcode::z ? 1 : 0;
     uint8_t vex_b = 0; // todo
-    uint8_t aaa = 0; // todo
+    uint8_t aaa = 0;
+    if (code.opt1 > asmcode::k0 && code.opt1 <= asmcode::k7)
+      aaa = code.opt1 - asmcode::k0;
 
     // vector length
     uint8_t vex_L_quote = 1;
@@ -4174,7 +4208,7 @@ namespace
     push1byte(stream, make_evex_p2(vex_z, vex_L_quote, vex_L, vex_b, vex_V_quote, aaa));
 
 
-    push1byte(stream, o.opcode_id);    
+    push1byte(stream, o.opcode_id);
 
     if (use_modrm)
       push1byte(stream, modrm);
