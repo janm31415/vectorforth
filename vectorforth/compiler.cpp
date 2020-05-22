@@ -377,9 +377,9 @@ void compile(asmcode& code, dictionary& d, compile_data& cd, std::vector<token> 
   code.add(asmcode::MOV, HERE, HERE_POINTER);
 
   /*
-  Align stack with 32 byte boundary
+  Align stack with 64 byte boundary
   */
-  code.add(asmcode::AND, asmcode::RSP, asmcode::NUMBER, 0xFFFFFFFFFFFFFFE0);
+  code.add(asmcode::AND, asmcode::RSP, asmcode::NUMBER, 0xFFFFFFFFFFFFFFC0);
 
   code.add(asmcode::MOV, RSP_TOP, asmcode::RSP);
 

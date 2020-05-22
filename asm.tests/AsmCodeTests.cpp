@@ -1672,6 +1672,19 @@ namespace
     _check_buffer(buffer, size, { 0xC5, 0xFC, 0x50, 0xC1 });
     }
 
+  void asmcode_kmovw()
+    {
+    asmcode code; uint8_t buffer[255];
+    code.add(asmcode::KMOVW, asmcode::EAX, asmcode::K1);
+    code.add(asmcode::KMOVW, asmcode::ECX, asmcode::K3);
+
+    uint64_t size;
+    size = code.get_instructions_list().front()[0].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0xC5, 0xF8, 0x93, 0xC1 });
+    size = code.get_instructions_list().front()[1].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0xC5, 0xF8, 0x93, 0xCB });
+    }
+
   }
 
 ASM_END
@@ -1779,4 +1792,5 @@ void run_all_asm_code_tests()
   asmcode_vcvtps2dq();
   asmcode_vminmaxps();
   asmcode_vmovmskps();
+  asmcode_kmovw();
   }

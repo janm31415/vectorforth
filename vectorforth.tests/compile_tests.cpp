@@ -1548,7 +1548,7 @@ struct prim : public compile_fixture
     TEST_EQ(14, get_avx2_f32(v, 2));
     TEST_EQ(15, get_avx2_f32(v, 1));
     TEST_EQ(16, get_avx2_f32(v, 0));
-    /*
+    
     run("4.2 2.1 fm/mod");
     TEST_EQ(2.f, get_stack_valuef(0));
     TEST_EQ(0.f, get_stack_valuef(1));
@@ -1560,8 +1560,8 @@ struct prim : public compile_fixture
     run("10 3 fm/mod");
     TEST_EQ(3.f, get_stack_valuef(0));
     TEST_EQ_CLOSE(1.f, get_stack_valuef(1), 1e-5f);
-
-    run("v8 1 2 3 4 5 6 7 8 v8 8 7 6 5 4 3 2 1 min");
+    
+    run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 v16 8 7 6 5 4 3 2 1 8 7 6 5 4 3 2 1 min");
     v = get_last_stack_value();
     TEST_EQ(1.f, get_avx2_f32(v, 7));
     TEST_EQ(2.f, get_avx2_f32(v, 6));
@@ -1572,7 +1572,7 @@ struct prim : public compile_fixture
     TEST_EQ(2.f, get_avx2_f32(v, 1));
     TEST_EQ(1.f, get_avx2_f32(v, 0));
 
-    run("v8 1 2 3 4 5 6 7 8 v8 8 7 6 5 4 3 2 1 max");
+    run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 v16 8 7 6 5 4 3 2 1 8 7 6 5 4 3 2 1 max");
     v = get_last_stack_value();
     TEST_EQ(8.f, get_avx2_f32(v, 7));
     TEST_EQ(7.f, get_avx2_f32(v, 6));
@@ -1582,7 +1582,7 @@ struct prim : public compile_fixture
     TEST_EQ(6.f, get_avx2_f32(v, 2));
     TEST_EQ(7.f, get_avx2_f32(v, 1));
     TEST_EQ(8.f, get_avx2_f32(v, 0));
-    */
+    
     }
 #else
   void test()
@@ -1772,11 +1772,7 @@ struct complex : public compile_fixture
 
 struct return_stack : public compile_fixture
   {
-#ifdef AVX512
-  void test()
-    {
-    }
-#else
+
   void test()
     {
     run("1 2 3 push + pop *");
@@ -1794,16 +1790,11 @@ struct return_stack : public compile_fixture
     run("0.5 push 0 sin pop");
     TEST_EQ(0.5f, get_stack_valuef(0));
     }
-#endif
+
   };
 
 struct redefine_primitives : public compile_fixture
   {
-#ifdef AVX512
-  void test()
-    {
-    }
-#else
   void test()
     {
     run(": sin 3.1415926535 2 * * sin ; 0.1 sin");
@@ -1812,7 +1803,6 @@ struct redefine_primitives : public compile_fixture
     run(": sin cos ; 5 sin 5 cos");
     TEST_EQ(get_stack_valuef(1), get_stack_valuef(0));
     }
-#endif
   };
 
 struct if_tests : public compile_fixture
@@ -1820,6 +1810,96 @@ struct if_tests : public compile_fixture
 #ifdef AVX512
   void test()
     {
+    run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 4 > if 2 else 3 then");
+    auto v = get_stack_value(0);
+    TEST_EQ(3.f, get_avx2_f32(v, 7));
+    TEST_EQ(3.f, get_avx2_f32(v, 6));
+    TEST_EQ(3.f, get_avx2_f32(v, 5));
+    TEST_EQ(3.f, get_avx2_f32(v, 4));
+    TEST_EQ(2.f, get_avx2_f32(v, 3));
+    TEST_EQ(2.f, get_avx2_f32(v, 2));
+    TEST_EQ(2.f, get_avx2_f32(v, 1));
+    TEST_EQ(2.f, get_avx2_f32(v, 0));
+    /*
+    run("v8 1 2 3 4 5 6 7 8 2 fm/mod drop 0 = if 10 12 else 11 13 then");
+    v = get_stack_value(0);
+    TEST_EQ(13.f, get_avx2_f32(v, 7));
+    TEST_EQ(12.f, get_avx2_f32(v, 6));
+    TEST_EQ(13.f, get_avx2_f32(v, 5));
+    TEST_EQ(12.f, get_avx2_f32(v, 4));
+    TEST_EQ(13.f, get_avx2_f32(v, 3));
+    TEST_EQ(12.f, get_avx2_f32(v, 2));
+    TEST_EQ(13.f, get_avx2_f32(v, 1));
+    TEST_EQ(12.f, get_avx2_f32(v, 0));
+    v = get_stack_value(1);
+    TEST_EQ(11.f, get_avx2_f32(v, 7));
+    TEST_EQ(10.f, get_avx2_f32(v, 6));
+    TEST_EQ(11.f, get_avx2_f32(v, 5));
+    TEST_EQ(10.f, get_avx2_f32(v, 4));
+    TEST_EQ(11.f, get_avx2_f32(v, 3));
+    TEST_EQ(10.f, get_avx2_f32(v, 2));
+    TEST_EQ(11.f, get_avx2_f32(v, 1));
+    TEST_EQ(10.f, get_avx2_f32(v, 0));
+
+    run("1 2 > if 3 else 5 then");
+    v = get_stack_value(0);
+    TEST_EQ(5.f, get_avx2_f32(v, 7));
+    TEST_EQ(5.f, get_avx2_f32(v, 6));
+    TEST_EQ(5.f, get_avx2_f32(v, 5));
+    TEST_EQ(5.f, get_avx2_f32(v, 4));
+    TEST_EQ(5.f, get_avx2_f32(v, 3));
+    TEST_EQ(5.f, get_avx2_f32(v, 2));
+    TEST_EQ(5.f, get_avx2_f32(v, 1));
+    TEST_EQ(5.f, get_avx2_f32(v, 0));
+
+    run("1 2 < if 3 else 5 then");
+    v = get_stack_value(0);
+    TEST_EQ(3.f, get_avx2_f32(v, 7));
+    TEST_EQ(3.f, get_avx2_f32(v, 6));
+    TEST_EQ(3.f, get_avx2_f32(v, 5));
+    TEST_EQ(3.f, get_avx2_f32(v, 4));
+    TEST_EQ(3.f, get_avx2_f32(v, 3));
+    TEST_EQ(3.f, get_avx2_f32(v, 2));
+    TEST_EQ(3.f, get_avx2_f32(v, 1));
+    TEST_EQ(3.f, get_avx2_f32(v, 0));
+
+    run("1 2 < if 3 2 1 else 5 6 7 then");
+    for (int i = 0; i < 3; ++i)
+      {
+      v = get_stack_value(i);
+      for (int j = 0; j < 8; ++j)
+        TEST_EQ(i == 0 ? 1.f : i == 1 ? 2.f : 3.f, get_avx2_f32(v, j));
+      }
+
+    run("1 2 > if 3 2 1 else 5 6 7 then");
+    for (int i = 0; i < 3; ++i)
+      {
+      v = get_stack_value(i);
+      for (int j = 0; j < 8; ++j)
+        TEST_EQ(i == 0 ? 7.f : i == 1 ? 6.f : 5.f, get_avx2_f32(v, j));
+      }
+
+    run("v8 1 2 3 4 5 6 7 8 dup 2 fm/mod drop 0 = if dup 4 > if 40 else 39 then else  dup 2 < if 11 else 27 then then");
+    v = get_stack_value(0);
+    TEST_EQ(11.f, get_avx2_f32(v, 7));
+    TEST_EQ(39.f, get_avx2_f32(v, 6));
+    TEST_EQ(27.f, get_avx2_f32(v, 5));
+    TEST_EQ(39.f, get_avx2_f32(v, 4));
+    TEST_EQ(27.f, get_avx2_f32(v, 3));
+    TEST_EQ(40.f, get_avx2_f32(v, 2));
+    TEST_EQ(27.f, get_avx2_f32(v, 1));
+    TEST_EQ(40.f, get_avx2_f32(v, 0));
+
+    run("3 4 > if 2 > 1 if 10 else 11 then else 7 8 < if 2 else 20 then then");
+    v = get_stack_value(0);
+    TEST_EQ(2.f, get_avx2_f32(v, 7));
+    TEST_EQ(2.f, get_avx2_f32(v, 6));
+    TEST_EQ(2.f, get_avx2_f32(v, 5));
+    TEST_EQ(2.f, get_avx2_f32(v, 4));
+    TEST_EQ(2.f, get_avx2_f32(v, 3));
+    TEST_EQ(2.f, get_avx2_f32(v, 2));
+    TEST_EQ(2.f, get_avx2_f32(v, 1));
+    TEST_EQ(2.f, get_avx2_f32(v, 0));*/
     }
 #else
   void test()

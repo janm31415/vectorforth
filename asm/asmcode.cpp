@@ -291,6 +291,7 @@ namespace
       case asmcode::IDIV: return "idiv";
       case asmcode::IMUL: return "imul";
       case asmcode::INC: return "inc";
+      case asmcode::KMOVW: return "kmovw";
       case asmcode::MOV: return "mov";
       case asmcode::MOVAPS: return "movaps";
       case asmcode::MOVD: return "movd";
@@ -1343,7 +1344,8 @@ namespace
       m512 = 0x800000,
       zmm = 0x1000000,
       zmm_m512 = 0x1800008,
-      k64 = 0x2000080,
+      k16 = 0x2000020,
+      km16 = 0x2000022
       };
 
     enum opcode_flags
@@ -1385,7 +1387,8 @@ namespace
       _128,
       _256,
       _512,
-      LIG
+      LIG,
+      L0
       };
 
     enum vex_field_3
@@ -1672,6 +1675,29 @@ namespace
     o.vex_1 = opcode::vvvv_must_be_1111;
     o.vex_2 = f2;
     o.vex_3 = f3;
+    o.vex_4 = f4;
+    o.vex_5 = f5;
+    o.vex_6 = opcode::NO_WIG;
+    return o;
+    }
+
+  opcode make_vex_opcode(std::string mnemonic, opcode::vex_field_2 f2, opcode::vex_field_4 f4, opcode::vex_field_5 f5, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = opcode::none;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::VEX;
+    o.vex_1 = opcode::vvvv_must_be_1111;
+    o.vex_2 = f2;
+    o.vex_3 = opcode::NO_PREFIX;
     o.vex_4 = f4;
     o.vex_5 = f5;
     o.vex_6 = opcode::NO_WIG;
@@ -2182,7 +2208,7 @@ namespace
 
   bool is_rm_operand_type(opcode::opcode_operand_type op)
     {
-    return (op == opcode::rm8 || op == opcode::rm16 || op == opcode::rm32 || op == opcode::rm64 || op == opcode::xmm_m32 || op == opcode::xmm_m64 || op == opcode::xmm_m128 || op == opcode::ymm_m256 || op == opcode::zmm_m512);
+    return (op == opcode::rm8 || op == opcode::rm16 || op == opcode::rm32 || op == opcode::rm64 || op == opcode::xmm_m32 || op == opcode::xmm_m64 || op == opcode::xmm_m128 || op == opcode::ymm_m256 || op == opcode::zmm_m512 || op == opcode::km16);
     }
 
   bool is_immediate_operand_type(opcode::opcode_operand_type op)
@@ -2400,6 +2426,9 @@ namespace
     t.add_opcode(make_opcode("TEST", opcode::rexw | opcode::r, 0x85, opcode::rm64, opcode::r64));
 
     t.add_opcode(make_opcode("TEST", opcode::r, 0x84, opcode::rm8, opcode::r8));
+
+    //85 /r TEST r/m32, r32
+    t.add_opcode(make_opcode("TEST", opcode::r, 0x85, opcode::rm32, opcode::r32));
     return t;
     }
 
@@ -2850,7 +2879,7 @@ namespace
     //VEX.NDS.256.0F.WIG C2 /r ib VCMPPS ymm1, ymm2, ymm3 / m256, imm8
     t.add_opcode(make_vex_opcode("VCMPPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0xC2, opcode::r | opcode::ib, opcode::ymm, opcode::ymm, opcode::ymm_m256, opcode::imm8));
 
-    t.add_opcode(make_evex_opcode("VCMPPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0xC2, opcode::r | opcode::ib, opcode::k64, opcode::zmm, opcode::zmm_m512, opcode::imm8));
+    t.add_opcode(make_evex_opcode("VCMPPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0xC2, opcode::r | opcode::ib, opcode::k16, opcode::zmm, opcode::zmm_m512, opcode::imm8));
     return t;
     }
 
@@ -3028,6 +3057,14 @@ namespace
     //EVEX.512.66.0F38.W0 18 /r VBROADCASTSS zmm1{ k1 }{z}, xmm2 / m32
     t.add_opcode(make_evex_opcode("VBROADCASTSS", opcode::_512, opcode::_66, opcode::_0F38, opcode::W0, 0x18, opcode::r, opcode::zmm, opcode::xmm_m32));
 
+    return t;
+    }
+
+  opcode_table make_kmovw_table()
+    {
+    opcode_table t;
+    //VEX.L0.0F.W0 93 / r KMOVW r32, k1
+    t.add_opcode(make_vex_opcode("KMOVW", opcode::L0, opcode::_0F, opcode::W0, 0x93, opcode::r, opcode::r32, opcode::km16)); // hack: should be k16, but km16 to fix modrm byte
     return t;
     }
 
@@ -3507,6 +3544,7 @@ namespace
     table["JGES"] = make_jges_table();
     table["JNES"] = make_jnes_table();
     table["JMPS"] = make_jmps_table();
+    table["KMOVW"] = make_kmovw_table();
     table["MOV"] = make_mov_table();
     table["MOVAPS"] = make_movaps_table();
     table["MOVD"] = make_movd_table();
@@ -3717,14 +3755,14 @@ namespace
       case asmcode::ZMM5: return opcode::zmm;
       case asmcode::ZMM6: return opcode::zmm;
       case asmcode::ZMM7: return opcode::zmm;
-      case asmcode::K0: return opcode::k64;
-      case asmcode::K1: return opcode::k64;
-      case asmcode::K2: return opcode::k64;
-      case asmcode::K3: return opcode::k64;
-      case asmcode::K4: return opcode::k64;
-      case asmcode::K5: return opcode::k64;
-      case asmcode::K6: return opcode::k64;
-      case asmcode::K7: return opcode::k64;
+      case asmcode::K0: return opcode::k16;
+      case asmcode::K1: return opcode::k16;
+      case asmcode::K2: return opcode::k16;
+      case asmcode::K3: return opcode::k16;
+      case asmcode::K4: return opcode::k16;
+      case asmcode::K5: return opcode::k16;
+      case asmcode::K6: return opcode::k16;
+      case asmcode::K7: return opcode::k16;
       case asmcode::VARIABLE: return opcode::imm64;
       case asmcode::LABELADDRESS: return opcode::imm64;
       }
@@ -3945,7 +3983,7 @@ namespace
       vvvv = encode_vex_register(code.operand3);
       }
     uint8_t vex_l = 1;
-    if (o.vex_2 == opcode::_128 || o.vex_2 == opcode::LIG)
+    if (o.vex_2 == opcode::_128 || o.vex_2 == opcode::LIG || o.vex_2 == opcode::L0)
       vex_l = 0;
     uint8_t vex_pp = 0;
     if (o.vex_3 == opcode::_66)
@@ -4470,7 +4508,8 @@ uint64_t asmcode::instruction::fill_opcode(uint8_t* opcode_stream) const
     case asmcode::JGS: return fill(opcode_stream, *this, g_table.find("JGS")->second);
     case asmcode::JGES: return fill(opcode_stream, *this, g_table.find("JGES")->second);
     case asmcode::JNES: return fill(opcode_stream, *this, g_table.find("JNES")->second);
-    case asmcode::JMPS: return fill(opcode_stream, *this, g_table.find("JMPS")->second);
+    case asmcode::JMPS: return fill(opcode_stream, *this, g_table.find("JMPS")->second);    
+    case asmcode::KMOVW: return fill(opcode_stream, *this, g_table.find("KMOVW")->second);
     case asmcode::MOV: return fill(opcode_stream, *this, g_table.find("MOV")->second);
     case asmcode::MOVAPS: return fill(opcode_stream, *this, g_table.find("MOVAPS")->second);
     case asmcode::MOVD: return fill(opcode_stream, *this, g_table.find("MOVD")->second);

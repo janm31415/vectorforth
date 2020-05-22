@@ -95,6 +95,7 @@ class asmcode
       JGS, // JG short
       JGES, // JGE short
       JNES, // JNE short
+      KMOVW,
       LABEL,
       LABEL_ALIGNED,
       MOV,

@@ -871,7 +871,11 @@ void primitive_here(ASM::asmcode& code, compile_data&)
 void primitive_cells(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
+#ifdef AVX512
+  code.add(asmcode::SHL, asmcode::RAX, asmcode::NUMBER, 6);
+#else
   code.add(asmcode::SHL, asmcode::RAX, asmcode::NUMBER, 5);
+#endif
   code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
   }
 
@@ -954,7 +958,11 @@ void primitive_fmod(asmcode& code, compile_data&)
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER); // n1
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1)); // d1
   code.add(asmcode::VDIVPS, AVX_REG2, AVX_REG0, AVX_REG1); // quotient
+#ifdef AVX512
+  code.add(asmcode::VRNDSCALEPS, AVX_REG2, AVX_REG2, asmcode::NUMBER, 8+1); // floored quotient n3
+#else
   code.add(asmcode::VROUNDPS, AVX_REG2, AVX_REG2, asmcode::NUMBER, 1); // floored quotient n3
+#endif
   code.add(asmcode::VMULPS, AVX_REG1, AVX_REG2, AVX_REG1); // floored quotient n3 times n1
   code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1); // remainder n2
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(1), AVX_REG0);
@@ -1036,9 +1044,15 @@ void primitive_if(ASM::asmcode& code, compile_data& cd)
   // push stack register on return stack
   code.add(asmcode::MOV, asmcode::MEM_RSP, STACK_REGISTER);
 
-
+#ifdef AVX512
+  code.add(asmcode::VMOVAPS, AVX_REG1, NO_BITS);
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
+  code.add(asmcode::KMOVW, asmcode::EAX, asmcode::K1);
+  code.add(asmcode::TEST, asmcode::EAX, asmcode::EAX);
+#else
   code.add(asmcode::VMOVMSKPS, asmcode::RAX, AVX_REG0); // if rax == 0, then all conditions are false, if rax == 255, all conditions are true
   code.add(asmcode::TEST, asmcode::RAX, asmcode::RAX);
+#endif
   code.add(asmcode::JE, cd.else_label.back()); // if rax == 0, skip to the end of the else code  
   }
 
@@ -1056,13 +1070,24 @@ void primitive_then(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RSP, AVX_CELLS(1)); // test condition
   code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(2));
 
+#ifdef AVX512
+  code.add(asmcode::VMOVAPS, AVX_REG2, NO_BITS);
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG1, AVX_REG2, asmcode::NUMBER, 0);
+  code.add(asmcode::KMOVW, asmcode::EAX, asmcode::K1);
+  code.add(asmcode::TEST, asmcode::EAX, asmcode::EAX);
+#else
   code.add(asmcode::VMOVMSKPS, asmcode::RAX, AVX_REG1); // if rax == 0, then all conditions are false, if rax == 255, all conditions are true
   code.add(asmcode::TEST, asmcode::RAX, asmcode::RAX);
+#endif
   code.add(asmcode::JE, loop_end);
 
   code.add(asmcode::MOV, asmcode::RAX, STACK_REGISTER); // address of current stack register in rax
   code.add(asmcode::SUB, asmcode::RCX, asmcode::RAX);
+#ifdef AVX512
+  code.add(asmcode::SHR, asmcode::RCX, asmcode::NUMBER, 6); // divide rcx by 64: now rcx contains number of items added on the stack
+#else
   code.add(asmcode::SHR, asmcode::RCX, asmcode::NUMBER, 5); // divide rcx by 32: now rcx contains number of items added on the stack
+#endif
 
   code.add(asmcode::MOV, asmcode::RDX, STACK_REGISTER);
 
@@ -1103,13 +1128,24 @@ void primitive_else(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RSP, AVX_CELLS(1)); // test condition
   code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(2));
 
+#ifdef AVX512
+  code.add(asmcode::VMOVAPS, AVX_REG2, NO_BITS);
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG1, AVX_REG2, asmcode::NUMBER, 0);
+  code.add(asmcode::KMOVW, asmcode::EAX, asmcode::K1);
+  code.add(asmcode::CMP, asmcode::EAX, asmcode::NUMBER, 0xffff);
+#else
   code.add(asmcode::VMOVMSKPS, asmcode::RAX, AVX_REG1); // if rax == 0, then all conditions are false, if rax == 255, all conditions are true
   code.add(asmcode::CMP, asmcode::RAX, asmcode::NUMBER, 255); 
+#endif
   code.add(asmcode::JE, cd.then_label.back());
 
   code.add(asmcode::MOV, asmcode::RAX, STACK_REGISTER); // address of current stack register in rax
   code.add(asmcode::SUB, asmcode::RCX, asmcode::RAX);  
+#ifdef AVX512
+  code.add(asmcode::SHR, asmcode::RCX, asmcode::NUMBER, 6); // divide rcx by 64: now rcx contains number of items added on the stack  
+#else
   code.add(asmcode::SHR, asmcode::RCX, asmcode::NUMBER, 5); // divide rcx by 32: now rcx contains number of items added on the stack  
+#endif
 
   code.add(asmcode::MOV, STACK_REGISTER, asmcode::RDX); // the stack should point to the same location as before we did the if branch
   code.add(asmcode::SUB, asmcode::RDX, asmcode::NUMBER, AVX_CELLS(1)); // rdx now points to first item added to the stack by the if branch
