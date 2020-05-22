@@ -48,12 +48,16 @@ VF_BEGIN
 #define AVX_REG1 ASM::asmcode::ZMM1
 #define AVX_REG2 ASM::asmcode::ZMM2
 #define AVX_REG3 ASM::asmcode::ZMM3
+#define AVX_REG4 ASM::asmcode::ZMM4
+#define AVX_REG5 ASM::asmcode::ZMM5
 #define AVX_CELLS(n) (n)*64
 #else
 #define AVX_REG0 ASM::asmcode::YMM0
 #define AVX_REG1 ASM::asmcode::YMM1
 #define AVX_REG2 ASM::asmcode::YMM2
 #define AVX_REG3 ASM::asmcode::YMM3
+#define AVX_REG4 ASM::asmcode::YMM4
+#define AVX_REG5 ASM::asmcode::YMM5
 #define AVX_CELLS(n) (n)*32
 #endif
 VF_END

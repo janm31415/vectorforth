@@ -156,6 +156,23 @@ int main(int argc, char** argv)
   std::string line;
   std::string shader;
 
+#ifdef AVX512
+  std::string main = R"(
+: x st@ #64- @ ;
+: y st@ #128- @ ;
+: rx st@ #192- @ ;
+: ry st@ #256- @ ;
+: u st@ #320 #- @ ;
+: v st@ #384 #- @ ;
+: t st@ #448 #- @ ;
+: dt st@ #512 #- @ ;
+: frame st@ #576 #- @ ;
+: mx st@ #640 #- @ ;
+: my st@ #704 #- @ ;
+: mz st@ #768 #- @ ;
+: mw st@ #832 #- @ ;
+)";
+#else
   std::string main = R"(
 : x st@ #32- @ ;
 : y st@ #64- @ ;
@@ -171,6 +188,7 @@ int main(int argc, char** argv)
 : mz st@ #384 #- @ ;
 : mw st@ #416 #- @ ;
 )";
+#endif
 
   int main_lines = (int)std::count(main.begin(), main.end(), '\n');
 
@@ -210,7 +228,11 @@ int main(int argc, char** argv)
   int w = 800;
   int h = 450;
 
+#ifdef AVX512
+  uint32_t* image = (uint32_t*)(_mm_malloc(w * h * sizeof(uint32_t), 64));
+#else
   uint32_t* image = (uint32_t*)(_mm_malloc(w * h * sizeof(uint32_t), 32));
+#endif
 
   listener l;
 
@@ -218,6 +240,15 @@ int main(int argc, char** argv)
   
   register_listener(wh, &l);
 
+#ifdef AVX512
+  assert(w % 16 == 0);
+  const int stack_top_offset = 832;
+  assert(stack_top_offset % 64 == 0);
+  const __m512 offset = _mm512_set_ps(15.f, 14.f, 13.f, 12.f, 11.f, 10.f, 9.f, 8.f, 7.f, 6.f, 5.f, 4.f, 3.f, 2.f, 1.f, 0.f);
+  const float defaults[16] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+  __m512 rx_val = _mm512_set1_ps((float)w);
+  __m512 ry_val = _mm512_set1_ps((float)h);
+#else
   assert(w % 8 == 0);
   const int stack_top_offset = 416;
   assert(stack_top_offset % 32 == 0);
@@ -225,6 +256,7 @@ int main(int argc, char** argv)
   const float defaults[8] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
   __m256 rx_val = _mm256_set1_ps((float)w);
   __m256 ry_val = _mm256_set1_ps((float)h);  
+#endif
   int frame = 0;
   auto last_tic = std::chrono::high_resolution_clock::now();
   float time = 0.f;
@@ -232,18 +264,31 @@ int main(int argc, char** argv)
 
   while (!l.quit)
     {
+#ifdef AVX512
+    __m512 frame_val = _mm512_set1_ps((float)frame);
+    __m512 mx_val = _mm512_set1_ps(l.mx);
+    __m512 my_val = _mm512_set1_ps(l.my);
+    __m512 mz_val = _mm512_set1_ps(l.mz);
+    __m512 mw_val = _mm512_set1_ps(l.mw);
+#else
     __m256 frame_val = _mm256_set1_ps((float)frame);
     __m256 mx_val = _mm256_set1_ps(l.mx);
     __m256 my_val = _mm256_set1_ps(l.my);
     __m256 mz_val = _mm256_set1_ps(l.mz);
     __m256 mw_val = _mm256_set1_ps(l.mw);
+#endif
 
     auto tic = std::chrono::high_resolution_clock::now();
     float time_delta = (float)(std::chrono::duration_cast<std::chrono::microseconds>(tic - last_tic).count()) / 1000000.f;
     last_tic = tic;
     time += time_delta;
+#ifdef AVX512
+    __m512 time_delta_val = _mm512_set1_ps((float)time_delta);
+    __m512 time_val = _mm512_set1_ps((float)time);
+#else
     __m256 time_delta_val = _mm256_set1_ps((float)time_delta);
     __m256 time_val = _mm256_set1_ps((float)time);
+#endif
 
 #ifdef SINGLE
     for (int y = 0; y < h; ++y)
@@ -257,9 +302,29 @@ int main(int argc, char** argv)
       VF::context& ctxt = local_context.local();
 
       if (ctxt.memory_allocated == nullptr)
+#ifdef AVX512
+        ctxt = VF::create_context(2048 * 1024, 4096, 2048 * 1024);
+#else
         ctxt = VF::create_context(1024 * 1024, 2048, 1024 * 1024);
+#endif
 
       const float vrel = (float)y / (float)h;
+#ifdef AVX512
+      __m512 y_val = _mm512_set1_ps((float)y);
+      __m512 v_val = _mm512_set1_ps(vrel);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*64), y_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*192), v_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*224), time_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*256), time_delta_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*96), rx_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*128), ry_val);
+
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*288), frame_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*320), mx_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*352), my_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*384), mz_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*416), mw_val);
+#else
       __m256 y_val = _mm256_set1_ps((float)y);
       __m256 v_val = _mm256_set1_ps(vrel);
       _mm256_store_ps((float*)(ctxt.aligned_stack_top - 64), y_val);
@@ -274,17 +339,33 @@ int main(int argc, char** argv)
       _mm256_store_ps((float*)(ctxt.aligned_stack_top - 352), my_val);
       _mm256_store_ps((float*)(ctxt.aligned_stack_top - 384), mz_val);
       _mm256_store_ps((float*)(ctxt.aligned_stack_top - 416), mw_val);
+#endif
 
+#ifdef AVX512
+      for (int x = 0; x < w; x += 16)
+#else
       for (int x = 0; x < w; x += 8)
+#endif
         {
+#ifdef AVX512
+        __m512 x_val = _mm512_add_ps(_mm512_set1_ps((float)x), offset);
+        __m512 u_val = _mm512_div_ps(x_val, rx_val);
+        _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*32), x_val);
+        _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*160), u_val);
+#else
         __m256 x_val = _mm256_add_ps(_mm256_set1_ps((float)x), offset);
         __m256 u_val = _mm256_div_ps(x_val, rx_val);
         _mm256_store_ps((float*)(ctxt.aligned_stack_top - 32), x_val);
         _mm256_store_ps((float*)(ctxt.aligned_stack_top - 160), u_val);
+#endif
         ctxt.stack_pointer = ctxt.aligned_stack_top - stack_top_offset;
 
         // reset "here" pointer
+#ifdef AVX512
+        char* data_space_pointer = ctxt.here_pointer + 64;
+#else
         char* data_space_pointer = ctxt.here_pointer + 32;
+#endif
         *((uint64_t*)ctxt.here_pointer) = (uint64_t)((void*)data_space_pointer);
 
         fun(&ctxt);
@@ -292,9 +373,15 @@ int main(int argc, char** argv)
         //print_stack(std::cout, ctxt);
         //print_data_space(std::cout, ctxt);
 
+#ifdef AVX512
+        const float* b = (const float*)(ctxt.stack_pointer);
+        const float* g = (const float*)(ctxt.stack_pointer) + 16;
+        const float* r = (const float*)(ctxt.stack_pointer) + 32;
+#else
         const float* b = (const float*)(ctxt.stack_pointer);
         const float* g = (const float*)(ctxt.stack_pointer) + 8;
         const float* r = (const float*)(ctxt.stack_pointer) + 16;
+#endif
 
         if (b >= (const float*)(ctxt.aligned_stack_top - stack_top_offset))
           {
@@ -315,7 +402,11 @@ int main(int argc, char** argv)
           b = &defaults[0];
           }
 
+#ifdef AVX512
+        for (int i = 0; i < 16; ++i)
+#else
         for (int i = 0; i < 8; ++i)
+#endif
           {
           uint32_t red = (uint64_t)(clamp(r[i], 0.f, 1.f) * 255.f);
           uint32_t green = (uint64_t)(clamp(g[i], 0.f, 1.f) * 255.f);

@@ -129,13 +129,13 @@ void primitive_complex_mul(asmcode& code, compile_data&)
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(2));
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(3));
     
-  code.add(asmcode::VMULPS, asmcode::YMM4, AVX_REG0, AVX_REG2); //y0y2
+  code.add(asmcode::VMULPS, AVX_REG4, AVX_REG0, AVX_REG2); //y0y2
   code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG3); //y0y3
-  code.add(asmcode::VMULPS, asmcode::YMM5, AVX_REG1, AVX_REG3); //y1y3
+  code.add(asmcode::VMULPS, AVX_REG5, AVX_REG1, AVX_REG3); //y1y3
   code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG2); //y1y2
 
   code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1); //y0y3 + y1y2
-  code.add(asmcode::VSUBPS, AVX_REG1, asmcode::YMM4, asmcode::YMM5); //y0y2 - y1y3
+  code.add(asmcode::VSUBPS, AVX_REG1, AVX_REG4, AVX_REG5); //y0y2 - y1y3
   
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_CELLS(1), AVX_REG1);
@@ -1059,8 +1059,8 @@ void primitive_then(ASM::asmcode& code, compile_data& cd)
 
   //_mm_or_ps(_mm_and_ps(mask.m128, updated_values.m128), _mm_andnot_ps(mask.m128, original.m128));
   code.add(asmcode::VANDPS, AVX_REG3, AVX_REG1, AVX_REG0);
-  code.add(asmcode::VANDNPS, asmcode::YMM4, AVX_REG1, AVX_REG2);
-  code.add(asmcode::VORPS, AVX_REG0, AVX_REG3, asmcode::YMM4);
+  code.add(asmcode::VANDNPS, AVX_REG4, AVX_REG1, AVX_REG2);
+  code.add(asmcode::VORPS, AVX_REG0, AVX_REG3, AVX_REG4);
   code.add(asmcode::VMOVAPS, asmcode::MEM_RDX, AVX_REG0);
 
   code.add(asmcode::ADD, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(1));
