@@ -888,28 +888,44 @@ void primitive_comma(ASM::asmcode& code, compile_data&)
 void primitive_floor(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+#ifdef AVX512
+  code.add(asmcode::VRNDSCALEPS, AVX_REG0, AVX_REG0, asmcode::NUMBER, 1+8);
+#else
   code.add(asmcode::VROUNDPS, AVX_REG0, AVX_REG0, asmcode::NUMBER, 1);
+#endif
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
 void primitive_ceil(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+#ifdef AVX512
+  code.add(asmcode::VRNDSCALEPS, AVX_REG0, AVX_REG0, asmcode::NUMBER, 2 + 8);
+#else
   code.add(asmcode::VROUNDPS, AVX_REG0, AVX_REG0, asmcode::NUMBER, 2);
+#endif
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
 void primitive_round(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+#ifdef AVX512
+  code.add(asmcode::VRNDSCALEPS, AVX_REG0, AVX_REG0, asmcode::NUMBER, 0 + 8);
+#else
   code.add(asmcode::VROUNDPS, AVX_REG0, AVX_REG0, asmcode::NUMBER, 0);
+#endif
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
 void primitive_truncate(asmcode& code, compile_data&)
   {
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+#ifdef AVX512
+  code.add(asmcode::VRNDSCALEPS, AVX_REG0, AVX_REG0, asmcode::NUMBER, 3 + 8);
+#else
   code.add(asmcode::VROUNDPS, AVX_REG0, AVX_REG0, asmcode::NUMBER, 3);
+#endif
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 

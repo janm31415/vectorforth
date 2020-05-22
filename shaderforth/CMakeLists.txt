@@ -71,6 +71,7 @@ endif (UNIX)
 # general build definitions
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+add_definitions(-DAVX512)
 
 if (WIN32)
 add_executable(shaderforth WIN32 ${HDRS} ${SRCS} ${IMGUI} ${JSON})
