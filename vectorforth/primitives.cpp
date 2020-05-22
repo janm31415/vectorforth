@@ -595,12 +595,17 @@ void primitive_equ(asmcode& code, compile_data&)
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
 #ifdef AVX512
   code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
-
+  code.add(asmcode::XOR, asmcode::RAX, asmcode::RAX);
+  code.add(asmcode::VMOVSS, asmcode::XMM0, NO_BITS_M32);
+  code.add(asmcode::VMOVSS, asmcode::XMM1, ALL_BITS_M32);
+  code.add(asmcode::VBROADCASTSS, asmcode::ZMM0, asmcode::XMM0);
+  code.add(asmcode::VBROADCASTSS, asmcode::ZMM1, asmcode::XMM1);  
+  code.add(asmcode::VMOVAPS, asmcode::ZMM0, asmcode::k1, asmcode::ZMM1);
 #else
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
+#endif
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
-#endif
   }
 
 void primitive_nequ(asmcode& code, compile_data&)

@@ -40,6 +40,7 @@ struct context
   uint64_t signbit[8]; // offset 128
   uint64_t not_signbit[8]; // offset 192
   uint64_t all_bits[8]; // offset 256
+  uint64_t no_bits[8]; // offset 320
 
   char* memory_allocated;  
   }
