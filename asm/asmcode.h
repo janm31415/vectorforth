@@ -146,6 +146,7 @@ class asmcode
       VDIVPS,
       VMULPS,
       VMOVD,
+      VMOVSS,
       VMOVMSKPS,
       VMOVQ,
       VORPS,
