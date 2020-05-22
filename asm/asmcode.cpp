@@ -347,6 +347,7 @@ namespace
       case asmcode::VSHUFPS: return "vshufps";
       case asmcode::VSUBPS: return "vsubps";
       case asmcode::VROUNDPS: return "vroundps";
+      case asmcode::VRNDSCALEPS: return "vrndscaleps";
       case asmcode::VXORPS: return "vxorps";
       case asmcode::VBROADCASTSS: return "vbroadcastss";
       case asmcode::VMOVAPS: return "vmovaps";
@@ -1907,6 +1908,29 @@ namespace
     return o;
     }
 
+  opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_2 f2, opcode::vex_field_3 f3, opcode::vex_field_4 f4, opcode::vex_field_5 f5, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2, opcode::opcode_operand_type op3)
+    {
+    opcode o;
+    o.prefix = 0;
+    o.mnemonic = mnemonic;
+    o.flags = flags;
+    o.opcode_id = opcode_id;
+    o.opcode_id_2 = 0;
+    o.operand_1 = op1;
+    o.operand_2 = op2;
+    o.operand_3 = op3;
+    o.operand_4 = opcode::none;
+    o.use_postfix = false;
+    o.vex_type = opcode::EVEX;
+    o.vex_1 = opcode::vvvv_must_be_1111;
+    o.vex_2 = f2;
+    o.vex_3 = f3;
+    o.vex_4 = f4;
+    o.vex_5 = f5;
+    o.vex_6 = opcode::NO_WIG;
+    return o;
+    }
+
   opcode make_evex_opcode(std::string mnemonic, opcode::vex_field_2 f2, opcode::vex_field_3 f3, opcode::vex_field_4 f4, opcode::vex_field_5 f5, uint8_t opcode_id, uint64_t flags, opcode::opcode_operand_type op1, opcode::opcode_operand_type op2)
     {
     opcode o;
@@ -2839,6 +2863,14 @@ namespace
     return t;
     }
 
+  opcode_table make_vrndscaleps_table()
+    {
+    opcode_table t;
+    //EVEX.512.66.0F3A.W0 08 /r ib VRNDSCALEPS zmm1{ k1 }{z}, zmm2 / m512 / m32bcst{ sae }, imm8
+    t.add_opcode(make_evex_opcode("VRNDSCALEPS", opcode::_512, opcode::_66, opcode::_0F3A, opcode::W0, 0x08, opcode::r | opcode::ib, opcode::zmm, opcode::zmm_m512, opcode::imm8));
+    return t;
+    }
+
   opcode_table make_vsubps_table()
     {
     opcode_table t;
@@ -3536,6 +3568,7 @@ namespace
     table["VMOVAPS"] = make_vmovaps_table();
     table["VPERM2F128"] = make_vperm2f128_table();
     table["VROUNDPS"] = make_vroundps_table();
+    table["VRNDSCALEPS"] = make_vrndscaleps_table();
     table["VXORPS"] = make_vxorps_table();
     table["XOR"] = make_xor_table();
     table["XORPD"] = make_xorpd_table();
@@ -4117,13 +4150,13 @@ namespace
     /*disp8 compression mode for evex instructions*/
     uint64_t N = get_compressed_displacement(code, o, op1d, op2d, op3d, op4d);
 
-    if (is_8_bit((int64_t)code.operand1_mem / (int64_t)N))
+    if (code.operand1 != asmcode::NUMBER && is_8_bit((int64_t)code.operand1_mem / (int64_t)N))
       code.operand1_mem = (int64_t)code.operand1_mem / (int64_t)N;
 
-    if (is_8_bit((int64_t)code.operand2_mem / (int64_t)N))
+    if (code.operand2 != asmcode::NUMBER && is_8_bit((int64_t)code.operand2_mem / (int64_t)N))
       code.operand2_mem = (int64_t)code.operand2_mem / (int64_t)N;
 
-    if (is_8_bit((int64_t)code.operand3_mem / (int64_t)N))
+    if (code.operand3 != asmcode::NUMBER && is_8_bit((int64_t)code.operand3_mem / (int64_t)N))
       code.operand3_mem = (int64_t)code.operand3_mem / (int64_t)N;
 
     uint8_t* stream = opcode_stream;
@@ -4500,6 +4533,7 @@ uint64_t asmcode::instruction::fill_opcode(uint8_t* opcode_stream) const
     case asmcode::VMOVAPS: return fill(opcode_stream, *this, g_table.find("VMOVAPS")->second);
     case asmcode::VPERM2F128: return fill(opcode_stream, *this, g_table.find("VPERM2F128")->second);
     case asmcode::VROUNDPS: return fill(opcode_stream, *this, g_table.find("VROUNDPS")->second);
+    case asmcode::VRNDSCALEPS: return fill(opcode_stream, *this, g_table.find("VRNDSCALEPS")->second);
     case asmcode::VXORPS: return fill(opcode_stream, *this, g_table.find("VXORPS")->second);
     case asmcode::XOR: return fill(opcode_stream, *this, g_table.find("XOR")->second);
     case asmcode::XORPD: return fill(opcode_stream, *this, g_table.find("XORPD")->second);
