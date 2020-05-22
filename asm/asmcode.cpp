@@ -397,6 +397,14 @@ namespace
       case asmcode::ZMM5: return "zmm5";
       case asmcode::ZMM6: return "zmm6";
       case asmcode::ZMM7: return "zmm7";
+      case asmcode::K0: return "k0";
+      case asmcode::K1: return "k1";
+      case asmcode::K2: return "k2";
+      case asmcode::K3: return "k3";
+      case asmcode::K4: return "k4";
+      case asmcode::K5: return "k5";
+      case asmcode::K6: return "k6";
+      case asmcode::K7: return "k7";
       case asmcode::NUMBER: return uint64_to_hex(mem);
       case asmcode::MEM_EAX: return mem ? "[eax+" + _to_string(mem) + "]" : "[eax]";
       case asmcode::MEM_EBX: return mem ? "[ebx+" + _to_string(mem) + "]" : "[ebx]";
@@ -773,48 +781,56 @@ namespace
     bool zero = target_offset == 0;
     switch (target)
       {
+      case asmcode::K0:
       case asmcode::ZMM0:
       case asmcode::YMM0:
       case asmcode::XMM0:
       case asmcode::EAX:
       case asmcode::AL:
       case asmcode::RAX: mod = 3; rm = 0;  break;
+      case asmcode::K1:
       case asmcode::ZMM1:
       case asmcode::YMM1:
       case asmcode::XMM1:
       case asmcode::ECX:
       case asmcode::CL:
       case asmcode::RCX: mod = 3; rm = 1;  break;
+      case asmcode::K2:
       case asmcode::ZMM2:
       case asmcode::YMM2:
       case asmcode::XMM2:
       case asmcode::EDX:
       case asmcode::DL:
       case asmcode::RDX: mod = 3; rm = 2;  break;
+      case asmcode::K3:
       case asmcode::ZMM3:
       case asmcode::YMM3:
       case asmcode::XMM3:
       case asmcode::EBX:
       case asmcode::BL:
       case asmcode::RBX: mod = 3; rm = 3;  break;
+      case asmcode::K4:
       case asmcode::ZMM4:
       case asmcode::YMM4:
       case asmcode::XMM4:
       case asmcode::ESP:
       case asmcode::AH:
       case asmcode::RSP: mod = 3; rm = 4;  break;
+      case asmcode::K5:
       case asmcode::ZMM5:
       case asmcode::YMM5:
       case asmcode::XMM5:
       case asmcode::EBP:
       case asmcode::CH:
       case asmcode::RBP: mod = 3; rm = 5;  break;
+      case asmcode::K6:
       case asmcode::ZMM6:
       case asmcode::YMM6:
       case asmcode::XMM6:
       case asmcode::ESI:
       case asmcode::DH:
       case asmcode::RSI: mod = 3; rm = 6;  break;
+      case asmcode::K7:
       case asmcode::ZMM7:
       case asmcode::YMM7:
       case asmcode::XMM7:
@@ -905,48 +921,56 @@ namespace
     bool zero = target_offset == 0;
     switch (target)
       {
+      case asmcode::K0:
       case asmcode::ZMM0:
       case asmcode::YMM0:
       case asmcode::XMM0:
       case asmcode::EAX:
       case asmcode::AL:
       case asmcode::RAX: mod = 3; rm = 0;  break;
+      case asmcode::K1:
       case asmcode::ZMM1:
       case asmcode::YMM1:
       case asmcode::XMM1:
       case asmcode::ECX:
       case asmcode::CL:
       case asmcode::RCX: mod = 3; rm = 1;  break;
+      case asmcode::K2:
       case asmcode::ZMM2:
       case asmcode::YMM2:
       case asmcode::XMM2:
       case asmcode::EDX:
       case asmcode::DL:
       case asmcode::RDX: mod = 3; rm = 2;  break;
+      case asmcode::K3:
       case asmcode::ZMM3:
       case asmcode::YMM3:
       case asmcode::XMM3:
       case asmcode::EBX:
       case asmcode::BL:
       case asmcode::RBX: mod = 3; rm = 3;  break;
+      case asmcode::K4:
       case asmcode::ZMM4:
       case asmcode::YMM4:
       case asmcode::XMM4:
       case asmcode::ESP:
       case asmcode::AH:
       case asmcode::RSP: mod = 3; rm = 4;  break;
+      case asmcode::K5:
       case asmcode::ZMM5:
       case asmcode::YMM5:
       case asmcode::XMM5:
       case asmcode::EBP:
       case asmcode::CH:
       case asmcode::RBP: mod = 3; rm = 5;  break;
+      case asmcode::K6:
       case asmcode::ZMM6:
       case asmcode::YMM6:
       case asmcode::XMM6:
       case asmcode::ESI:
       case asmcode::DH:
       case asmcode::RSI: mod = 3; rm = 6;  break;
+      case asmcode::K7:
       case asmcode::ZMM7:
       case asmcode::YMM7:
       case asmcode::XMM7:
@@ -1027,48 +1051,56 @@ namespace
       }
     switch (source)
       {
+      case asmcode::K0:
       case asmcode::AL:
       case asmcode::XMM0:
       case asmcode::YMM0:
       case asmcode::ZMM0:
       case asmcode::EAX:
       case asmcode::RAX: reg = 0;  break;
+      case asmcode::K1:
       case asmcode::ZMM1:
       case asmcode::YMM1:
       case asmcode::XMM1:
       case asmcode::ECX:
       case asmcode::CL:
       case asmcode::RCX: reg = 1;  break;
+      case asmcode::K2:
       case asmcode::ZMM2:
       case asmcode::YMM2:
       case asmcode::XMM2:
       case asmcode::EDX:
       case asmcode::DL:
       case asmcode::RDX: reg = 2;  break;
+      case asmcode::K3:
       case asmcode::ZMM3:
       case asmcode::YMM3:
       case asmcode::XMM3:
       case asmcode::EBX:
       case asmcode::BL:
       case asmcode::RBX: reg = 3;  break;
+      case asmcode::K4:
       case asmcode::ZMM4:
       case asmcode::YMM4:
       case asmcode::XMM4:
       case asmcode::ESP:
       case asmcode::AH:
       case asmcode::RSP: reg = 4;  break;
+      case asmcode::K5:
       case asmcode::ZMM5:
       case asmcode::YMM5:
       case asmcode::XMM5:
       case asmcode::EBP:
       case asmcode::CH:
       case asmcode::RBP: reg = 5;  break;
+      case asmcode::K6:
       case asmcode::ZMM6:
       case asmcode::YMM6:
       case asmcode::XMM6:
       case asmcode::ESI:
       case asmcode::DH:
       case asmcode::RSI: reg = 6;  break;
+      case asmcode::K7:
       case asmcode::ZMM7:
       case asmcode::YMM7:
       case asmcode::XMM7:
@@ -1142,66 +1174,74 @@ namespace
       {
       case asmcode::XMM0:
       case asmcode::YMM0:
-      case asmcode::ZMM0: return 15;
+      return 15;
       case asmcode::XMM1:
       case asmcode::YMM1:
-      case asmcode::ZMM1: return 14;
+      return 14;
       case asmcode::XMM2:
       case asmcode::YMM2:
-      case asmcode::ZMM2: return 13;
+      return 13;
       case asmcode::XMM3:
       case asmcode::YMM3:
-      case asmcode::ZMM3: return 12;
+      return 12;
       case asmcode::XMM4:
       case asmcode::YMM4:
-      case asmcode::ZMM4: return 11;
+      return 11;
       case asmcode::XMM5:
       case asmcode::YMM5:
-      case asmcode::ZMM5: return 10;
+      return 10;
       case asmcode::XMM6:
       case asmcode::YMM6:
-      case asmcode::ZMM6: return 9;
+      return 9;
       case asmcode::XMM7:
       case asmcode::YMM7:
-      case asmcode::ZMM7: return 8;
+      return 8;
       default: throw std::logic_error("encode_vex_register: this register is not implemented");
       }
     }
 
-  uint8_t encode_vex_register(uint8_t& vquote, const asmcode::operand& op)
+  uint8_t encode_evex_register(uint8_t& vquote, const asmcode::operand& op)
     {
-    if (op >= asmcode::ZMM0 || op <= asmcode::ZMM7)
+    if (op >= asmcode::ZMM0 && op <= asmcode::ZMM7) 
       vquote = 1;
     else
       vquote = 0;
 
     switch (op)
       {
+      case asmcode::K0:
       case asmcode::XMM0:
       case asmcode::YMM0:
       case asmcode::ZMM0: return 15;
+      case asmcode::K1:
       case asmcode::XMM1:
       case asmcode::YMM1:
       case asmcode::ZMM1: return 14;
+      case asmcode::K2:
       case asmcode::XMM2:
       case asmcode::YMM2:
       case asmcode::ZMM2: return 13;
+      case asmcode::K3:
       case asmcode::XMM3:
       case asmcode::YMM3:
       case asmcode::ZMM3: return 12;
+      case asmcode::K4:
       case asmcode::XMM4:
       case asmcode::YMM4:
       case asmcode::ZMM4: return 11;
+      case asmcode::K5:
       case asmcode::XMM5:
       case asmcode::YMM5:
       case asmcode::ZMM5: return 10;
+      case asmcode::K6:
       case asmcode::XMM6:
       case asmcode::YMM6:
       case asmcode::ZMM6: return 9;
+      case asmcode::K7:
       case asmcode::XMM7:
       case asmcode::YMM7:
       case asmcode::ZMM7: return 8;
-      default: throw std::logic_error("encode_vex_register: this register is not implemented");
+      default: throw std::logic_error("encode_evex_register: this register is not implemented");
       }
     }
 
@@ -1268,7 +1308,8 @@ namespace
       moffs64 = 0x400000,
       m512 = 0x800000,
       zmm = 0x1000000,
-      zmm_m512 = 0x1800008
+      zmm_m512 = 0x1800008,
+      k64 = 0x2000080,
       };
 
     enum opcode_flags
@@ -2752,7 +2793,7 @@ namespace
     //VEX.NDS.256.0F.WIG C2 /r ib VCMPPS ymm1, ymm2, ymm3 / m256, imm8
     t.add_opcode(make_vex_opcode("VCMPPS", opcode::NDS, opcode::_256, opcode::_0F, opcode::WIG, 0xC2, opcode::r | opcode::ib, opcode::ymm, opcode::ymm, opcode::ymm_m256, opcode::imm8));
 
-    t.add_opcode(make_evex_opcode("VCMPPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0xC2, opcode::r | opcode::ib, opcode::zmm, opcode::zmm, opcode::zmm_m512, opcode::imm8));
+    t.add_opcode(make_evex_opcode("VCMPPS", opcode::NDS, opcode::_512, opcode::_0F, opcode::W0, 0xC2, opcode::r | opcode::ib, opcode::k64, opcode::zmm, opcode::zmm_m512, opcode::imm8));
     return t;
     }
 
@@ -3595,6 +3636,14 @@ namespace
       case asmcode::ZMM5: return opcode::zmm;
       case asmcode::ZMM6: return opcode::zmm;
       case asmcode::ZMM7: return opcode::zmm;
+      case asmcode::K0: return opcode::k64;
+      case asmcode::K1: return opcode::k64;
+      case asmcode::K2: return opcode::k64;
+      case asmcode::K3: return opcode::k64;
+      case asmcode::K4: return opcode::k64;
+      case asmcode::K5: return opcode::k64;
+      case asmcode::K6: return opcode::k64;
+      case asmcode::K7: return opcode::k64;
       case asmcode::VARIABLE: return opcode::imm64;
       case asmcode::LABELADDRESS: return opcode::imm64;
       }
@@ -4026,15 +4075,15 @@ namespace
     uint8_t vvvv = 15;
     if (o.vex_1 == opcode::NDS)
       {
-      vvvv = encode_vex_register(vex_V_quote, code.operand2);
+      vvvv = encode_evex_register(vex_V_quote, code.operand2);
       }
     else if (o.vex_1 == opcode::NDD)
       {
-      vvvv = encode_vex_register(vex_V_quote, code.operand1);
+      vvvv = encode_evex_register(vex_V_quote, code.operand1);
       }
     else if (o.vex_1 == opcode::DDS)
       {
-      vvvv = encode_vex_register(vex_V_quote, code.operand3);
+      vvvv = encode_evex_register(vex_V_quote, code.operand3);
       }
 
     uint8_t vex_pp = 0;

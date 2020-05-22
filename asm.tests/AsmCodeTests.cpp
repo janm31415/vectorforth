@@ -1572,7 +1572,8 @@ namespace
     asmcode code; uint8_t buffer[255];
     code.add(asmcode::VCMPPS, asmcode::YMM0, asmcode::YMM0, asmcode::YMM1, asmcode::NUMBER, 255);
 
-    code.add(asmcode::VCMPPS, asmcode::ZMM0, asmcode::ZMM0, asmcode::ZMM1, asmcode::NUMBER, 0);
+    code.add(asmcode::VCMPPS, asmcode::K0, asmcode::ZMM0, asmcode::ZMM1, asmcode::NUMBER, 0);
+    code.add(asmcode::VCMPPS, asmcode::K3, asmcode::ZMM2, asmcode::ZMM7, asmcode::NUMBER, 255);
 
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
@@ -1580,6 +1581,8 @@ namespace
 
     size = code.get_instructions_list().front()[1].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0x62, 0xF1, 0x7C, 0x48, 0xC2, 0xC1, 0x00 });
+    size = code.get_instructions_list().front()[2].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF1, 0x6C, 0x48, 0xC2, 0xDF, 0xFF });
     }
 
   void asmcode_vlogicps()
