@@ -1292,11 +1292,15 @@ namespace
     code.add(asmcode::VBROADCASTSS, asmcode::YMM0, asmcode::DWORD_MEM_RSP, -32);
     code.add(asmcode::VBROADCASTSS, asmcode::YMM5, asmcode::DWORD_MEM_RCX, 1024);
 
+    code.add(asmcode::VBROADCASTSS, asmcode::ZMM0, asmcode::XMM0);
+
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC4, 0xE2, 0x7D, 0x18, 0x44, 0x24, 0xE0 });
     size = code.get_instructions_list().front()[1].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC4, 0xE2, 0x7D, 0x18, 0xA9, 0x00, 0x04, 0x00, 0x00 });
+    size = code.get_instructions_list().front()[2].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF2, 0x7D, 0x48, 0x18, 0xC0 });
     }
 
   void asmcode_vmovaps()
@@ -1479,9 +1483,15 @@ namespace
     {
     asmcode code; uint8_t buffer[255];
     code.add(asmcode::MOVSS, asmcode::XMM0, asmcode::XMM1);
+
+    code.add(asmcode::VMOVSS, asmcode::XMM0, asmcode::MEM_EAX);
+
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xF3, 0x0F, 0x11, 0xC8 });
+    size = code.get_instructions_list().front()[1].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x67, 0xC5, 0xFA, 0x10, 0x00 });
+
     }
 
   void asmcode_movsd()

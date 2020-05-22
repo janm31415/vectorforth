@@ -335,6 +335,7 @@ namespace
       case asmcode::VMINPS: return "vminps";
       case asmcode::VMULPS: return "vmulps";
       case asmcode::VMOVD: return "vmovd";
+      case asmcode::VMOVSS: return "vmovss";
       case asmcode::VMOVQ: return "vmovq";
       case asmcode::VMOVMSKPS: return "vmovmskps";
       case asmcode::VSQRTPS: return "vsqrtps";
@@ -2991,6 +2992,18 @@ namespace
     opcode_table t;
     //VEX.256.66.0F38.W0 18 /r VBROADCASTSS ymm1, m32
     t.add_opcode(make_vex_opcode("VBROADCASTSS", opcode::_256, opcode::_66, opcode::_0F38, opcode::W0, 0x18, opcode::r, opcode::ymm, opcode::m32));
+
+    //EVEX.512.66.0F38.W0 18 /r VBROADCASTSS zmm1{ k1 }{z}, xmm2 / m32
+    t.add_opcode(make_evex_opcode("VBROADCASTSS", opcode::_512, opcode::_66, opcode::_0F38, opcode::W0, 0x18, opcode::r, opcode::zmm, opcode::xmm_m32));
+
+    return t;
+    }
+
+  opcode_table make_vmovss_table()
+    {
+    opcode_table t;
+    //EVEX.LIG.F3.0F.W0 10 /r VMOVSS xmm1{ k1 }{z}, m32
+    t.add_opcode(make_vex_opcode("VMOVSS", opcode::LIG, opcode::_F3, opcode::_0F, opcode::W0, 0x10, opcode::r, opcode::xmm, opcode::m32));
     return t;
     }
 
@@ -3096,6 +3109,8 @@ namespace
     opcode_table t;
     t.add_opcode(make_opcode(0xf3, "MOVSS", opcode::r, 0x0f, 0x10, opcode::xmm, opcode::xmm_m32));
     t.add_opcode(make_opcode(0xf3, "MOVSS", opcode::r, 0x0f, 0x11, opcode::xmm_m32, opcode::xmm));
+
+    //EVEX.LIG.F3.0F.W0 10 /r VMOVSS xmm1{ k1 }{z}, m32
     return t;
     }
 
@@ -3507,6 +3522,7 @@ namespace
     table["VMINPS"] = make_vminps_table();
     table["VMOVMSKPS"] = make_vmovmskps_table();
     table["VMOVD"] = make_vmovd_table();
+    table["VMOVSS"] = make_vmovss_table();
     table["VMOVQ"] = make_vmovq_table();
     table["VORPS"] = make_vorps_table();
     table["VSQRTPS"] = make_vsqrtps_table();
@@ -3869,6 +3885,12 @@ namespace
 
   uint64_t fill_vex(uint8_t* opcode_stream, const asmcode::instruction& code, opcode o, opcode::opcode_operand_type op1d, opcode::opcode_operand_type op2d, opcode::opcode_operand_type op3d, opcode::opcode_operand_type op4d)
     {
+    if (op1d == opcode::m32 || op2d == opcode::m32)
+      {
+      if (!o.prefix && ((code.operand1 >= asmcode::MEM_EAX && code.operand1 <= asmcode::MEM_EBP) || (code.operand2 >= asmcode::MEM_EAX && code.operand2 <= asmcode::MEM_EBP)))
+        o.prefix = 0x67; // 0x67: address size override prefix, because we're compiling for x64 and working with x32 address size
+      }
+
     //The two-byte form of VEX
     //only applies to those instructions that do not require the following fields to be encoded : VEX.mmmmm, VEX.W,
     //  VEX.X, VEX.B.
@@ -3961,6 +3983,9 @@ namespace
       two_byte = false;
     if (!vex_b)
       two_byte = false;
+
+    if (o.prefix)
+      push1byte(stream, o.prefix);
 
     if (two_byte)
       {
@@ -4459,6 +4484,7 @@ uint64_t asmcode::instruction::fill_opcode(uint8_t* opcode_stream) const
     case asmcode::VMINPS: return fill(opcode_stream, *this, g_table.find("VMINPS")->second);
     case asmcode::VMULPS: return fill(opcode_stream, *this, g_table.find("VMULPS")->second);
     case asmcode::VMOVD: return fill(opcode_stream, *this, g_table.find("VMOVD")->second);
+    case asmcode::VMOVSS: return fill(opcode_stream, *this, g_table.find("VMOVSS")->second);
     case asmcode::VMOVMSKPS: return fill(opcode_stream, *this, g_table.find("VMOVMSKPS")->second);
     case asmcode::VMOVQ: return fill(opcode_stream, *this, g_table.find("VMOVQ")->second);
     case asmcode::VORPS: return fill(opcode_stream, *this, g_table.find("VORPS")->second);
