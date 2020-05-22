@@ -4186,7 +4186,7 @@ namespace
     uint8_t vex_b = 0; // todo
     uint8_t aaa = 0;
     if (code.opt1 > asmcode::k0 && code.opt1 <= asmcode::k7)
-      aaa = code.opt1 - asmcode::k0;
+      aaa = (uint8_t)((int)code.opt1 - (int)asmcode::k0);
 
     // vector length
     uint8_t vex_L_quote = 1;

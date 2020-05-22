@@ -591,13 +591,16 @@ void primitive_not(asmcode& code, compile_data&)
 
 void primitive_equ(asmcode& code, compile_data&)
   {
-
   code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER);
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1));
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
+
+#else
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
-
+#endif
   }
 
 void primitive_nequ(asmcode& code, compile_data&)
