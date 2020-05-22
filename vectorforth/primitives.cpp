@@ -1192,8 +1192,16 @@ void primitive_while(ASM::asmcode& code, compile_data& cd)
   The begin while repeat test only fails if it fails for all values in the simd vector
   */
 
+#ifdef AVX512
+  code.add(asmcode::VMOVAPS, AVX_REG1, NO_BITS);
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
+  code.add(asmcode::KMOVW, asmcode::EAX, asmcode::K1);
+  //code.add(asmcode::TEST, asmcode::EAX, asmcode::EAX);
+  code.add(asmcode::CMP, asmcode::EAX, asmcode::NUMBER, 0xffff);
+#else
   code.add(asmcode::VMOVMSKPS, asmcode::RAX, AVX_REG0); // if rax == 0, then all conditions are false
-  code.add(asmcode::TEST, asmcode::RAX, asmcode::RAX);
+  code.add(asmcode::TEST, asmcode::RAX, asmcode::RAX);  
+#endif
   code.add(asmcode::JE, cd.repeat_label.back()); // if rax == 0, skip to the end of the begin while repeat code, otherwise continue
   }
 

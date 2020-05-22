@@ -2009,6 +2009,95 @@ struct stdlib_tests : public compile_fixture
 #ifdef AVX512
   void test()
     {
+    run("3 4 5 nip");
+    TEST_EQ(5.f, get_stack_valuef(0));
+    TEST_EQ(3.f, get_stack_valuef(1));
+
+    run("3 4 5 tuck");
+    TEST_EQ(5.f, get_stack_valuef(0));
+    TEST_EQ(4.f, get_stack_valuef(1));
+    TEST_EQ(5.f, get_stack_valuef(2));
+    TEST_EQ(3.f, get_stack_valuef(3));
+
+    
+    run("5 4 3 2 1 0 #3 pick");
+    TEST_EQ(3.f, get_stack_valuef(0));
+    TEST_EQ(0.f, get_stack_valuef(1));
+    TEST_EQ(1.f, get_stack_valuef(2));
+    TEST_EQ(2.f, get_stack_valuef(3));
+    TEST_EQ(3.f, get_stack_valuef(4));
+    TEST_EQ(4.f, get_stack_valuef(5));
+    TEST_EQ(5.f, get_stack_valuef(6));
+    
+    run("5 4 3 2 1 0 #0 pick");
+    TEST_EQ(0.f, get_stack_valuef(0));
+    TEST_EQ(0.f, get_stack_valuef(1));
+    TEST_EQ(1.f, get_stack_valuef(2));
+    TEST_EQ(2.f, get_stack_valuef(3));
+    TEST_EQ(3.f, get_stack_valuef(4));
+    TEST_EQ(4.f, get_stack_valuef(5));
+    TEST_EQ(5.f, get_stack_valuef(6));
+
+    run("5 4 3 2 1 0 #5 pick");
+    TEST_EQ(5.f, get_stack_valuef(0));
+    TEST_EQ(0.f, get_stack_valuef(1));
+    TEST_EQ(1.f, get_stack_valuef(2));
+    TEST_EQ(2.f, get_stack_valuef(3));
+    TEST_EQ(3.f, get_stack_valuef(4));
+    TEST_EQ(4.f, get_stack_valuef(5));
+    TEST_EQ(5.f, get_stack_valuef(6));
+
+
+    run("2 1 3 within");
+    auto u = get_last_stack_value_i();
+    TEST_EQ(-1, get_avx2_i32(u, 7));
+    TEST_EQ(-1, get_avx2_i32(u, 6));
+    TEST_EQ(-1, get_avx2_i32(u, 5));
+    TEST_EQ(-1, get_avx2_i32(u, 4));
+    TEST_EQ(-1, get_avx2_i32(u, 3));
+    TEST_EQ(-1, get_avx2_i32(u, 2));
+    TEST_EQ(-1, get_avx2_i32(u, 1));
+    TEST_EQ(-1, get_avx2_i32(u, 0));
+
+    
+    run("v16 0 0.5 1 1.5 2 2.5 3 3.5 0 0.5 1 1.5 2 2.5 3 3.5 1 3 within");
+    u = get_last_stack_value_i();
+    TEST_EQ(0, get_avx2_i32(u, 7));
+    TEST_EQ(0, get_avx2_i32(u, 6));
+    TEST_EQ(-1, get_avx2_i32(u, 5));
+    TEST_EQ(-1, get_avx2_i32(u, 4));
+    TEST_EQ(-1, get_avx2_i32(u, 3));
+    TEST_EQ(-1, get_avx2_i32(u, 2));
+    TEST_EQ(0, get_avx2_i32(u, 1));
+    TEST_EQ(0, get_avx2_i32(u, 0));
+
+    ctxt.stack_pointer = ctxt.aligned_stack_top;
+    run("100 200 300 depth");
+    TEST_EQ(3, get_stack_valuei(0));
+
+    ctxt.stack_pointer = ctxt.aligned_stack_top;
+    run("100 200 300 400 500 depth");
+    TEST_EQ(5, get_stack_valuei(0));
+
+    ctxt.stack_pointer = ctxt.aligned_stack_top;
+    run("100 200 300 400 500 rdepth");
+    TEST_EQ(0, get_stack_valuei(0));
+
+    ctxt.stack_pointer = ctxt.aligned_stack_top;
+    run("100 200 300 400 500 >r >r rdepth");
+    TEST_EQ(2, get_stack_valuei(0));
+    
+    run("v16 0 0.5 1 1.5 2 2.5 3 3.5 0 0.5 1 1.5 2 2.5 3 3.5 1 3 clamp");
+    auto v = get_last_stack_value();
+    TEST_EQ(1.f, get_avx2_f32(v, 7));
+    TEST_EQ(1.f, get_avx2_f32(v, 6));
+    TEST_EQ(1.f, get_avx2_f32(v, 5));
+    TEST_EQ(1.5f, get_avx2_f32(v, 4));
+    TEST_EQ(2.f, get_avx2_f32(v, 3));
+    TEST_EQ(2.5f, get_avx2_f32(v, 2));
+    TEST_EQ(3.f, get_avx2_f32(v, 1));
+    TEST_EQ(3.f, get_avx2_f32(v, 0));
+    
     }
 #else
   void test()
@@ -2109,6 +2198,39 @@ struct begin_while_repeat_tests : public compile_fixture
 #ifdef AVX512
   void test()
     {
+    run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 begin dup 10 > while 1 + repeat");
+    auto v = get_last_stack_value();
+    TEST_EQ(1.f, get_avx2_f32(v, 7));
+    TEST_EQ(2.f, get_avx2_f32(v, 6));
+    TEST_EQ(3.f, get_avx2_f32(v, 5));
+    TEST_EQ(4.f, get_avx2_f32(v, 4));
+    TEST_EQ(5.f, get_avx2_f32(v, 3));
+    TEST_EQ(6.f, get_avx2_f32(v, 2));
+    TEST_EQ(7.f, get_avx2_f32(v, 1));
+    TEST_EQ(8.f, get_avx2_f32(v, 0));
+    
+    run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 begin dup 10 < while 1 + repeat");
+    v = get_last_stack_value();
+    TEST_EQ(10.f, get_avx2_f32(v, 7));
+    TEST_EQ(11.f, get_avx2_f32(v, 6));
+    TEST_EQ(12.f, get_avx2_f32(v, 5));
+    TEST_EQ(13.f, get_avx2_f32(v, 4));
+    TEST_EQ(14.f, get_avx2_f32(v, 3));
+    TEST_EQ(15.f, get_avx2_f32(v, 2));
+    TEST_EQ(16.f, get_avx2_f32(v, 1));
+    TEST_EQ(17.f, get_avx2_f32(v, 0));
+
+    run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 begin dup 10 < while 2 begin dup 4 < while 1 + repeat + repeat");
+    v = get_last_stack_value();
+    TEST_EQ(13.f, get_avx2_f32(v, 7));
+    TEST_EQ(14.f, get_avx2_f32(v, 6));
+    TEST_EQ(15.f, get_avx2_f32(v, 5));
+    TEST_EQ(16.f, get_avx2_f32(v, 4));
+    TEST_EQ(17.f, get_avx2_f32(v, 3));
+    TEST_EQ(18.f, get_avx2_f32(v, 2));
+    TEST_EQ(19.f, get_avx2_f32(v, 1));
+    TEST_EQ(20.f, get_avx2_f32(v, 0));
+    
     }
 #else
   void test()
