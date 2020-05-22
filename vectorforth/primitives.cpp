@@ -885,7 +885,11 @@ void primitive_comma(ASM::asmcode& code, compile_data&)
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));  
   code.add(asmcode::MOV, asmcode::RAX, MEM_HERE);
   code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+#ifdef AVX512
+  code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, 64);
+#else
   code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, 32);
+#endif
   code.add(asmcode::MOV, MEM_HERE, asmcode::RAX);
   }
 

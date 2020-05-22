@@ -47,7 +47,11 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
         de.type = dictionary_entry::T_VARIABLE;
         de.name = word.value;
         de.address = cd.binding_space_offset;
+#ifdef AVX512
+        cd.binding_space_offset += 64;
+#else
         cd.binding_space_offset += 32;
+#endif
         push(d, de);
         return;
         }

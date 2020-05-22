@@ -2276,6 +2276,106 @@ struct data_space_tests : public compile_fixture
 #ifdef AVX512
   void test()
     {
+    run("here");
+    auto v = get_last_stack_value_i();
+    uint64_t here_pointer = get_avx2_u64(v, 0);
+    uint64_t ctxt_here_pointer = (uint64_t)(void*)ctxt.here_pointer;
+    TEST_EQ(here_pointer, ctxt_here_pointer);
+    uint64_t ctxt_data_space_pointer = (uint64_t)(void*)ctxt.here_pointer + 64;
+    uint64_t here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer);
+    
+    run("#64 here #+!");
+    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 64);
+
+    run("#64 here #-!");
+    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer);
+    
+    run("#192 allot");
+    v = get_last_stack_value_i();
+    uint64_t allot_address = get_avx2_u64(v, 0);
+    TEST_EQ(allot_address, ctxt_data_space_pointer);
+    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 192);
+
+    run("#2 cells allot");
+    v = get_last_stack_value_i();
+    allot_address = get_avx2_u64(v, 0);
+    TEST_EQ(allot_address, ctxt_data_space_pointer + 192);
+    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 192 + 128);
+    
+    run("101 ,");
+    here_pointer_content = *(uint64_t*)ctxt.here_pointer;
+    TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 192 + 192);
+    void* ptr = (void*)here_pointer_content; // get the address in the here pointer
+    ptr = ((float*)ptr) - 16; // go back one cell
+    __m512 value = _mm512_load_ps((float*)ptr); // load the value
+    TEST_EQ(101.f, get_avx2_f32(value, 0)); // it should be 101
+    TEST_EQ(101.f, get_avx2_f32(value, 1));
+    TEST_EQ(101.f, get_avx2_f32(value, 2));
+    TEST_EQ(101.f, get_avx2_f32(value, 3));
+    TEST_EQ(101.f, get_avx2_f32(value, 4));
+    TEST_EQ(101.f, get_avx2_f32(value, 5));
+    TEST_EQ(101.f, get_avx2_f32(value, 6));
+    TEST_EQ(101.f, get_avx2_f32(value, 7));
+    TEST_EQ(101.f, get_avx2_f32(value, 8));
+    TEST_EQ(101.f, get_avx2_f32(value, 9));
+    TEST_EQ(101.f, get_avx2_f32(value, 10));
+    TEST_EQ(101.f, get_avx2_f32(value, 11));
+    TEST_EQ(101.f, get_avx2_f32(value, 12));
+    TEST_EQ(101.f, get_avx2_f32(value, 13));
+    TEST_EQ(101.f, get_avx2_f32(value, 14));
+    TEST_EQ(101.f, get_avx2_f32(value, 15));
+    
+    run("here @ create a");
+    TEST_EQ(cd.binding_space_offset, 64);
+    uint64_t a_val = *(uint64_t*)ctxt.binding_space_pointer;
+    here_pointer_content = *(uint64_t*)(ctxt.here_pointer);
+    TEST_EQ(a_val, here_pointer_content);
+    
+    run("here @ create a");
+    TEST_EQ(cd.binding_space_offset, 64);
+    uint64_t a_val_2 = *(uint64_t*)ctxt.binding_space_pointer;
+    here_pointer_content = *(uint64_t*)(ctxt.here_pointer);
+    TEST_EQ(a_val_2, here_pointer_content);
+
+    run("1000 a !");
+
+    run("1 2 3 a @");
+    auto f = get_last_stack_value();
+    TEST_EQ(1000.f, get_avx2_f32(f, 0));
+    
+    run("variable x 999 x ! variable y -999 y ! x @ y @");
+    f = get_stack_value(0);
+    TEST_EQ(-999.f, get_avx2_f32(f, 0));
+    f = get_stack_value(1);
+    TEST_EQ(999.f, get_avx2_f32(f, 0));
+
+    run("20 , 30 , 40 , x @ y @");
+    f = get_stack_value(1);
+    TEST_EQ(999.f, get_avx2_f32(f, 0));
+    f = get_stack_value(0);
+    TEST_EQ(-999.f, get_avx2_f32(f, 0));
+
+    for (int i = 0; i < 64; ++i) // only 32/16 variables possible, since constant space equals 1024 in this test, but reusing a variable name will also reuse its memory
+      {
+      run("20 value val");
+      run("val");
+      f = get_stack_value(0);
+      TEST_EQ(20.f, get_avx2_f32(f, 0));
+      }
+
+    run("x @");
+    f = get_stack_value(0);
+    TEST_EQ(999.f, get_avx2_f32(f, 0));
+
+    run("30 to val");
+    run("val");
+    f = get_stack_value(0);
+    TEST_EQ(30.f, get_avx2_f32(f, 0));
     }
 #else
   void test()
@@ -2379,11 +2479,6 @@ struct data_space_tests : public compile_fixture
 
 struct vec3_tests : public compile_fixture
   {
-#ifdef AVX512
-  void test()
-    {
-    }
-#else
   void test()
     {
     run("vec3 v 1 2 3 v vec3!");    
@@ -2455,7 +2550,6 @@ struct vec3_tests : public compile_fixture
     //print_stack(std::cout, ctxt);
     //print_data_space(std::cout, ctxt);
     }
-#endif
   };
 
 VF_END
