@@ -6,6 +6,8 @@
 #include <vectorforth/compile_data.h>
 #include <vectorforth/debug.h>
 #include <vectorforth/dictionary.h>
+#include <vectorforth/expand.h>
+#include <vectorforth/expand_data.h>
 #include <vectorforth/stdlib.h>
 #include <vectorforth/tokenize.h>
 
@@ -26,6 +28,7 @@ namespace
     std::string last_error;
     dictionary dict;
     compile_data cd;
+    expand_data ed;
 
 
     compile_fixture()
@@ -33,6 +36,7 @@ namespace
       ctxt = create_context(1024 * 1024, 1024, 1024 * 1024);
       add_stdlib_to_dictionary(dict);
       cd = create_compile_data();
+      ed = create_expand_data();
       }
 
     ~compile_fixture()
@@ -126,8 +130,10 @@ struct print_bytecode_test : public compile_fixture
   {
   void test()
     {
-    auto bytecode = get_asmcode("vec3 v 1 2 3 v vec3!");
-    bytecode.stream(std::cout);
+    std::string script = "vec3 v 1 2 3 v vec3!";
+    auto words = tokenize(script);
+    std::vector<expanded_token> expanded;
+    expand(expanded, dict, ed, words);
     }
   };
 
@@ -138,5 +144,5 @@ void run_all_debug_tests()
   using namespace VF;
   print_stack_test().test();
   print_data_space_test().test();
-  print_bytecode_test().test();
+  //print_bytecode_test().test();
   }

@@ -9,6 +9,8 @@ context.h
 context_defs.h
 debug.h
 dictionary.h
+expand.h
+expand_data.h
 namespace.h
 primitives.h
 stdlib.h
@@ -23,6 +25,7 @@ context.cpp
 compiler.cpp
 compile_error.cpp
 debug.cpp
+expand.cpp
 dictionary.cpp
 primitives.cpp
 stdlib.cpp

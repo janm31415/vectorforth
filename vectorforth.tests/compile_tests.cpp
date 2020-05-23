@@ -2396,14 +2396,14 @@ struct data_space_tests : public compile_fixture
     run("#32 here #-!");
     here_pointer_content = *(uint64_t*)ctxt.here_pointer;
     TEST_EQ(here_pointer_content, ctxt_data_space_pointer);
-
+    
     run("#96 allot");
     v = get_last_stack_value_i();
     uint64_t allot_address = get_avx2_u64(v, 0);
     TEST_EQ(allot_address, ctxt_data_space_pointer);
     here_pointer_content = *(uint64_t*)ctxt.here_pointer;
     TEST_EQ(here_pointer_content, ctxt_data_space_pointer + 96);
-
+    
     run("#2 cells allot");
     v = get_last_stack_value_i();
     allot_address = get_avx2_u64(v, 0);
@@ -2425,7 +2425,7 @@ struct data_space_tests : public compile_fixture
     TEST_EQ(101.f, get_avx2_f32(value, 5));
     TEST_EQ(101.f, get_avx2_f32(value, 6));
     TEST_EQ(101.f, get_avx2_f32(value, 7));
-
+    
     run("here @ create a");
     TEST_EQ(cd.binding_space_offset, 32);
     uint64_t a_val = *(uint64_t*)ctxt.binding_space_pointer;
@@ -2472,7 +2472,7 @@ struct data_space_tests : public compile_fixture
     run("30 to val");
     run("val");
     f = get_stack_value(0);
-    TEST_EQ(30.f, get_avx2_f32(f, 0));
+    TEST_EQ(30.f, get_avx2_f32(f, 0));    
     }
 #endif
   };

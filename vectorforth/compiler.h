@@ -12,7 +12,9 @@ VF_BEGIN
 
 struct compile_data;
 
-void compile_words(ASM::asmcode& code, dictionary& d, compile_data& cd, std::vector<token>& words);
+void compile_words_old(ASM::asmcode& code, dictionary& d, compile_data& cd, std::vector<token>& words);
+
+VECTOR_FORTH_API void compile_old(ASM::asmcode& code, dictionary& d, compile_data& cd, std::vector<token> words);
 
 VECTOR_FORTH_API void compile(ASM::asmcode& code, dictionary& d, compile_data& cd, std::vector<token> words);
 

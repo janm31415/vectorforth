@@ -2,6 +2,8 @@
 #include "compile_data.h"
 #include "compile_error.h"
 #include "context_defs.h"
+#include "expand.h"
+#include "expand_data.h"
 #include "primitives.h"
 #include "asm_aux.h"
 #include "tokenize.h"
@@ -14,7 +16,7 @@ using namespace ASM;
 
 VF_BEGIN
 
-void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token word)
+void compile_primitive_old(asmcode& code, dictionary& d, compile_data& cd, token word)
   {
   static prim_map pm = generate_primitives_map();
   if (word.value == "create")
@@ -62,7 +64,7 @@ void compile_primitive(asmcode& code, dictionary& d, compile_data& cd, token wor
     }
   }
 
-void compile_variable(asmcode& code, compile_data& cd, uint64_t address)
+void compile_variable_old(asmcode& code, compile_data& cd, uint64_t address)
   {
   if (cd.to_called)
     {
@@ -85,7 +87,7 @@ void compile_variable(asmcode& code, compile_data& cd, uint64_t address)
     }
   }
 
-void compile_word(asmcode& code, dictionary& d, compile_data& cd, token word)
+void compile_word_old(asmcode& code, dictionary& d, compile_data& cd, token word)
   {
   dictionary_entry e;
   if (find(e, d, word.value))
@@ -94,7 +96,7 @@ void compile_word(asmcode& code, dictionary& d, compile_data& cd, token word)
       {
       case dictionary_entry::T_FUNCTION:
       {
-      compile_words(code, d, cd, e.words);
+      compile_words_old(code, d, cd, e.words);
       break;
       }
       case dictionary_entry::T_VARIABLE:
@@ -110,7 +112,7 @@ void compile_word(asmcode& code, dictionary& d, compile_data& cd, token word)
         return;
         }
       else
-        compile_variable(code, cd, e.address);
+        compile_variable_old(code, cd, e.address);
       break;
       }
       default:
@@ -122,11 +124,11 @@ void compile_word(asmcode& code, dictionary& d, compile_data& cd, token word)
     }
   else
     {
-    compile_primitive(code, d, cd, word);
+    compile_primitive_old(code, d, cd, word);
     }
   }
 
-void compile_float(asmcode& code, token word)
+void compile_float_old(asmcode& code, token word)
   {
   assert(word.type == token::T_FLOAT);
   float f = to_float(word.value.c_str());
@@ -147,7 +149,7 @@ void compile_float(asmcode& code, token word)
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
 
-void compile_integer(asmcode& code, token word)
+void compile_integer_old(asmcode& code, token word)
   {
   assert(word.type == token::T_INTEGER);
   std::stringstream ss;
@@ -160,7 +162,7 @@ void compile_integer(asmcode& code, token word)
   }
 
 #ifdef AVX512
-void compile_vector16(asmcode& code, const std::vector<token>& words)
+void compile_vector16_old(asmcode& code, const std::vector<token>& words)
   {
   assert(words.size() == 16);
   for (int i = 0; i < 8; ++i)
@@ -204,7 +206,7 @@ void compile_vector16(asmcode& code, const std::vector<token>& words)
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
 #else
-void compile_vector8(asmcode& code, const std::vector<token>& words)
+void compile_vector8_old(asmcode& code, const std::vector<token>& words)
   {
   assert(words.size() == 8);
   for (int i = 0; i < 4; ++i)
@@ -249,7 +251,7 @@ void compile_vector8(asmcode& code, const std::vector<token>& words)
   }
 #endif
 
-void compile_definition(dictionary& d, std::vector<token>& words, int line_nr, int column_nr)
+void compile_definition_old(dictionary& d, std::vector<token>& words, int line_nr, int column_nr)
   {
   if (words.empty())
     throw std::runtime_error(compile_error_text(VF_ERROR_EMPTY_DEFINITION, line_nr, column_nr).c_str());
@@ -258,7 +260,7 @@ void compile_definition(dictionary& d, std::vector<token>& words, int line_nr, i
   register_definition(d, words);
   }
 
-void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<token>& words)
+void compile_words_old(asmcode& code, dictionary& d, compile_data& cd, std::vector<token>& words)
   {
   while (!words.empty())
     {
@@ -268,21 +270,21 @@ void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<t
       {
       case token::T_WORD:
       {
-      compile_word(code, d, cd, word);
+      compile_word_old(code, d, cd, word);
       break;
       }
       case token::T_PRIMITIVE:
       {
-      compile_primitive(code, d, cd, word);
+      compile_primitive_old(code, d, cd, word);
       break;
       }
       case token::T_FLOAT:
       {
-      compile_float(code, word);
+      compile_float_old(code, word);
       break;
       }
 #ifdef AVX512
-      case token::T_VECTOR16:
+      case token::T_VECTOR:
       {
       std::vector<token> vector_words;
       if (words.size() < 16)
@@ -294,11 +296,11 @@ void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<t
           throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR16_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
         words.pop_back();
         }
-      compile_vector16(code, vector_words);
+      compile_vector16_old(code, vector_words);
       break;
       }
 #else
-      case token::T_VECTOR8:
+      case token::T_VECTOR:
       {
       std::vector<token> vector_words;
       if (words.size() < 8)
@@ -310,7 +312,7 @@ void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<t
           throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR8_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
         words.pop_back();
         }
-      compile_vector8(code, vector_words);
+      compile_vector8_old(code, vector_words);
       break;
       }
 #endif
@@ -329,7 +331,7 @@ void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<t
       if (definition_words.back().type != token::T_SEMICOLON)
         throw std::runtime_error(compile_error_text(VF_ERROR_NO_CORRESPONDING_SEMICOLON, word.line_nr, word.column_nr).c_str());
       definition_words.pop_back(); // last item is semicolon, we don't need that for the definition
-      compile_definition(d, definition_words, word.line_nr, word.column_nr);
+      compile_definition_old(d, definition_words, word.line_nr, word.column_nr);
       break;
       }
       case token::T_SEMICOLON:
@@ -339,7 +341,7 @@ void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<t
       }
       case token::T_INTEGER:
       {
-      compile_integer(code, word);
+      compile_integer_old(code, word);
       break;
       }
       default:
@@ -348,7 +350,7 @@ void compile_words(asmcode& code, dictionary& d, compile_data& cd, std::vector<t
     }
   }
 
-void compile(asmcode& code, dictionary& d, compile_data& cd, std::vector<token> words)
+void compile_old(asmcode& code, dictionary& d, compile_data& cd, std::vector<token> words)
   {
   assert(!cd.to_called);
   assert(!cd.create_called);
@@ -387,7 +389,7 @@ void compile(asmcode& code, dictionary& d, compile_data& cd, std::vector<token> 
 
   code.add(asmcode::MOV, RSP_TOP, asmcode::RSP);
 
-  compile_words(code, d, cd, words);
+  compile_words_old(code, d, cd, words);
 
   code.add(asmcode::MOV, STACK_POINTER, STACK_REGISTER);
 
@@ -401,6 +403,189 @@ void compile(asmcode& code, dictionary& d, compile_data& cd, std::vector<token> 
     throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_TO, -1, -1).c_str());
   if (cd.create_called)
     throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_CREATE, -1, -1).c_str());
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>& words)
+  {
+  while (!words.empty())
+    {
+    expanded_token word = words.back();
+    words.pop_back();
+    switch (word.t)
+      {
+      case expanded_token::ET_PRIMITIVE:
+      {
+      word.prim(code, cd);
+      break;
+      }
+      case expanded_token::ET_INTEGER:
+      {
+      std::stringstream ss;
+      ss << word.value;
+      int64_t v;
+      ss >> v;
+      code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v);
+      code.add(asmcode::MOV, MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::RAX);
+      code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+      break;
+      }
+      case expanded_token::ET_FLOAT:
+      {
+      float f = to_float(word.value.c_str());
+      uint32_t v = *(reinterpret_cast<uint32_t*>(&f));
+      uint64_t v64 = (uint64_t)v;
+      uint64_t v2 = (v64 << 32) | v64;
+      code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v2);
+      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(1), asmcode::RAX);
+      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(2), asmcode::RAX);
+      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(3), asmcode::RAX);
+      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(4), asmcode::RAX);
+#ifdef AVX512
+      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(5), asmcode::RAX);
+      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(6), asmcode::RAX);
+      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(7), asmcode::RAX);
+      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(8), asmcode::RAX);
+#endif
+      code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+      break;
+      }
+      case expanded_token::ET_VECTOR:
+      {
+#ifdef AVX512
+      for (int i = 0; i < 8; ++i)
+#else
+      for (int i = 0; i < 4; ++i)
+#endif
+        {
+        uint64_t v1_64, v2_64;
+        float f = word.f[i * 2];
+        uint32_t v = *(reinterpret_cast<uint32_t*>(&f));
+        v1_64 = (uint64_t)v;
+        f = word.f[i * 2 + 1];
+        v = *(reinterpret_cast<uint32_t*>(&f));
+        v2_64 = (uint64_t)v;
+        uint64_t vv = (v1_64 << 32) | v2_64;
+        code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, vv);
+        code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(i + 1), asmcode::RAX);
+        }
+      code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+      break;
+      }
+      case expanded_token::ET_OVERWRITE_VARIABLE:
+      {
+      code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+      code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.binding_space_offset);
+      code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+      code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, (word.binding_space_offset - word.variable_address));
+      code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+      break;
+      }
+      case expanded_token::ET_VARIABLE:
+      {
+      if (word.variable_to_called)
+        {
+        code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+        if (word.variable_address)
+          code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.variable_address);
+        code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+        code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+        code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+        }
+      else
+        {
+        code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+        if (word.variable_address)
+          code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.variable_address);
+        code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+        code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+        code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+        }
+      break;
+      }
+      case expanded_token::ET_CREATE_VARIABLE:
+      {
+      code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+      if (word.binding_space_offset)
+        code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.binding_space_offset);
+      code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+      code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+      code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+      break;
+      }
+      } // switch
+    }
+  }
+
+void compile(ASM::asmcode& code, dictionary& d, compile_data& cd, std::vector<token> words)
+  {
+  expand_data ed;
+  ed.binding_space_offset = cd.binding_space_offset;
+  ed.create_called = cd.create_called;
+  ed.to_called = cd.to_called;
+
+  std::vector<expanded_token> expanded;
+  expand(expanded, d, ed, words);
+
+  std::reverse(expanded.begin(), expanded.end());
+
+  code.add(asmcode::GLOBAL, "forth_entry");
+#ifdef _WIN32
+  /*
+  windows parameters calling convention: rcx, rdx, r8, r9
+  First parameter (rcx) points to the context.
+  We store the pointer to the context in register r10.
+  */
+  code.add(asmcode::MOV, CONTEXT, asmcode::RCX);
+#else
+  /*
+  Linux parameters calling convention: rdi, rsi, rdx, rcx, r8, r9
+  First parameter (rdi) points to the context.
+  We store the pointer to the context in register r10.
+  */
+  code.add(asmcode::MOV, CONTEXT, asmcode::RDI);
+#endif
+
+  /*
+  Save the current content of the registers in the context
+  */
+  store_registers(code);
+
+  code.add(asmcode::MOV, STACK_REGISTER, STACK_POINTER);
+
+  code.add(asmcode::MOV, HERE, HERE_POINTER);
+
+  /*
+  Align stack with 64 byte boundary
+  */
+  code.add(asmcode::AND, asmcode::RSP, asmcode::NUMBER, 0xFFFFFFFFFFFFFFC0);
+
+  code.add(asmcode::MOV, RSP_TOP, asmcode::RSP);
+
+  compile_words(code, cd, expanded);
+
+  code.add(asmcode::MOV, STACK_POINTER, STACK_REGISTER);
+
+  /*Restore the registers to their original state*/
+  load_registers(code);
+
+  /*Return to the caller*/
+  code.add(asmcode::RET);
+
+  cd.binding_space_offset = ed.binding_space_offset;
+  cd.create_called = ed.create_called;
+  cd.to_called = ed.to_called;
   }
 
 VF_END

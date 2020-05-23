@@ -35,9 +35,9 @@ void test_tokenize()
   TEST_ASSERT(equal(words[6], "1.e-8", token::T_FLOAT));
   TEST_ASSERT(equal(words[7], "4509.3498.234234", token::T_WORD));
 #ifdef AVX512
-  TEST_ASSERT(equal(words[8], "v16", token::T_VECTOR16));
+  TEST_ASSERT(equal(words[8], "v16", token::T_VECTOR));
 #else
-  TEST_ASSERT(equal(words[8], "v8", token::T_VECTOR8));
+  TEST_ASSERT(equal(words[8], "v8", token::T_VECTOR));
 #endif
 
   TEST_EQ(1.f, to_float(words[1].value.c_str()));
