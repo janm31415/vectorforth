@@ -122,6 +122,15 @@ struct print_data_space_test : public compile_fixture
     }
   };
 
+struct print_bytecode_test : public compile_fixture
+  {
+  void test()
+    {
+    auto bytecode = get_asmcode("vec3 v 1 2 3 v vec3!");
+    bytecode.stream(std::cout);
+    }
+  };
+
 VF_END
 
 void run_all_debug_tests()
@@ -129,4 +138,5 @@ void run_all_debug_tests()
   using namespace VF;
   print_stack_test().test();
   print_data_space_test().test();
+  print_bytecode_test().test();
   }
