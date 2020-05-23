@@ -16,7 +16,11 @@ using namespace ASM;
 
 VF_BEGIN
 
-void compile_primitive_old(asmcode& code, dictionary& d, compile_data& cd, token word)
+/////////////////////////////////////////////////////////////
+// Singlepass compiler
+/////////////////////////////////////////////////////////////
+
+void compile_primitive_single_pass(asmcode& code, dictionary& d, compile_data& cd, token word)
   {
   static prim_map pm = generate_primitives_map();
   if (word.value == "create")
@@ -64,7 +68,7 @@ void compile_primitive_old(asmcode& code, dictionary& d, compile_data& cd, token
     }
   }
 
-void compile_variable_old(asmcode& code, compile_data& cd, uint64_t address)
+void compile_variable_single_pass(asmcode& code, compile_data& cd, uint64_t address)
   {
   if (cd.to_called)
     {
@@ -87,7 +91,7 @@ void compile_variable_old(asmcode& code, compile_data& cd, uint64_t address)
     }
   }
 
-void compile_word_old(asmcode& code, dictionary& d, compile_data& cd, token word)
+void compile_word_single_pass(asmcode& code, dictionary& d, compile_data& cd, token word)
   {
   dictionary_entry e;
   if (find(e, d, word.value))
@@ -96,7 +100,7 @@ void compile_word_old(asmcode& code, dictionary& d, compile_data& cd, token word
       {
       case dictionary_entry::T_FUNCTION:
       {
-      compile_words_old(code, d, cd, e.words);
+      compile_words_single_pass(code, d, cd, e.words);
       break;
       }
       case dictionary_entry::T_VARIABLE:
@@ -112,7 +116,7 @@ void compile_word_old(asmcode& code, dictionary& d, compile_data& cd, token word
         return;
         }
       else
-        compile_variable_old(code, cd, e.address);
+        compile_variable_single_pass(code, cd, e.address);
       break;
       }
       default:
@@ -124,11 +128,11 @@ void compile_word_old(asmcode& code, dictionary& d, compile_data& cd, token word
     }
   else
     {
-    compile_primitive_old(code, d, cd, word);
+    compile_primitive_single_pass(code, d, cd, word);
     }
   }
 
-void compile_float_old(asmcode& code, token word)
+void compile_float_single_pass(asmcode& code, token word)
   {
   assert(word.type == token::T_FLOAT);
   float f = to_float(word.value.c_str());
@@ -149,7 +153,7 @@ void compile_float_old(asmcode& code, token word)
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
 
-void compile_integer_old(asmcode& code, token word)
+void compile_integer_single_pass(asmcode& code, token word)
   {
   assert(word.type == token::T_INTEGER);
   std::stringstream ss;
@@ -162,7 +166,7 @@ void compile_integer_old(asmcode& code, token word)
   }
 
 #ifdef AVX512
-void compile_vector16_old(asmcode& code, const std::vector<token>& words)
+void compile_vector16_single_pass(asmcode& code, const std::vector<token>& words)
   {
   assert(words.size() == 16);
   for (int i = 0; i < 8; ++i)
@@ -206,7 +210,7 @@ void compile_vector16_old(asmcode& code, const std::vector<token>& words)
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
 #else
-void compile_vector8_old(asmcode& code, const std::vector<token>& words)
+void compile_vector8_single_pass(asmcode& code, const std::vector<token>& words)
   {
   assert(words.size() == 8);
   for (int i = 0; i < 4; ++i)
@@ -251,7 +255,7 @@ void compile_vector8_old(asmcode& code, const std::vector<token>& words)
   }
 #endif
 
-void compile_definition_old(dictionary& d, std::vector<token>& words, int line_nr, int column_nr)
+void compile_definition_single_pass(dictionary& d, std::vector<token>& words, int line_nr, int column_nr)
   {
   if (words.empty())
     throw std::runtime_error(compile_error_text(VF_ERROR_EMPTY_DEFINITION, line_nr, column_nr).c_str());
@@ -260,7 +264,7 @@ void compile_definition_old(dictionary& d, std::vector<token>& words, int line_n
   register_definition(d, words);
   }
 
-void compile_words_old(asmcode& code, dictionary& d, compile_data& cd, std::vector<token>& words)
+void compile_words_single_pass(asmcode& code, dictionary& d, compile_data& cd, std::vector<token>& words)
   {
   while (!words.empty())
     {
@@ -270,17 +274,17 @@ void compile_words_old(asmcode& code, dictionary& d, compile_data& cd, std::vect
       {
       case token::T_WORD:
       {
-      compile_word_old(code, d, cd, word);
+      compile_word_single_pass(code, d, cd, word);
       break;
       }
       case token::T_PRIMITIVE:
       {
-      compile_primitive_old(code, d, cd, word);
+      compile_primitive_single_pass(code, d, cd, word);
       break;
       }
       case token::T_FLOAT:
       {
-      compile_float_old(code, word);
+      compile_float_single_pass(code, word);
       break;
       }
 #ifdef AVX512
@@ -296,7 +300,7 @@ void compile_words_old(asmcode& code, dictionary& d, compile_data& cd, std::vect
           throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR16_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
         words.pop_back();
         }
-      compile_vector16_old(code, vector_words);
+      compile_vector16_single_pass(code, vector_words);
       break;
       }
 #else
@@ -312,7 +316,7 @@ void compile_words_old(asmcode& code, dictionary& d, compile_data& cd, std::vect
           throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR8_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
         words.pop_back();
         }
-      compile_vector8_old(code, vector_words);
+      compile_vector8_single_pass(code, vector_words);
       break;
       }
 #endif
@@ -331,7 +335,7 @@ void compile_words_old(asmcode& code, dictionary& d, compile_data& cd, std::vect
       if (definition_words.back().type != token::T_SEMICOLON)
         throw std::runtime_error(compile_error_text(VF_ERROR_NO_CORRESPONDING_SEMICOLON, word.line_nr, word.column_nr).c_str());
       definition_words.pop_back(); // last item is semicolon, we don't need that for the definition
-      compile_definition_old(d, definition_words, word.line_nr, word.column_nr);
+      compile_definition_single_pass(d, definition_words, word.line_nr, word.column_nr);
       break;
       }
       case token::T_SEMICOLON:
@@ -341,7 +345,7 @@ void compile_words_old(asmcode& code, dictionary& d, compile_data& cd, std::vect
       }
       case token::T_INTEGER:
       {
-      compile_integer_old(code, word);
+      compile_integer_single_pass(code, word);
       break;
       }
       default:
@@ -350,7 +354,7 @@ void compile_words_old(asmcode& code, dictionary& d, compile_data& cd, std::vect
     }
   }
 
-void compile_old(asmcode& code, dictionary& d, compile_data& cd, std::vector<token> words)
+void compile_single_pass(asmcode& code, dictionary& d, compile_data& cd, std::vector<token> words)
   {
   assert(!cd.to_called);
   assert(!cd.create_called);
@@ -389,7 +393,7 @@ void compile_old(asmcode& code, dictionary& d, compile_data& cd, std::vector<tok
 
   code.add(asmcode::MOV, RSP_TOP, asmcode::RSP);
 
-  compile_words_old(code, d, cd, words);
+  compile_words_single_pass(code, d, cd, words);
 
   code.add(asmcode::MOV, STACK_POINTER, STACK_REGISTER);
 
@@ -412,7 +416,9 @@ void compile_old(asmcode& code, dictionary& d, compile_data& cd, std::vector<tok
 
 
 
-
+/////////////////////////////////////////////////////////////
+// Multipass compiler
+/////////////////////////////////////////////////////////////
 
 
 

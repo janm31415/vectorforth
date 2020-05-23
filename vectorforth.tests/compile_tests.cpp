@@ -118,6 +118,14 @@ namespace
 
 #endif
 
+
+  struct compiler_options
+    {
+    compiler_options() : single_pass(false) {}
+
+    bool single_pass;
+    };
+
   struct compile_fixture
     {
     context ctxt;
@@ -126,6 +134,7 @@ namespace
     std::string last_error;
     dictionary dict;
     compile_data cd;
+    compiler_options c_ops;
 
 
     compile_fixture()
@@ -146,7 +155,10 @@ namespace
       {
       asmcode code;
       auto words = tokenize(script);
-      compile(code, dict, cd, words);
+      if (c_ops.single_pass)
+        compile_single_pass(code, dict, cd, words);
+      else
+        compile(code, dict, cd, words);
       return code;
       }
 
@@ -322,8 +334,9 @@ namespace
 
 struct empty_program : public compile_fixture
   {
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top, run(""));
     }
   };
@@ -331,8 +344,9 @@ struct empty_program : public compile_fixture
 struct floats : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 64, run("3.14"));
     
     auto v = get_last_stack_value();
@@ -392,8 +406,9 @@ struct floats : public compile_fixture
     TEST_EQ(20.45f, get_avx2_f32(v, 15));
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.14"));
     auto v = get_last_stack_value();
     TEST_EQ(3.14f, get_avx2_f32(v, 0));
@@ -434,8 +449,9 @@ struct floats : public compile_fixture
 struct definitions : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top, run(": pi 3.14;"));
     dictionary_entry e;
     TEST_ASSERT(find(e, dict, "pi"));
@@ -462,8 +478,9 @@ struct definitions : public compile_fixture
     TEST_EQ(3.14f, get_avx2_f32(v, 15));
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top, run(": pi 3.14;"));
     dictionary_entry e;
     TEST_ASSERT(find(e, dict, "pi"));
@@ -487,8 +504,9 @@ struct definitions : public compile_fixture
 struct add : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 64, run("3.1 2.4 +"));
     auto v = get_last_stack_value();
     TEST_EQ(5.5f, get_avx2_f32(v, 0));
@@ -509,8 +527,9 @@ struct add : public compile_fixture
     TEST_EQ(5.5f, get_avx2_f32(v, 15));
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 +"));
     auto v = get_last_stack_value();
     TEST_EQ(5.5f, get_avx2_f32(v, 0));
@@ -528,8 +547,9 @@ struct add : public compile_fixture
 struct sub : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 64, run("3.1 2.4 -"));
     auto v = get_last_stack_value();
     TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 0), 1e-6f);
@@ -550,8 +570,9 @@ struct sub : public compile_fixture
     TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 15), 1e-6f);
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 -"));
     auto v = get_last_stack_value();
     TEST_EQ_CLOSE(0.7f, get_avx2_f32(v, 0), 1e-6f);
@@ -569,8 +590,9 @@ struct sub : public compile_fixture
 struct mul : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 64, run("3.1 2.4 *"));
     auto v = get_last_stack_value();
     TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 0), 1e-6f);
@@ -591,8 +613,9 @@ struct mul : public compile_fixture
     TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 15), 1e-6f);
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 *"));
     auto v = get_last_stack_value();
     TEST_EQ_CLOSE(3.1f*2.4f, get_avx2_f32(v, 0), 1e-6f);
@@ -610,8 +633,9 @@ struct mul : public compile_fixture
 struct division : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 64, run("3.1 2.4 /"));
     auto v = get_last_stack_value();
     TEST_EQ_CLOSE(3.1f / 2.4f, get_avx2_f32(v, 0), 1e-6f);
@@ -632,8 +656,9 @@ struct division : public compile_fixture
     TEST_EQ_CLOSE(3.1f / 2.4f, get_avx2_f32(v, 15), 1e-6f);
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.1 2.4 /"));
     auto v = get_last_stack_value();
     TEST_EQ_CLOSE(3.1f/2.4f, get_avx2_f32(v, 0), 1e-6f);
@@ -651,8 +676,9 @@ struct division : public compile_fixture
 struct v8 : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     // zmm0 = x15 / x14 / x13 / x12 / x11 / x10 / x9 / x8 / x7 / x6 / x5 / x4 / x3 / x2 / x1 / x0
     TEST_EQ(ctxt.aligned_stack_top - 64, run("v16 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16"));
     auto v = get_last_stack_value();
@@ -674,8 +700,9 @@ struct v8 : public compile_fixture
     TEST_EQ(16.f, get_avx2_f32(v, 0));
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     // ymm0 = x7 / x6 / x5 / x4 / x3 / x2 / x1 / x0
     TEST_EQ(ctxt.aligned_stack_top - 32, run("v8 1 2 3 4 5 6 7 8"));
     auto v = get_last_stack_value();
@@ -694,8 +721,9 @@ struct v8 : public compile_fixture
 struct avx_mathfun : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 64, run("3.14159265359 sin"));
     auto v = get_last_stack_value();
     TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 15), 1e-6f);
@@ -790,8 +818,9 @@ struct avx_mathfun : public compile_fixture
     TEST_EQ_CLOSE(8.f, get_avx2_f32(v, 8), 1e-5f);
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.14159265359 sin"));
     auto v = get_last_stack_value();
     TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 7), 1e-6f);
@@ -874,8 +903,9 @@ struct avx_mathfun : public compile_fixture
 
 struct prim_test : public compile_fixture
   {
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("1 2 3 drop");
     TEST_EQ(2.f, get_stack_valuef(0));
     TEST_EQ(1.f, get_stack_valuef(1));
@@ -932,8 +962,9 @@ struct prim_test : public compile_fixture
 
 struct integers : public compile_fixture
   {
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("#123");
     TEST_EQ(123, get_stack_valuei(0));
     TEST_EQ(123, get_stack_valuef_uint64(0));
@@ -1018,8 +1049,9 @@ struct integers : public compile_fixture
 struct comparisons : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 v16 1 2 0 0 8 8 8 8 1 2 0 0 8 8 8 8 =");
     auto v = get_last_stack_value_i();
     TEST_EQ(-1, get_avx2_i32(v, 7));
@@ -1155,8 +1187,9 @@ struct comparisons : public compile_fixture
     }
     
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("v8 1 2 3 4 5 6 7 8 v8 1 2 0 0 8 8 8 8 =");
     auto v = get_last_stack_value_i();
     TEST_EQ(-1, get_avx2_i32(v, 7));
@@ -1296,8 +1329,9 @@ struct comparisons : public compile_fixture
 struct address : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     char* ptr = run("12345 2 3 4 5 st@ sp@");
     uint64_t st = get_stack_valuef_uint64(1);
     TEST_EQ((uint64_t)ctxt.aligned_stack_top, st);
@@ -1343,8 +1377,9 @@ struct address : public compile_fixture
     TEST_EQ(101.f, get_avx2_f32(v, 0));
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     char* ptr = run("12345 2 3 4 5 st@ sp@");
     uint64_t st = get_stack_valuef_uint64(1);
     TEST_EQ((uint64_t)ctxt.aligned_stack_top, st);
@@ -1379,8 +1414,9 @@ struct address : public compile_fixture
 struct prim : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("v16 -1 2 -3 4 5 -6 7 -8 9 -10 11 -12 13 -14 15 -16 abs");
     auto v = get_last_stack_value();
     TEST_EQ(1.f, get_avx2_f32(v, 15));
@@ -1585,8 +1621,9 @@ struct prim : public compile_fixture
     
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("v8 -1 2 -3 4 5 -6 7 -8 abs");
     auto v = get_last_stack_value();
     TEST_EQ(1.f, get_avx2_f32(v, 7));
@@ -1754,8 +1791,9 @@ struct prim : public compile_fixture
 
 struct complex : public compile_fixture
   {
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("3 4 -1 2 z*");
     TEST_EQ(-11.f, get_stack_valuef(1));
     TEST_EQ(2.f, get_stack_valuef(0));
@@ -1773,8 +1811,9 @@ struct complex : public compile_fixture
 struct return_stack : public compile_fixture
   {
 
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("1 2 3 push + pop *");
     TEST_EQ(9.f, get_stack_valuef(0));
 
@@ -1795,8 +1834,9 @@ struct return_stack : public compile_fixture
 
 struct redefine_primitives : public compile_fixture
   {
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run(": sin 3.1415926535 2 * * sin ; 0.1 sin");
     TEST_EQ(0.58778525229f, get_stack_valuef(0));
 
@@ -1808,8 +1848,9 @@ struct redefine_primitives : public compile_fixture
 struct if_tests : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 4 > if 2 else 3 then");
     auto v = get_stack_value(0);
     TEST_EQ(3.f, get_avx2_f32(v, 7));
@@ -1902,8 +1943,9 @@ struct if_tests : public compile_fixture
     TEST_EQ(2.f, get_avx2_f32(v, 0));
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     
     //if <true> else <false> then should be balanced:
     //- both branches should add equally amount on the stack
@@ -2007,8 +2049,9 @@ struct if_tests : public compile_fixture
 struct stdlib_tests : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("3 4 5 nip");
     TEST_EQ(5.f, get_stack_valuef(0));
     TEST_EQ(3.f, get_stack_valuef(1));
@@ -2100,8 +2143,9 @@ struct stdlib_tests : public compile_fixture
     
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("3 4 5 nip");
     TEST_EQ(5.f, get_stack_valuef(0));
     TEST_EQ(3.f, get_stack_valuef(1));
@@ -2196,8 +2240,9 @@ struct stdlib_tests : public compile_fixture
 struct begin_while_repeat_tests : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("v16 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 8 begin dup 10 > while 1 + repeat");
     auto v = get_last_stack_value();
     TEST_EQ(1.f, get_avx2_f32(v, 7));
@@ -2233,8 +2278,9 @@ struct begin_while_repeat_tests : public compile_fixture
     
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("v8 1 2 3 4 5 6 7 8 begin dup 10 > while 1 + repeat");
     auto v = get_last_stack_value();
     TEST_EQ(1.f, get_avx2_f32(v, 7));
@@ -2274,8 +2320,9 @@ struct begin_while_repeat_tests : public compile_fixture
 struct data_space_tests : public compile_fixture
   {
 #ifdef AVX512
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("here");
     auto v = get_last_stack_value_i();
     uint64_t here_pointer = get_avx2_u64(v, 0);
@@ -2378,8 +2425,9 @@ struct data_space_tests : public compile_fixture
     TEST_EQ(30.f, get_avx2_f32(f, 0));
     }
 #else
-  void test()
+  void test(const compiler_options& ops)
     {
+    c_ops = ops;
     run("here");
     auto v = get_last_stack_value_i();
     uint64_t here_pointer = get_avx2_u64(v, 0);
@@ -2479,8 +2527,10 @@ struct data_space_tests : public compile_fixture
 
 struct vec3_tests : public compile_fixture
   {
-  void test()
-    {
+  void test(const compiler_options& ops)
+    {    
+    c_ops = ops;
+
     run("vec3 v 1 2 3 v vec3!");    
     auto dsv0 = get_data_space_value(0);
     auto dsv1 = get_data_space_value(1);
@@ -2552,33 +2602,41 @@ struct vec3_tests : public compile_fixture
     }
   };
 
+void run_compile_tests(const compiler_options& ops)
+  {
+  empty_program().test(ops);
+  floats().test(ops);
+
+  definitions().test(ops);
+  add().test(ops);
+  sub().test(ops);
+  mul().test(ops);
+  division().test(ops);
+  v8().test(ops);
+  avx_mathfun().test(ops);
+  prim_test().test(ops);
+  integers().test(ops);
+  comparisons().test(ops);
+  address().test(ops);
+  prim().test(ops);
+  complex().test(ops);
+  return_stack().test(ops);
+  redefine_primitives().test(ops);
+  if_tests().test(ops);
+  stdlib_tests().test(ops);
+  begin_while_repeat_tests().test(ops);
+  data_space_tests().test(ops);
+  vec3_tests().test(ops);
+  }
+
 VF_END
 
 void run_all_compile_tests()
   {
   using namespace VF;  
-  empty_program().test();
-  floats().test();
-  
-  definitions().test();
-  add().test();
-  sub().test();
-  mul().test();
-  division().test();
-  v8().test();  
-  avx_mathfun().test();
-  prim_test().test();
-  integers().test();
-  comparisons().test();
-  address().test();
-  prim().test();
-  complex().test();
-  return_stack().test();
-  redefine_primitives().test();
-  if_tests().test();
-  stdlib_tests().test();
-  begin_while_repeat_tests().test();
-  data_space_tests().test();
-  vec3_tests().test();
-  
+  compiler_options c_ops;
+  c_ops.single_pass = true;
+  run_compile_tests(c_ops);
+  c_ops.single_pass = false;
+  run_compile_tests(c_ops);
   }
