@@ -6,6 +6,7 @@
 #include "expand.h"
 #include "expand_data.h"
 #include "primitives.h"
+#include "strength_reduction.h"
 #include "asm_aux.h"
 #include "tokenize.h"
 
@@ -474,6 +475,7 @@ void compile(ASM::asmcode& code, dictionary& d, expand_data& ed, const std::vect
   expand(expanded, d, ed, words);
 
   constant_folding(expanded);
+  strength_reduction(expanded);
 
   std::reverse(expanded.begin(), expanded.end());
 

@@ -2602,6 +2602,16 @@ struct vec3_tests : public compile_fixture
     }
   };
 
+struct strength_reduction_tests : public compile_fixture
+  {
+  void test(const compiler_options& ops)
+    {
+    c_ops = ops;
+    run("20 value val val 2 **");
+    TEST_EQ(400.f, get_stack_valuef(0));
+    }
+  };
+
 void run_compile_tests(const compiler_options& ops)
   {
   empty_program().test(ops);
@@ -2627,6 +2637,7 @@ void run_compile_tests(const compiler_options& ops)
   begin_while_repeat_tests().test(ops);
   data_space_tests().test(ops);
   vec3_tests().test(ops);
+  strength_reduction_tests().test(ops);
   }
 
 VF_END

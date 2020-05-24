@@ -15,6 +15,7 @@ expand_data.h
 namespace.h
 primitives.h
 stdlib.h
+strength_reduction.h
 tokenize.h
 vectorforth_api.h
 )
@@ -31,6 +32,7 @@ expand.cpp
 dictionary.cpp
 primitives.cpp
 stdlib.cpp
+strength_reduction.cpp
 tokenize.cpp
 )
 
