@@ -5,8 +5,8 @@
 #include "primitives.h"
 #include "tokenize.h"
 #include "vectorforth_api.h"
+#include "context_defs.h"
 
-#include <string>
 #include <vector>
 
 VF_BEGIN
@@ -25,35 +25,22 @@ struct expanded_token
     ET_UPDATE_VARIABLE
     };
 
-
-  expanded_token(token i_t)  : value(i_t.value)
-    {
-    switch (i_t.type)
-      {
-      case token::T_FLOAT: t = ET_FLOAT; break;
-      case token::T_INTEGER: t = ET_INTEGER; break;
-      case token::T_VECTOR: t = ET_VECTOR; break;
-      default:
-        throw std::runtime_error("compiler error");
-      }
-    }
-
   expanded_token(e_type type) : t(type) {}
 
   e_type t;
-  float f[16];
-  std::string value;
+  float f[AVX_LENGTH]; // used by ET_FLOAT and ET_VECTOR
+  int64_t int_value; // used by ET_INTEGER
 
-  uint64_t binding_space_offset;
-  uint64_t variable_address;
+  uint64_t binding_space_offset; //used by ET_OVERWRITE_VARIABLE. Contains address of the new value of the variable.
+  uint64_t variable_address; // used by all ET_<...>_VARIABLE types.
 
-  prim_fun prim;
+  prim_fun prim; // used by ET_PRIMITIVE. Contains pointer to primitive operation.
   };
 
 struct expand_data;
 
-void expand_words(std::vector<expanded_token>& expanded, dictionary& d, expand_data& cd, std::vector<token>& words);
+void expand_words(std::vector<expanded_token>& expanded, dictionary& d, expand_data& ed, std::vector<token>& words);
 
-VECTOR_FORTH_API void expand(std::vector<expanded_token>& expanded, dictionary& d, expand_data& cd, std::vector<token> words);
+VECTOR_FORTH_API void expand(std::vector<expanded_token>& expanded, dictionary& d, expand_data& ed, std::vector<token> words);
 
 VF_END

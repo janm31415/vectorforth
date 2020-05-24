@@ -10,7 +10,7 @@
 
 #include <vectorforth/context.h>
 #include <vectorforth/compiler.h>
-#include <vectorforth/compile_data.h>
+#include <vectorforth/expand_data.h>
 #include <vectorforth/dictionary.h>
 #include <vectorforth/tokenize.h>
 #include <vectorforth/stdlib.h>
@@ -112,10 +112,10 @@ bool shader_program::compile(const std::string& script)
     {
     VF::dictionary dict;
     add_stdlib_to_dictionary(dict);
-    VF::compile_data cd = VF::create_compile_data();
+    VF::expand_data ed = VF::create_expand_data();
     ASM::asmcode code;
     auto words = VF::tokenize(shader);
-    VF::compile(code, dict, cd, words);
+    VF::compile(code, dict, ed, words);
     ASM::first_pass_data d;
 
     _fun = (fun_ptr)assemble(_fun_size, d, code);

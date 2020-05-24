@@ -20,40 +20,40 @@ VF_BEGIN
 // Singlepass compiler
 /////////////////////////////////////////////////////////////
 
-void compile_primitive_single_pass(asmcode& code, dictionary& d, compile_data& cd, token word)
+void compile_primitive_single_pass(asmcode& code, dictionary& d, expand_data& ed, compile_data& cd, token word)
   {
   static prim_map pm = generate_primitives_map();
   if (word.value == "create")
     {
-    if (cd.create_called)
+    if (ed.create_called)
       throw std::runtime_error(compile_error_text(VF_ERROR_CREATE_WAS_ALREADY_CALLED, word.line_nr, word.column_nr).c_str());
-    cd.create_called = true;
+    ed.create_called = true;
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
-    if (cd.binding_space_offset)
-      code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.binding_space_offset);
+    if (ed.binding_space_offset)
+      code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, ed.binding_space_offset);
     code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
     code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
     code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
     }
   else if (word.value == "to")
     {
-    if (cd.to_called || cd.create_called)
+    if (ed.to_called || ed.create_called)
       throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_TO, word.line_nr, word.column_nr).c_str());
-    cd.to_called = true;
+    ed.to_called = true;
     }
   else
     {
     auto it = pm.find(word.value);
     if (it == pm.end())
       {
-      if (cd.create_called)
+      if (ed.create_called)
         {
-        cd.create_called = false;
+        ed.create_called = false;
         dictionary_entry de;
         de.type = dictionary_entry::T_VARIABLE;
         de.name = word.value;
-        de.address = cd.binding_space_offset;
-        cd.binding_space_offset += AVX_ALIGNMENT;
+        de.address = ed.binding_space_offset;
+        ed.binding_space_offset += AVX_ALIGNMENT;
         push(d, de);
         return;
         }
@@ -64,11 +64,11 @@ void compile_primitive_single_pass(asmcode& code, dictionary& d, compile_data& c
     }
   }
 
-void compile_variable_single_pass(asmcode& code, compile_data& cd, uint64_t address)
+void compile_variable_single_pass(asmcode& code, expand_data& ed, uint64_t address)
   {
-  if (cd.to_called)
+  if (ed.to_called)
     {
-    cd.to_called = false;
+    ed.to_called = false;
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
     if (address)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
@@ -87,7 +87,7 @@ void compile_variable_single_pass(asmcode& code, compile_data& cd, uint64_t addr
     }
   }
 
-void compile_word_single_pass(asmcode& code, dictionary& d, compile_data& cd, token word)
+void compile_word_single_pass(asmcode& code, dictionary& d, expand_data& ed, compile_data& cd, token word)
   {
   dictionary_entry e;
   if (find(e, d, word.value))
@@ -96,23 +96,23 @@ void compile_word_single_pass(asmcode& code, dictionary& d, compile_data& cd, to
       {
       case dictionary_entry::T_FUNCTION:
       {
-      compile_words_single_pass(code, d, cd, e.words);
+      compile_words_single_pass(code, d, ed, cd, e.words);
       break;
       }
       case dictionary_entry::T_VARIABLE:
       {
-      if (cd.create_called)  // overwriting existing variable
+      if (ed.create_called)  // overwriting existing variable
         {
         code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
-        code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.binding_space_offset);
+        code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, ed.binding_space_offset);
         code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
-        code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, (cd.binding_space_offset - e.address));
+        code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, (ed.binding_space_offset - e.address));
         code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
-        cd.create_called = false;
+        ed.create_called = false;
         return;
         }
       else
-        compile_variable_single_pass(code, cd, e.address);
+        compile_variable_single_pass(code, ed, e.address);
       break;
       }
       default:
@@ -124,7 +124,7 @@ void compile_word_single_pass(asmcode& code, dictionary& d, compile_data& cd, to
     }
   else
     {
-    compile_primitive_single_pass(code, d, cd, word);
+    compile_primitive_single_pass(code, d, ed, cd, word);
     }
   }
 
@@ -214,7 +214,7 @@ void compile_definition_single_pass(dictionary& d, std::vector<token>& words, in
   register_definition(d, words);
   }
 
-void compile_words_single_pass(asmcode& code, dictionary& d, compile_data& cd, std::vector<token>& words)
+void compile_words_single_pass(asmcode& code, dictionary& d, expand_data& ed, compile_data& cd, std::vector<token>& words)
   {
   while (!words.empty())
     {
@@ -224,12 +224,12 @@ void compile_words_single_pass(asmcode& code, dictionary& d, compile_data& cd, s
       {
       case token::T_WORD:
       {
-      compile_word_single_pass(code, d, cd, word);
+      compile_word_single_pass(code, d, ed, cd, word);
       break;
       }
       case token::T_PRIMITIVE:
       {
-      compile_primitive_single_pass(code, d, cd, word);
+      compile_primitive_single_pass(code, d, ed, cd, word);
       break;
       }
       case token::T_FLOAT:
@@ -294,11 +294,13 @@ void compile_words_single_pass(asmcode& code, dictionary& d, compile_data& cd, s
     }
   }
 
-void compile_single_pass(asmcode& code, dictionary& d, compile_data& cd, std::vector<token> words)
+void compile_single_pass(asmcode& code, dictionary& d, expand_data& ed, std::vector<token> words)
   {
-  assert(!cd.to_called);
-  assert(!cd.create_called);
+  assert(!ed.to_called);
+  assert(!ed.create_called);
   std::reverse(words.begin(), words.end());
+
+  compile_data cd = create_compile_data();
 
   code.add(asmcode::GLOBAL, "forth_entry");
 #ifdef _WIN32
@@ -333,7 +335,7 @@ void compile_single_pass(asmcode& code, dictionary& d, compile_data& cd, std::ve
 
   code.add(asmcode::MOV, RSP_TOP, asmcode::RSP);
 
-  compile_words_single_pass(code, d, cd, words);
+  compile_words_single_pass(code, d, ed, cd, words);
 
   code.add(asmcode::MOV, STACK_POINTER, STACK_REGISTER);
 
@@ -343,9 +345,9 @@ void compile_single_pass(asmcode& code, dictionary& d, compile_data& cd, std::ve
   /*Return to the caller*/
   code.add(asmcode::RET);
 
-  if (cd.to_called)
+  if (ed.to_called)
     throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_TO, -1, -1).c_str());
-  if (cd.create_called)
+  if (ed.create_called)
     throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_CREATE, -1, -1).c_str());
   }
 
@@ -378,19 +380,14 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       }
       case expanded_token::ET_INTEGER:
       {
-      std::stringstream ss;
-      ss << word.value;
-      int64_t v;
-      ss >> v;
-      code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v);
+      code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, word.int_value);
       code.add(asmcode::MOV, MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::RAX);
       code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
       break;
       }
       case expanded_token::ET_FLOAT:
       {
-      float f = to_float(word.value.c_str());
-      uint32_t v = *(reinterpret_cast<uint32_t*>(&f));
+      uint32_t v = *(reinterpret_cast<uint32_t*>(&word.f[0]));
       uint64_t v64 = (uint64_t)v;
       uint64_t v2 = (v64 << 32) | v64;
       code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v2);
@@ -468,12 +465,9 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
     }
   }
 
-void compile(ASM::asmcode& code, dictionary& d, compile_data& cd, const std::vector<token>& words)
+void compile(ASM::asmcode& code, dictionary& d, expand_data& ed, const std::vector<token>& words)
   {
-  expand_data ed;
-  ed.binding_space_offset = cd.binding_space_offset;
-  ed.create_called = cd.create_called;
-  ed.to_called = cd.to_called;
+  compile_data cd = create_compile_data();
 
   std::vector<expanded_token> expanded;
   expand(expanded, d, ed, words);
@@ -522,10 +516,6 @@ void compile(ASM::asmcode& code, dictionary& d, compile_data& cd, const std::vec
 
   /*Return to the caller*/
   code.add(asmcode::RET);
-
-  cd.binding_space_offset = ed.binding_space_offset;
-  cd.create_called = ed.create_called;
-  cd.to_called = ed.to_called;
   }
 
 VF_END

@@ -5,9 +5,9 @@
 
 #include <vectorforth/context.h>
 #include <vectorforth/compiler.h>
-#include <vectorforth/compile_data.h>
 #include <vectorforth/debug.h>
 #include <vectorforth/dictionary.h>
+#include <vectorforth/expand_data.h>
 #include <vectorforth/stdlib.h>
 #include <vectorforth/tokenize.h>
 
@@ -133,7 +133,7 @@ namespace
     std::vector<std::pair<fun_ptr, uint64_t>> compiled_functions;
     std::string last_error;
     dictionary dict;
-    compile_data cd;
+    expand_data ed;
     compiler_options c_ops;
 
 
@@ -141,7 +141,7 @@ namespace
       {
       ctxt = create_context(1024 * 1024, 1024, 1024 * 1024);
       add_stdlib_to_dictionary(dict);
-      cd = create_compile_data();
+      ed = create_expand_data();
       }
 
     ~compile_fixture()
@@ -156,9 +156,9 @@ namespace
       asmcode code;
       auto words = tokenize(script);
       if (c_ops.single_pass)
-        compile_single_pass(code, dict, cd, words);
+        compile_single_pass(code, dict, ed, words);
       else
-        compile(code, dict, cd, words);
+        compile(code, dict, ed, words);
       return code;
       }
 
@@ -2475,13 +2475,13 @@ struct data_space_tests : public compile_fixture
     TEST_EQ(101.f, get_avx2_f32(value, 7));
     
     run("here @ create a");
-    TEST_EQ(cd.binding_space_offset, 32);
+    TEST_EQ(ed.binding_space_offset, 32);
     uint64_t a_val = *(uint64_t*)ctxt.binding_space_pointer;
     here_pointer_content = *(uint64_t*)(ctxt.here_pointer);
     TEST_EQ(a_val, here_pointer_content);
 
     run("here @ create a");
-    TEST_EQ(cd.binding_space_offset, 32);
+    TEST_EQ(ed.binding_space_offset, 32);
     uint64_t a_val_2 = *(uint64_t*)ctxt.binding_space_pointer;
     here_pointer_content = *(uint64_t*)(ctxt.here_pointer);
     TEST_EQ(a_val_2, here_pointer_content);

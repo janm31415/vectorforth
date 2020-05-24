@@ -9,36 +9,36 @@
 
 VF_BEGIN
 
-void expand_primitive(std::vector<expanded_token>& expanded, dictionary& d, expand_data& cd, token word)
+void expand_primitive(std::vector<expanded_token>& expanded, dictionary& d, expand_data& ed, token word)
   {
   static prim_map pm = generate_primitives_map();
   if (word.value == "create")
     {
-    if (cd.create_called)
+    if (ed.create_called)
       throw std::runtime_error(compile_error_text(VF_ERROR_CREATE_WAS_ALREADY_CALLED, word.line_nr, word.column_nr).c_str());
-    cd.create_called = true;
+    ed.create_called = true;
     expanded.emplace_back(expanded_token::ET_CREATE_VARIABLE);
-    expanded.back().binding_space_offset = cd.binding_space_offset;
+    expanded.back().binding_space_offset = ed.binding_space_offset;
     }
   else if (word.value == "to")
     {
-    if (cd.to_called || cd.create_called)
+    if (ed.to_called || ed.create_called)
       throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_TO, word.line_nr, word.column_nr).c_str());
-    cd.to_called = true;
+    ed.to_called = true;
     }
   else
     {
     auto it = pm.find(word.value);
     if (it == pm.end())
       {
-      if (cd.create_called)
+      if (ed.create_called)
         {
-        cd.create_called = false;
+        ed.create_called = false;
         dictionary_entry de;
         de.type = dictionary_entry::T_VARIABLE;
         de.name = word.value;
-        de.address = cd.binding_space_offset;
-        cd.binding_space_offset += AVX_ALIGNMENT;
+        de.address = ed.binding_space_offset;
+        ed.binding_space_offset += AVX_ALIGNMENT;
         push(d, de);
         return;
         }
@@ -50,11 +50,11 @@ void expand_primitive(std::vector<expanded_token>& expanded, dictionary& d, expa
     }
   }
 
-void expand_variable(std::vector<expanded_token>& expanded, expand_data& cd, uint64_t address)
+void expand_variable(std::vector<expanded_token>& expanded, expand_data& ed, uint64_t address)
   {
-  if (cd.to_called)
+  if (ed.to_called)
     {
-    cd.to_called = false;
+    ed.to_called = false;
     expanded.emplace_back(expanded_token::ET_UPDATE_VARIABLE);
     expanded.back().variable_address = address;
     }
@@ -65,7 +65,7 @@ void expand_variable(std::vector<expanded_token>& expanded, expand_data& cd, uin
     }
   }
 
-void expand_word(std::vector<expanded_token>& expanded, dictionary& d, expand_data& cd, token word)
+void expand_word(std::vector<expanded_token>& expanded, dictionary& d, expand_data& ed, token word)
   {
   dictionary_entry e;
   if (find(e, d, word.value))
@@ -74,21 +74,21 @@ void expand_word(std::vector<expanded_token>& expanded, dictionary& d, expand_da
       {
       case dictionary_entry::T_FUNCTION:
       {
-      expand_words(expanded, d, cd, e.words);
+      expand_words(expanded, d, ed, e.words);
       break;
       }
       case dictionary_entry::T_VARIABLE:
       {
-      if (cd.create_called)  // overwriting existing variable
+      if (ed.create_called)  // overwriting existing variable
         {
         expanded.emplace_back(expanded_token::ET_OVERWRITE_VARIABLE);
-        expanded.back().binding_space_offset = cd.binding_space_offset;
+        expanded.back().binding_space_offset = ed.binding_space_offset;
         expanded.back().variable_address = e.address;
-        cd.create_called = false;
+        ed.create_called = false;
         return;
         }
       else
-        expand_variable(expanded, cd, e.address);
+        expand_variable(expanded, ed, e.address);
       break;
       }
       default:
@@ -100,25 +100,32 @@ void expand_word(std::vector<expanded_token>& expanded, dictionary& d, expand_da
     }
   else
     {
-    expand_primitive(expanded, d, cd, word);
+    expand_primitive(expanded, d, ed, word);
     }
   }
 
 void expand_float(std::vector<expanded_token>& expanded, token word)
   {
   assert(word.type == token::T_FLOAT);
-  expanded.emplace_back(word);
+  float f = to_float(word.value.c_str());
+  expanded.emplace_back(expanded_token::ET_FLOAT);
+  expanded.back().f[0] = f;
   }
 
 void expand_integer(std::vector<expanded_token>& expanded, token word)
   {
   assert(word.type == token::T_INTEGER);  
-  expanded.emplace_back(word);
+  std::stringstream ss;
+  ss << word.value;
+  int64_t v;
+  ss >> v;
+  expanded.emplace_back(expanded_token::ET_INTEGER);
+  expanded.back().int_value = v;
   }
 
-void expand_vector(std::vector<expanded_token>& expanded, const std::vector<token>& words, token current)
+void expand_vector(std::vector<expanded_token>& expanded, const std::vector<token>& words)
   {  
-  expanded_token et(current);
+  expanded_token et(expanded_token::ET_VECTOR);
 
   assert(words.size() == AVX_LENGTH);
   for (int i = 0; i < AVX_LENGTH; ++i)
@@ -152,7 +159,7 @@ void expand_definition(dictionary& d, std::vector<token>& words, int line_nr, in
   register_definition(d, words);
   }
 
-void expand_words(std::vector<expanded_token>& expanded, dictionary& d, expand_data& cd, std::vector<token>& words)
+void expand_words(std::vector<expanded_token>& expanded, dictionary& d, expand_data& ed, std::vector<token>& words)
   {
   while (!words.empty())
     {
@@ -162,12 +169,12 @@ void expand_words(std::vector<expanded_token>& expanded, dictionary& d, expand_d
       {
       case token::T_WORD:
       {
-      expand_word(expanded, d, cd, word);
+      expand_word(expanded, d, ed, word);
       break;
       }
       case token::T_PRIMITIVE:
       {
-      expand_primitive(expanded, d, cd, word);
+      expand_primitive(expanded, d, ed, word);
       break;
       }
       case token::T_FLOAT:
@@ -195,7 +202,7 @@ void expand_words(std::vector<expanded_token>& expanded, dictionary& d, expand_d
 #endif
         words.pop_back();
         }
-      expand_vector(expanded, vector_words, word);
+      expand_vector(expanded, vector_words);
       break;
       }
       case token::T_COLON:
@@ -232,17 +239,17 @@ void expand_words(std::vector<expanded_token>& expanded, dictionary& d, expand_d
     }
   }
 
-void expand(std::vector<expanded_token>& expanded, dictionary& d, expand_data& cd, std::vector<token> words)
+void expand(std::vector<expanded_token>& expanded, dictionary& d, expand_data& ed, std::vector<token> words)
   {
-  assert(!cd.to_called);
-  assert(!cd.create_called);
+  assert(!ed.to_called);
+  assert(!ed.create_called);
   std::reverse(words.begin(), words.end());
 
-  expand_words(expanded, d, cd, words);
+  expand_words(expanded, d, ed, words);
 
-  if (cd.to_called)
+  if (ed.to_called)
     throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_TO, -1, -1).c_str());
-  if (cd.create_called)
+  if (ed.create_called)
     throw std::runtime_error(compile_error_text(VF_ERROR_UNCLEAR_TARGET_FOR_CREATE, -1, -1).c_str());
   }
 

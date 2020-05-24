@@ -3,7 +3,6 @@
 
 #include <vectorforth/context.h>
 #include <vectorforth/compiler.h>
-#include <vectorforth/compile_data.h>
 #include <vectorforth/debug.h>
 #include <vectorforth/dictionary.h>
 #include <vectorforth/expand.h>
@@ -27,7 +26,6 @@ namespace
     std::vector<std::pair<fun_ptr, uint64_t>> compiled_functions;
     std::string last_error;
     dictionary dict;
-    compile_data cd;
     expand_data ed;
 
 
@@ -35,7 +33,6 @@ namespace
       {
       ctxt = create_context(1024 * 1024, 1024, 1024 * 1024);
       add_stdlib_to_dictionary(dict);
-      cd = create_compile_data();
       ed = create_expand_data();
       }
 
@@ -50,7 +47,7 @@ namespace
       {
       asmcode code;
       auto words = tokenize(script);
-      compile(code, dict, cd, words);
+      compile(code, dict, ed, words);
       return code;
       }
 
