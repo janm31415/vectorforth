@@ -4,12 +4,14 @@
 #include <asm/assembler.h>
 
 #include <vectorforth/context.h>
+#include <vectorforth/context_defs.h>
 #include <vectorforth/compiler.h>
 #include <vectorforth/debug.h>
 #include <vectorforth/dictionary.h>
 #include <vectorforth/expand_data.h>
 #include <vectorforth/stdlib.h>
 #include <vectorforth/tokenize.h>
+#include <vectorforth/avx_mathfun.h>
 
 #include <immintrin.h>
 
@@ -2668,6 +2670,24 @@ void run_compile_tests(const compiler_options& ops)
   strength_reduction_tests().test(ops);
   }
 
+void avx_mathfun_test()
+  {
+#ifdef AVX512
+  // COMPILER BUG !!
+  __m512 x = _mm512_set1_ps(0.5f);
+  __m512 y = _mm512_set1_ps(-0.2f);
+  __m512 res = atan2_avx_ps(y, x);
+  for (int i = 0; i < AVX_LENGTH; ++i)
+    TEST_EQ_CLOSE(get_avx2_f32(res, i), std::atan2(get_avx2_f32(y, i), get_avx2_f32(x, i)), 1e-5);
+#else
+  __m256 x = _mm256_set1_ps(0.5f);
+  __m256 y = _mm256_set1_ps(-0.2f);
+  __m256 res = atan2_avx_ps(y, x);
+  for (int i = 0; i < AVX_LENGTH; ++i)
+    TEST_EQ_CLOSE(get_avx2_f32(res, i), std::atan2(get_avx2_f32(y, i), get_avx2_f32(x, i)), 1e-5);
+#endif
+  }
+
 VF_END
 
 void run_all_compile_tests()
@@ -2678,4 +2698,5 @@ void run_all_compile_tests()
   run_compile_tests(c_ops);
   c_ops.single_pass = false;
   run_compile_tests(c_ops);
+  avx_mathfun_test();
   }

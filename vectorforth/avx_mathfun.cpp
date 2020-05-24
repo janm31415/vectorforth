@@ -1,7 +1,7 @@
 #include "avx_mathfun.h"
 
 #ifdef AVX512
-#define INSTRSET 10
+#define INSTRSET 9
 #else
 #define INSTRSET 8
 #endif
@@ -46,7 +46,7 @@ __m512 _VECTORCALL atan2_avx_ps(__m512 y, __m512 x)
   {
   Vec16f vx(x), vy(y);
   Vec16f p = atan2(vy, vx);
-  return p.operator __m512();
+  return p.operator __m512();  
   }
 
 __m512 _VECTORCALL sin_avx_ps(__m512 x)
