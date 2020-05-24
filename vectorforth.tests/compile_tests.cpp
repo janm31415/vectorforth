@@ -1824,14 +1824,31 @@ struct return_stack : public compile_fixture
     run("1 2 3 >r + r> *");
     TEST_EQ(9.f, get_stack_valuef(0));
 
-    run("1 >r 2 3 r@");
+#ifdef AVX512
+    run("1 >r 2 3 rt@ #64- @");
+    TEST_EQ(1.f, get_stack_valuef(0));
+
+    run("1 >r 2 3 rt@ #64- @ + + pop +");
+    TEST_EQ(7.f, get_stack_valuef(0));
+#else
+    run("1 >r 2 3 rt@ #32- @");
     TEST_EQ(1.f, get_stack_valuef(0));
      
-    run("1 >r 2 3 r@ + + pop +");
+    run("1 >r 2 3 rt@ #32- @ + + pop +");
     TEST_EQ(7.f, get_stack_valuef(0));
+#endif
 
     run("0.5 push 0 sin pop");
     TEST_EQ(0.5f, get_stack_valuef(0));
+
+    run("1 2 3 push push push r@");
+    TEST_EQ(1.f, get_stack_valuef(0));
+    run("1 2 3 push push push pop r@");
+    TEST_EQ(2.f, get_stack_valuef(0));
+    run("1 2 3 push push push pop r@ pop r@");
+    TEST_EQ(3.f, get_stack_valuef(0));
+    run("1 2 3 push push push pop r@ pop r@ pop");
+    TEST_EQ(3.f, get_stack_valuef(0));
     }
 
   };

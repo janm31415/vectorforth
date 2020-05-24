@@ -72,6 +72,8 @@ The binding space is used for binding words to data space locations. This memory
 
 `pop`   ( -- v )  Pop a value v from the return stack and push it on the regular stack.
 
+`r@`    ( -- v )  Push a copy of the top value of the return stack on the regular stack.
+
 `rt@`    ( -- #v ) Read the 64-bit address of the return stack top and put it on the stack.
 
 `rp@`    ( -- #v ) Read the 64-bit address of the return stack pointer and put it on the stack.

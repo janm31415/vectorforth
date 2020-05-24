@@ -1009,9 +1009,7 @@ void primitive_return_stack_pop(ASM::asmcode& code, compile_data&)
 
 void primitive_return_stack_top(ASM::asmcode& code, compile_data&)
   {
-  code.add(asmcode::MOV, asmcode::RAX, RSP_TOP);
-  code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, AVX_CELLS(1));
-  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RSP);
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
@@ -1227,9 +1225,6 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("z*", &primitive_complex_mul));
   pm.insert(std::pair<std::string, prim_fun>("z+", &primitive_complex_add));
   pm.insert(std::pair<std::string, prim_fun>("z-", &primitive_complex_sub));
-  //pm.insert(std::pair<std::string, prim_fun>("Z*", &primitive_complex_mul));
-  //pm.insert(std::pair<std::string, prim_fun>("Z+", &primitive_complex_add));
-  //pm.insert(std::pair<std::string, prim_fun>("Z-", &primitive_complex_sub));
 
   pm.insert(std::pair<std::string, prim_fun>("push", &primitive_return_stack_push));
   pm.insert(std::pair<std::string, prim_fun>("pop", &primitive_return_stack_pop));
@@ -1251,18 +1246,6 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("min", &primitive_min));
   pm.insert(std::pair<std::string, prim_fun>("max", &primitive_max));
 
-  //pm.insert(std::pair<std::string, prim_fun>("DROP", &primitive_drop));
-  //pm.insert(std::pair<std::string, prim_fun>("SWAP", &primitive_swap));
-  //pm.insert(std::pair<std::string, prim_fun>("DUP", &primitive_dup));
-  //pm.insert(std::pair<std::string, prim_fun>("OVER", &primitive_over));
-  //pm.insert(std::pair<std::string, prim_fun>("ROT", &primitive_rot));
-  //pm.insert(std::pair<std::string, prim_fun>("-ROT", &primitive_minrot));
-  //pm.insert(std::pair<std::string, prim_fun>("2DROP", &primitive_twodrop));
-  //pm.insert(std::pair<std::string, prim_fun>("2DUP", &primitive_twodup));
-  //pm.insert(std::pair<std::string, prim_fun>("2SWAP", &primitive_twoswap));  
-  //pm.insert(std::pair<std::string, prim_fun>("MIN", &primitive_min));
-  //pm.insert(std::pair<std::string, prim_fun>("MAX", &primitive_max));
-
   pm.insert(std::pair<std::string, prim_fun>("sin", &primitive_sin));
   pm.insert(std::pair<std::string, prim_fun>("cos", &primitive_cos));
   pm.insert(std::pair<std::string, prim_fun>("tan", &primitive_tan));
@@ -1279,30 +1262,7 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("xor", &primitive_xor));
   pm.insert(std::pair<std::string, prim_fun>("not", &primitive_not));
 
-  //pm.insert(std::pair<std::string, prim_fun>("SIN", &primitive_sin));
-  //pm.insert(std::pair<std::string, prim_fun>("COS", &primitive_cos));
-  //pm.insert(std::pair<std::string, prim_fun>("EXP", &primitive_exp));
-  //pm.insert(std::pair<std::string, prim_fun>("LOG", &primitive_log));
-  //pm.insert(std::pair<std::string, prim_fun>("**", &primitive_pow));
-  //pm.insert(std::pair<std::string, prim_fun>("POW", &primitive_pow));
-  //pm.insert(std::pair<std::string, prim_fun>("ATAN2", &primitive_atan2));
-  //pm.insert(std::pair<std::string, prim_fun>("SQRT", &primitive_sqrt));
-  //pm.insert(std::pair<std::string, prim_fun>("ABS", &primitive_abs));
-  //pm.insert(std::pair<std::string, prim_fun>("NEGATE", &primitive_negate));
-  //pm.insert(std::pair<std::string, prim_fun>("AND", &primitive_and));
-  //pm.insert(std::pair<std::string, prim_fun>("OR", &primitive_or));
-  //pm.insert(std::pair<std::string, prim_fun>("XOR", &primitive_xor));
-  //pm.insert(std::pair<std::string, prim_fun>("NOT", &primitive_not));
-
-  //pm.insert(std::pair<std::string, prim_fun>("FM/MOD", &primitive_fmod));
   pm.insert(std::pair<std::string, prim_fun>("fm/mod", &primitive_fmod));
-
-  //pm.insert(std::pair<std::string, prim_fun>("FLOOR", &primitive_floor));
-  //pm.insert(std::pair<std::string, prim_fun>("CEIL", &primitive_ceil));
-  //pm.insert(std::pair<std::string, prim_fun>("ROUND", &primitive_round));
-  //pm.insert(std::pair<std::string, prim_fun>("TRUNC", &primitive_truncate));
-  //pm.insert(std::pair<std::string, prim_fun>("FCAST", &primitive_fcast));
-  //pm.insert(std::pair<std::string, prim_fun>("ICAST", &primitive_icast));
 
   pm.insert(std::pair<std::string, prim_fun>("floor", &primitive_floor));
   pm.insert(std::pair<std::string, prim_fun>("ceil", &primitive_ceil));
@@ -1346,11 +1306,7 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("f<", &primitive_flt));
   pm.insert(std::pair<std::string, prim_fun>("f>", &primitive_fgt));
   pm.insert(std::pair<std::string, prim_fun>("f<=", &primitive_fle));
-  pm.insert(std::pair<std::string, prim_fun>("f>=", &primitive_fge));
-  
-
-  //pm.insert(std::pair<std::string, prim_fun>("ST@", &primitive_stack_top_fetch));
-  //pm.insert(std::pair<std::string, prim_fun>("SP@", &primitive_stack_pointer_fetch));
+  pm.insert(std::pair<std::string, prim_fun>("f>=", &primitive_fge));  
 
   pm.insert(std::pair<std::string, prim_fun>("st@", &primitive_stack_top_fetch));
   pm.insert(std::pair<std::string, prim_fun>("sp@", &primitive_stack_pointer_fetch));

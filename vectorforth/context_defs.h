@@ -38,9 +38,6 @@ VF_BEGIN
 #define NO_BITS ASM::asmcode::MEM_R10, 320
 #define ONEF_BITS ASM::asmcode::MEM_R10, 384
 
-//#define ALL_BITS_M32 ASM::asmcode::DWORD_MEM_R10, 256
-//#define NO_BITS_M32 ASM::asmcode::DWORD_MEM_R10, 320
-
 #define CELLS(n) (n)*8
 
 #ifdef AVX512

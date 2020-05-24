@@ -4,7 +4,7 @@
 : x' u 0.5 - t sin 0.2 * + ;
 : y' v 0.5 - t 1.5 * cos 0.2 * + ;
 : dist r> dup >r ;
-: at2 r@ ;
+: at2 rt@ #1 cells #- @ ;
 : xor + abs 2 mod ;
 : b / floor 2 mod ;
 : m 256 * floor ;
