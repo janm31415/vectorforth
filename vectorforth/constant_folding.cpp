@@ -485,6 +485,19 @@ namespace
         words.erase(it);
         return it1;
         }
+      else if (it1->t == expanded_token::ET_FLOAT)
+        {
+        for (int i = 1; i < AVX_LENGTH; ++i)
+          it1->f[i] = it1->f[0];
+        it1->t = expanded_token::ET_VECTOR;
+        for (int i = 0; i < AVX_LENGTH; ++i)
+          {
+          int32_t v = static_cast<int32_t>(it1->f[i]);
+          it1->f[i] = *reinterpret_cast<float*>(&v);
+          }
+        words.erase(it);
+        return it1;
+        }
       }
     return it;
     }
@@ -505,6 +518,24 @@ namespace
     return it;
     }
 
+  std::vector<expanded_token>::iterator apply_twodup(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
+    {
+    auto sz = std::distance(words.begin(), it);
+    if (sz >= 2)
+      {
+      auto it1 = it - 1;
+      auto it2 = it - 2;
+      if ((it1->t == expanded_token::ET_VECTOR || it1->t == expanded_token::ET_FLOAT || it1->t == expanded_token::ET_INTEGER) &&
+        (it2->t == expanded_token::ET_VECTOR || it2->t == expanded_token::ET_FLOAT || it2->t == expanded_token::ET_INTEGER))
+        {
+        *it = *it1;
+        it = words.insert(it, *it2);
+        return ++it;
+        }
+      }
+    return it;
+    }
+
   std::vector<expanded_token>::iterator apply_swap(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
     {
     auto sz = std::distance(words.begin(), it);
@@ -516,6 +547,29 @@ namespace
         (it2->t == expanded_token::ET_VECTOR || it2->t == expanded_token::ET_FLOAT || it2->t == expanded_token::ET_INTEGER))
         {
         std::swap(*it1, *it2);
+        words.erase(it);
+        return it1;
+        }
+      }
+    return it;
+    }
+
+  std::vector<expanded_token>::iterator apply_twoswap(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
+    {
+    auto sz = std::distance(words.begin(), it);
+    if (sz >= 4)
+      {
+      auto it1 = it - 1;
+      auto it2 = it - 2;
+      auto it3 = it - 3;
+      auto it4 = it - 4;
+      if ((it1->t == expanded_token::ET_VECTOR || it1->t == expanded_token::ET_FLOAT || it1->t == expanded_token::ET_INTEGER) &&
+        (it2->t == expanded_token::ET_VECTOR || it2->t == expanded_token::ET_FLOAT || it2->t == expanded_token::ET_INTEGER) &&
+        (it3->t == expanded_token::ET_VECTOR || it3->t == expanded_token::ET_FLOAT || it3->t == expanded_token::ET_INTEGER) &&
+        (it4->t == expanded_token::ET_VECTOR || it4->t == expanded_token::ET_FLOAT || it4->t == expanded_token::ET_INTEGER))
+        {
+        std::swap(*it1, *it3);
+        std::swap(*it2, *it4);
         words.erase(it);
         return it1;
         }
@@ -652,6 +706,25 @@ namespace
       }
     return it;
     }
+
+  std::vector<expanded_token>::iterator apply_twodrop(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
+    {
+    auto sz = std::distance(words.begin(), it);
+    if (sz >= 2)
+      {
+      auto it1 = it - 1;
+      auto it2 = it - 2;
+      if ((it1->t == expanded_token::ET_VECTOR || it1->t == expanded_token::ET_FLOAT || it1->t == expanded_token::ET_INTEGER) &&
+        (it2->t == expanded_token::ET_VECTOR || it2->t == expanded_token::ET_FLOAT || it2->t == expanded_token::ET_INTEGER))
+        {
+        it = words.erase(it2, it + 1);
+        if (it != words.begin())
+          --it;
+        return it;
+        }
+      }
+    return it;
+    }
   
   }
 
@@ -748,8 +821,12 @@ void constant_folding(std::vector<expanded_token>& words)
         it = apply_icast(words, it);
       else if (it->prim == &primitive_dup)
         it = apply_dup(words, it);
+      else if (it->prim == &primitive_twodup)
+        it = apply_twodup(words, it);
       else if (it->prim == &primitive_swap)
         it = apply_swap(words, it);
+      else if (it->prim == &primitive_twoswap)
+        it = apply_twoswap(words, it);
       else if (it->prim == &primitive_over)
         it = apply_over(words, it);
       else if (it->prim == &primitive_rot)
@@ -761,6 +838,12 @@ void constant_folding(std::vector<expanded_token>& words)
       else if (it->prim == &primitive_drop)
         {
         it = apply_drop(words, it);
+        if (it == words.end())
+          break;
+        }
+      else if (it->prim == &primitive_twodrop)
+        {
+        it = apply_twodrop(words, it);
         if (it == words.end())
           break;
         }
