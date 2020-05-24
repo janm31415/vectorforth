@@ -2,6 +2,7 @@
 #include "expand_data.h"
 #include "compile_error.h"
 #include "primitives.h"
+#include "context_defs.h"
 
 #include <cassert>
 #include <sstream>
@@ -16,14 +17,8 @@ void expand_primitive(std::vector<expanded_token>& expanded, dictionary& d, expa
     if (cd.create_called)
       throw std::runtime_error(compile_error_text(VF_ERROR_CREATE_WAS_ALREADY_CALLED, word.line_nr, word.column_nr).c_str());
     cd.create_called = true;
-    expanded.emplace_back(expanded_token::ET_CREATE_VARIABLE, word.line_nr, word.column_nr);
+    expanded.emplace_back(expanded_token::ET_CREATE_VARIABLE);
     expanded.back().binding_space_offset = cd.binding_space_offset;
-    //code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
-    //if (cd.binding_space_offset)
-    //  code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.binding_space_offset);
-    //code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-    //code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
-    //code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
     }
   else if (word.value == "to")
     {
@@ -43,49 +38,30 @@ void expand_primitive(std::vector<expanded_token>& expanded, dictionary& d, expa
         de.type = dictionary_entry::T_VARIABLE;
         de.name = word.value;
         de.address = cd.binding_space_offset;
-#ifdef AVX512
-        cd.binding_space_offset += 64;
-#else
-        cd.binding_space_offset += 32;
-#endif
+        cd.binding_space_offset += AVX_ALIGNMENT;
         push(d, de);
         return;
         }
       else
         throw std::runtime_error(compile_error_text(VF_ERROR_WORD_UNKNOWN, word.line_nr, word.column_nr, word.value).c_str());
       }
-    expanded.emplace_back(expanded_token::ET_PRIMITIVE, word.line_nr, word.column_nr);
+    expanded.emplace_back(expanded_token::ET_PRIMITIVE);
     expanded.back().prim = it->second;
-    //it->second(code, cd);
     }
   }
 
-void expand_variable(std::vector<expanded_token>& expanded, expand_data& cd, uint64_t address, int line_nr, int column_nr)
+void expand_variable(std::vector<expanded_token>& expanded, expand_data& cd, uint64_t address)
   {
   if (cd.to_called)
     {
     cd.to_called = false;
-    expanded.emplace_back(expanded_token::ET_VARIABLE, line_nr, column_nr);
+    expanded.emplace_back(expanded_token::ET_UPDATE_VARIABLE);
     expanded.back().variable_address = address;
-    expanded.back().variable_to_called = true;
-    //code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
-    //if (address)
-    //  code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
-    //code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-    //code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
-    //code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
     }
   else
     {
-    expanded.emplace_back(expanded_token::ET_VARIABLE, line_nr, column_nr);
+    expanded.emplace_back(expanded_token::ET_VARIABLE);
     expanded.back().variable_address = address;
-    expanded.back().variable_to_called = false;
-    //code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
-    //if (address)
-    //  code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
-    //code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
-    //code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
-    //code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
     }
   }
 
@@ -105,19 +81,14 @@ void expand_word(std::vector<expanded_token>& expanded, dictionary& d, expand_da
       {
       if (cd.create_called)  // overwriting existing variable
         {
-        //code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
-        //code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, cd.binding_space_offset);
-        //code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
-        //code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, (cd.binding_space_offset - e.address));
-        //code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
-        expanded.emplace_back(expanded_token::ET_OVERWRITE_VARIABLE, word.line_nr, word.column_nr);
+        expanded.emplace_back(expanded_token::ET_OVERWRITE_VARIABLE);
         expanded.back().binding_space_offset = cd.binding_space_offset;
         expanded.back().variable_address = e.address;
         cd.create_called = false;
         return;
         }
       else
-        expand_variable(expanded, cd, e.address, word.line_nr, word.column_nr);
+        expand_variable(expanded, cd, e.address);
       break;
       }
       default:
@@ -145,40 +116,12 @@ void expand_integer(std::vector<expanded_token>& expanded, token word)
   expanded.emplace_back(word);
   }
 
-#ifdef AVX512
-void expand_vector16(std::vector<expanded_token>& expanded, const std::vector<token>& words, token current)
-  {
-  expanded_token et(current);
-
-  assert(words.size() == 16);
-  for (int i = 0; i < 16; ++i)
-    {
-    assert(words[i].type == token::T_FLOAT || words[i].type == token::T_INTEGER);    
-
-    
-    if (words[i].type == token::T_FLOAT)
-      {
-      float f = to_float(words[i].value.c_str());
-      et.f[i] = f;
-      }
-    else
-      {
-      std::stringstream ss;
-      ss << words[i].value;
-      uint32_t v;
-      ss >> v;
-      et.f[i] = *(reinterpret_cast<float*>(&v));
-      }
-    }
-  expanded.push_back(et);
-  }
-#else
-void expand_vector8(std::vector<expanded_token>& expanded, const std::vector<token>& words, token current)
+void expand_vector(std::vector<expanded_token>& expanded, const std::vector<token>& words, token current)
   {  
   expanded_token et(current);
 
-  assert(words.size() == 8);
-  for (int i = 0; i < 8; ++i)
+  assert(words.size() == AVX_LENGTH);
+  for (int i = 0; i < AVX_LENGTH; ++i)
     {
     assert(words[i].type == token::T_FLOAT || words[i].type == token::T_INTEGER);    
 
@@ -199,7 +142,6 @@ void expand_vector8(std::vector<expanded_token>& expanded, const std::vector<tok
     }
   expanded.push_back(et);
   }
-#endif
 
 void expand_definition(dictionary& d, std::vector<token>& words, int line_nr, int column_nr)
   {
@@ -233,39 +175,29 @@ void expand_words(std::vector<expanded_token>& expanded, dictionary& d, expand_d
       expand_float(expanded, word);
       break;
       }
+      case token::T_VECTOR:
+      {
+      std::vector<token> vector_words;
+      if (words.size() < AVX_LENGTH)
 #ifdef AVX512
-      case token::T_VECTOR:
-      {
-      std::vector<token> vector_words;
-      if (words.size() < 16)
         throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR16_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
-      for (int i = 0; i < 16; ++i)
-        {
-        vector_words.push_back(words.back());
-        if (vector_words.back().type != token::T_FLOAT && vector_words.back().type != token::T_INTEGER)
-          throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR16_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
-        words.pop_back();
-        }
-      expand_vector16(expanded, vector_words, word);
-      break;
-      }
 #else
-      case token::T_VECTOR:
-      {
-      std::vector<token> vector_words;
-      if (words.size() < 8)
         throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR8_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
-      for (int i = 0; i < 8; ++i)
+#endif
+      for (int i = 0; i < AVX_LENGTH; ++i)
         {
         vector_words.push_back(words.back());
         if (vector_words.back().type != token::T_FLOAT && vector_words.back().type != token::T_INTEGER)
+#ifdef AVX512
+          throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR16_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
+#else
           throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR8_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
+#endif
         words.pop_back();
         }
-      expand_vector8(expanded, vector_words, word);
+      expand_vector(expanded, vector_words, word);
       break;
       }
-#endif
       case token::T_COLON:
       {
       std::vector<token> definition_words;

@@ -21,11 +21,12 @@ struct expanded_token
     ET_VECTOR,
     ET_OVERWRITE_VARIABLE,
     ET_VARIABLE,
-    ET_CREATE_VARIABLE
+    ET_CREATE_VARIABLE,
+    ET_UPDATE_VARIABLE
     };
 
 
-  expanded_token(token i_t)  : value(i_t.value), line_nr(i_t.line_nr), column_nr(i_t.column_nr)
+  expanded_token(token i_t)  : value(i_t.value)
     {
     switch (i_t.type)
       {
@@ -33,21 +34,18 @@ struct expanded_token
       case token::T_INTEGER: t = ET_INTEGER; break;
       case token::T_VECTOR: t = ET_VECTOR; break;
       default:
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("compiler error");
       }
     }
 
-  expanded_token(e_type type, int i_line_nr, int i_column_nr) : t(type), line_nr(i_line_nr), column_nr(i_column_nr) {}
+  expanded_token(e_type type) : t(type) {}
 
   e_type t;
   float f[16];
   std::string value;
-  int line_nr;
-  int column_nr;
 
   uint64_t binding_space_offset;
   uint64_t variable_address;
-  bool variable_to_called;
 
   prim_fun prim;
   };

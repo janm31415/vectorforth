@@ -53,11 +53,7 @@ void compile_primitive_single_pass(asmcode& code, dictionary& d, compile_data& c
         de.type = dictionary_entry::T_VARIABLE;
         de.name = word.value;
         de.address = cd.binding_space_offset;
-#ifdef AVX512
-        cd.binding_space_offset += 64;
-#else
-        cd.binding_space_offset += 32;
-#endif
+        cd.binding_space_offset += AVX_ALIGNMENT;
         push(d, de);
         return;
         }
@@ -165,11 +161,10 @@ void compile_integer_single_pass(asmcode& code, token word)
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
 
-#ifdef AVX512
-void compile_vector16_single_pass(asmcode& code, const std::vector<token>& words)
+void compile_vector_single_pass(asmcode& code, const std::vector<token>& words)
   {
-  assert(words.size() == 16);
-  for (int i = 0; i < 8; ++i)
+  assert(words.size() == AVX_LENGTH);
+  for (int i = 0; i < AVX_LENGTH/2; ++i)
     {
     assert(words[2 * i].type == token::T_FLOAT || words[2 * i].type == token::T_INTEGER);
     assert(words[2 * i + 1].type == token::T_FLOAT || words[2 * i + 1].type == token::T_INTEGER);
@@ -209,51 +204,6 @@ void compile_vector16_single_pass(asmcode& code, const std::vector<token>& words
     }
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
   }
-#else
-void compile_vector8_single_pass(asmcode& code, const std::vector<token>& words)
-  {
-  assert(words.size() == 8);
-  for (int i = 0; i < 4; ++i)
-    {
-    assert(words[2 * i].type == token::T_FLOAT || words[2 * i].type == token::T_INTEGER);
-    assert(words[2 * i + 1].type == token::T_FLOAT || words[2 * i + 1].type == token::T_INTEGER);
-    uint64_t v1_64, v2_64;
-    if (words[2 * i].type == token::T_FLOAT)
-      {
-      float f = to_float(words[i * 2].value.c_str());
-      uint32_t v = *(reinterpret_cast<uint32_t*>(&f));
-      v1_64 = (uint64_t)v;
-      }
-    else
-      {
-      std::stringstream ss;
-      ss << words[i * 2].value;
-      uint32_t v;
-      ss >> v;
-      v1_64 = (uint64_t)v;
-      }
-
-    if (words[2 * i + 1].type == token::T_FLOAT)
-      {
-      float f = to_float(words[i * 2 + 1].value.c_str());
-      uint32_t v = *(reinterpret_cast<uint32_t*>(&f));
-      v2_64 = (uint64_t)v;
-      }
-    else
-      {
-      std::stringstream ss;
-      ss << words[i * 2 + 1].value;
-      uint32_t v;
-      ss >> v;
-      v2_64 = (uint64_t)v;
-      }
-    uint64_t v = (v1_64 << 32) | v2_64;
-    code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v);
-    code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(i + 1), asmcode::RAX);
-    }
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
-  }
-#endif
 
 void compile_definition_single_pass(dictionary& d, std::vector<token>& words, int line_nr, int column_nr)
   {
@@ -287,39 +237,29 @@ void compile_words_single_pass(asmcode& code, dictionary& d, compile_data& cd, s
       compile_float_single_pass(code, word);
       break;
       }
+      case token::T_VECTOR:
+      {
+      std::vector<token> vector_words;
+      if (words.size() < AVX_LENGTH)
 #ifdef AVX512
-      case token::T_VECTOR:
-      {
-      std::vector<token> vector_words;
-      if (words.size() < 16)
         throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR16_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
-      for (int i = 0; i < 16; ++i)
-        {
-        vector_words.push_back(words.back());
-        if (vector_words.back().type != token::T_FLOAT && vector_words.back().type != token::T_INTEGER)
-          throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR16_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
-        words.pop_back();
-        }
-      compile_vector16_single_pass(code, vector_words);
-      break;
-      }
 #else
-      case token::T_VECTOR:
-      {
-      std::vector<token> vector_words;
-      if (words.size() < 8)
         throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR8_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
-      for (int i = 0; i < 8; ++i)
+#endif
+      for (int i = 0; i < AVX_LENGTH; ++i)
         {
         vector_words.push_back(words.back());
         if (vector_words.back().type != token::T_FLOAT && vector_words.back().type != token::T_INTEGER)
+#ifdef AVX512
+          throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR16_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
+#else
           throw std::runtime_error(compile_error_text(VF_ERROR_VECTOR8_INVALID_SYNTAX, word.line_nr, word.column_nr).c_str());
+#endif
         words.pop_back();
         }
-      compile_vector8_single_pass(code, vector_words);
+      compile_vector_single_pass(code, vector_words);
       break;
       }
-#endif
       case token::T_COLON:
       {
       std::vector<token> definition_words;
@@ -469,11 +409,7 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       }
       case expanded_token::ET_VECTOR:
       {
-#ifdef AVX512
-      for (int i = 0; i < 8; ++i)
-#else
-      for (int i = 0; i < 4; ++i)
-#endif
+      for (int i = 0; i < AVX_LENGTH/2; ++i)
         {
         uint64_t v1_64, v2_64;
         float f = word.f[i * 2];
@@ -498,26 +434,24 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
       break;
       }
+      case expanded_token::ET_UPDATE_VARIABLE:
+      {
+      code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+      if (word.variable_address)
+        code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.variable_address);
+      code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+      code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+      code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+      break;
+      }
       case expanded_token::ET_VARIABLE:
       {
-      if (word.variable_to_called)
-        {
-        code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
-        if (word.variable_address)
-          code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.variable_address);
-        code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-        code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
-        code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
-        }
-      else
-        {
-        code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
-        if (word.variable_address)
-          code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.variable_address);
-        code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
-        code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
-        code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
-        }
+      code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+      if (word.variable_address)
+        code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.variable_address);
+      code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+      code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
       break;
       }
       case expanded_token::ET_CREATE_VARIABLE:
@@ -534,7 +468,7 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
     }
   }
 
-void compile(ASM::asmcode& code, dictionary& d, compile_data& cd, std::vector<token> words)
+void compile(ASM::asmcode& code, dictionary& d, compile_data& cd, const std::vector<token>& words)
   {
   expand_data ed;
   ed.binding_space_offset = cd.binding_space_offset;

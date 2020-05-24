@@ -51,6 +51,8 @@ VF_BEGIN
 #define AVX_REG4 ASM::asmcode::ZMM4
 #define AVX_REG5 ASM::asmcode::ZMM5
 #define AVX_CELLS(n) (n)*64
+#define AVX_ALIGNMENT 64
+#define AVX_LENGTH 16
 #else
 #define AVX_REG0 ASM::asmcode::YMM0
 #define AVX_REG1 ASM::asmcode::YMM1
@@ -59,5 +61,7 @@ VF_BEGIN
 #define AVX_REG4 ASM::asmcode::YMM4
 #define AVX_REG5 ASM::asmcode::YMM5
 #define AVX_CELLS(n) (n)*32
+#define AVX_ALIGNMENT 32
+#define AVX_LENGTH 8
 #endif
 VF_END
