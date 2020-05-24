@@ -474,8 +474,11 @@ void compile(ASM::asmcode& code, dictionary& d, expand_data& ed, const std::vect
   std::vector<expanded_token> expanded;
   expand(expanded, d, ed, words);
 
-  constant_folding(expanded);
-  strength_reduction(expanded);
+  for (int iter = 0; iter < 2; ++iter)
+    {
+    strength_reduction(expanded);
+    constant_folding(expanded);
+    }
 
   std::reverse(expanded.begin(), expanded.end());
 

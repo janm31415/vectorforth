@@ -910,6 +910,10 @@ struct prim_test : public compile_fixture
     TEST_EQ(2.f, get_stack_valuef(0));
     TEST_EQ(1.f, get_stack_valuef(1));
 
+    run("1 drop");
+    TEST_EQ(2.f, get_stack_valuef(0));
+    TEST_EQ(1.f, get_stack_valuef(1));
+
     run("4 5 6 swap");
     TEST_EQ(5.f, get_stack_valuef(0));
     TEST_EQ(6.f, get_stack_valuef(1));
@@ -2609,6 +2613,13 @@ struct strength_reduction_tests : public compile_fixture
     c_ops = ops;
     run("20 value val val 2 **");
     TEST_EQ(400.f, get_stack_valuef(0));
+    run("val 3 **");
+    TEST_EQ(8000.f, get_stack_valuef(0));
+    run("val 4 **");
+    TEST_EQ(160000.f, get_stack_valuef(0));
+
+    run("2 3 > if 6 else 8 then");
+    TEST_EQ(8.f, get_stack_valuef(0));
     }
   };
 
