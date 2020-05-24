@@ -7,6 +7,38 @@ VF_BEGIN
 namespace
   {
 
+  struct addi_op
+    {
+    int64_t operator () (int64_t a, int64_t b)
+      {
+      return a + b;
+      }
+    };
+
+  struct subi_op
+    {
+    int64_t operator () (int64_t a, int64_t b)
+      {
+      return a - b;
+      }
+    };
+
+  struct muli_op
+    {
+    int64_t operator () (int64_t a, int64_t b)
+      {
+      return a * b;
+      }
+    };
+
+  struct divi_op
+    {
+    int64_t operator () (int64_t a, int64_t b)
+      {
+      return a / b;
+      }
+    };
+
   struct add_op
     {
     float operator () (float a, float b)
@@ -68,6 +100,114 @@ namespace
     float operator () (float a, float b)
       {
       return a > b ? a : b;
+      }
+    };
+
+  struct fequ_op
+    {
+    float operator () (float a, float b)
+      {
+      return a == b ? 1.f : 0.f;
+      }
+    };
+
+  struct fnequ_op
+    {
+    float operator () (float a, float b)
+      {
+      return a != b ? 1.f : 0.f;
+      }
+    };
+
+  struct flt_op
+    {
+    float operator () (float a, float b)
+      {
+      return a < b ? 1.f : 0.f;
+      }
+    };
+
+  struct fgt_op
+    {
+    float operator () (float a, float b)
+      {
+      return a > b ? 1.f : 0.f;
+      }
+    };
+
+  struct fle_op
+    {
+    float operator () (float a, float b)
+      {
+      return a <= b ? 1.f : 0.f;
+      }
+    };
+
+  struct fge_op
+    {
+    float operator () (float a, float b)
+      {
+      return a >= b ? 1.f : 0.f;
+      }
+    };
+
+  struct equ_op
+    {
+    float operator () (float a, float b)
+      {
+      uint32_t fa = 0xffffffff;
+      float nan = *reinterpret_cast<float*>(&fa);
+      return a == b ? nan : 0.f;
+      }
+    };
+
+  struct nequ_op
+    {
+    float operator () (float a, float b)
+      {
+      uint32_t fa = 0xffffffff;
+      float nan = *reinterpret_cast<float*>(&fa);
+      return a != b ? nan : 0.f;
+      }
+    };
+
+  struct lt_op
+    {
+    float operator () (float a, float b)
+      {
+      uint32_t fa = 0xffffffff;
+      float nan = *reinterpret_cast<float*>(&fa);
+      return a < b ? nan : 0.f;
+      }
+    };
+
+  struct gt_op
+    {
+    float operator () (float a, float b)
+      {
+      uint32_t fa = 0xffffffff;
+      float nan = *reinterpret_cast<float*>(&fa);
+      return a > b ? nan : 0.f;
+      }
+    };
+
+  struct le_op
+    {
+    float operator () (float a, float b)
+      {
+      uint32_t fa = 0xffffffff;
+      float nan = *reinterpret_cast<float*>(&fa);
+      return a <= b ? nan : 0.f;
+      }
+    };
+
+  struct ge_op
+    {
+    float operator () (float a, float b)
+      {
+      uint32_t fa = 0xffffffff;
+      float nan = *reinterpret_cast<float*>(&fa);
+      return a >= b ? nan : 0.f;
       }
     };
 
@@ -252,6 +392,25 @@ namespace
     }
 
   template <class oper>
+  std::vector<expanded_token>::iterator apply_2_integers(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
+    {
+    oper op;
+    auto sz = std::distance(words.begin(), it);
+    if (sz >= 2)
+      {
+      auto it1 = it - 1;
+      auto it2 = it - 2;
+      if (it1->t == expanded_token::ET_INTEGER && it2->t == expanded_token::ET_INTEGER)
+        {
+        it2->int_value = op(it2->int_value, it1->int_value);
+        words.erase(it1, it + 1);
+        return it2;
+        }      
+      }
+    return it;
+    }
+
+  template <class oper>
   std::vector<expanded_token>::iterator apply_1_float(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
     {
     oper op;
@@ -276,6 +435,45 @@ namespace
     return it;
     }
 
+  std::vector<expanded_token>::iterator apply_fcast(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
+    {
+    auto sz = std::distance(words.begin(), it);
+    if (sz >= 1)
+      {
+      auto it1 = it - 1;
+      if (it1->t == expanded_token::ET_VECTOR)
+        {
+        for (int i = 0; i < AVX_LENGTH; ++i)
+          {
+          int32_t v = *reinterpret_cast<int32_t*>(&it1->f[i]);
+          it1->f[i] = static_cast<float>(v);
+          }
+        words.erase(it);
+        return it1;
+        }
+      }
+    return it;
+    }
+
+  std::vector<expanded_token>::iterator apply_icast(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
+    {
+    auto sz = std::distance(words.begin(), it);
+    if (sz >= 1)
+      {
+      auto it1 = it - 1;
+      if (it1->t == expanded_token::ET_VECTOR)
+        {
+        for (int i = 0; i < AVX_LENGTH; ++i)
+          {
+          int32_t v = static_cast<int32_t>(it1->f[i]);
+          it1->f[i] = *reinterpret_cast<float*>(&v);
+          }
+        words.erase(it);
+        return it1;
+        }
+      }
+    return it;
+    }
   }
 
 void constant_folding(std::vector<expanded_token>& words)
@@ -301,6 +499,30 @@ void constant_folding(std::vector<expanded_token>& words)
         it = apply_2_floats<min_op>(words, it);
       else if (it->prim == &primitive_max)
         it = apply_2_floats<max_op>(words, it);
+      else if (it->prim == &primitive_fequ)
+        it = apply_2_floats<fequ_op>(words, it);
+      else if (it->prim == &primitive_fnequ)
+        it = apply_2_floats<fnequ_op>(words, it);
+      else if (it->prim == &primitive_flt)
+        it = apply_2_floats<flt_op>(words, it);
+      else if (it->prim == &primitive_fgt)
+        it = apply_2_floats<fgt_op>(words, it);
+      else if (it->prim == &primitive_fle)
+        it = apply_2_floats<fle_op>(words, it);
+      else if (it->prim == &primitive_fge)
+        it = apply_2_floats<fge_op>(words, it);
+      else if (it->prim == &primitive_equ)
+        it = apply_2_floats<equ_op>(words, it);
+      else if (it->prim == &primitive_nequ)
+        it = apply_2_floats<nequ_op>(words, it);
+      else if (it->prim == &primitive_lt)
+        it = apply_2_floats<lt_op>(words, it);
+      else if (it->prim == &primitive_gt)
+        it = apply_2_floats<gt_op>(words, it);
+      else if (it->prim == &primitive_le)
+        it = apply_2_floats<le_op>(words, it);
+      else if (it->prim == &primitive_ge)
+        it = apply_2_floats<ge_op>(words, it);
       else if (it->prim == &primitive_and)
         it = apply_2_floats<and_op>(words, it);
       else if (it->prim == &primitive_or)
@@ -333,6 +555,18 @@ void constant_folding(std::vector<expanded_token>& words)
         it = apply_1_float<trunc_op>(words, it);
       else if (it->prim == &primitive_not)
         it = apply_1_float<not_op>(words, it);
+      else if (it->prim == &primitive_addi)
+        it = apply_2_integers<addi_op>(words, it);
+      else if (it->prim == &primitive_subi)
+        it = apply_2_integers<subi_op>(words, it);
+      else if (it->prim == &primitive_muli)
+        it = apply_2_integers<muli_op>(words, it);
+      else if (it->prim == &primitive_divi)
+        it = apply_2_integers<divi_op>(words, it);
+      else if (it->prim == &primitive_fcast)
+        it = apply_fcast(words, it);
+      else if (it->prim == &primitive_icast)
+        it = apply_icast(words, it);
       }
     ++it;
     }
