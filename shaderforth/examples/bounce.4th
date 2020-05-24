@@ -75,7 +75,7 @@ sdEllipsoid
   dup
   sdguy
   swap
-  #32+ @
+  #1 cells #+ @
   0.25 +
   min
 ;
@@ -155,7 +155,7 @@ tmp1 tmp2 rd add3
 
 rd rd normalize3
 
-rd #32+ @ dup -0.7 * swap -10 * exp   ( -0.7*rd.y  exp(-10*rd.y)  )
+rd #1 cells #+ @ dup -0.7 * swap -10 * exp   ( -0.7*rd.y  exp(-10*rd.y)  )
      over 0.4 +  over 0.7 swap mix 
 -rot over 0.75 + over 0.75 swap mix
 -rot swap 1 + swap 0.8 swap mix  basecol vec3!
@@ -179,14 +179,14 @@ tmp2 sun_dir castray 0 step *                        \ shadow
 
 sun_col col scalarmul3
 
-norm #32+ @ 0.5 * 0.5 + 0 1 clamp over 0 f> *      \ sky diffuse
+norm #1 cells #+ @ 0.5 * 0.5 + 0 1 clamp over 0 f> *      \ sky diffuse
 
 0.18 * \ material color
 
 sky_col tmp2 scalarmul3                            
 col tmp2 col add3
 
-norm #32+ @ -0.5 * 0.5 + 0 1 clamp over 0 f> *      \ bounce diffuse
+norm #1 cells #+ @ -0.5 * 0.5 + 0 1 clamp over 0 f> *      \ bounce diffuse
 
 0.18 * \ material color
 
@@ -207,7 +207,7 @@ basecol col col add3
 
 
 col @ 0.4545 **
-col #32+ @ 0.4545 ** 
-col #64+ @ 0.4545 **
+col #1 cells #+ @ 0.4545 ** 
+col #2 cells #+ @ 0.4545 **
 
 
