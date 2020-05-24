@@ -31,7 +31,7 @@ struct expanded_token
   float f[AVX_LENGTH]; // used by ET_FLOAT and ET_VECTOR
   int64_t int_value; // used by ET_INTEGER
 
-  uint64_t binding_space_offset; //used by ET_OVERWRITE_VARIABLE. Contains address of the new value of the variable.
+  uint64_t binding_space_offset; //used by ET_OVERWRITE_VARIABLE. Contains address with the new value of the variable.
   uint64_t variable_address; // used by all ET_<...>_VARIABLE types.
 
   prim_fun prim; // used by ET_PRIMITIVE. Contains pointer to primitive operation.

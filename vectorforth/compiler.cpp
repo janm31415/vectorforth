@@ -1,6 +1,7 @@
 #include "compiler.h"
 #include "compile_data.h"
 #include "compile_error.h"
+#include "constant_folding.h"
 #include "context_defs.h"
 #include "expand.h"
 #include "expand_data.h"
@@ -471,6 +472,8 @@ void compile(ASM::asmcode& code, dictionary& d, expand_data& ed, const std::vect
 
   std::vector<expanded_token> expanded;
   expand(expanded, d, ed, words);
+
+  constant_folding(expanded);
 
   std::reverse(expanded.begin(), expanded.end());
 

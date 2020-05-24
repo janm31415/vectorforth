@@ -5,6 +5,7 @@ avx_mathfun.h
 compiler.h
 compile_data.h
 compile_error.h
+constant_folding.h
 context.h
 context_defs.h
 debug.h
@@ -24,6 +25,7 @@ avx_mathfun.cpp
 context.cpp
 compiler.cpp
 compile_error.cpp
+constant_folding.cpp
 debug.cpp
 expand.cpp
 dictionary.cpp
