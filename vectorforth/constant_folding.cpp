@@ -386,9 +386,11 @@ namespace
         }
       if (it1->t == expanded_token::ET_VECTOR && it2->t == expanded_token::ET_FLOAT)
         {
-        for (int i = 0; i < AVX_LENGTH; ++i)
-          it2->f[i] = op(it2->f[0], it1->f[i]);
+        for (int i = 1; i < AVX_LENGTH; ++i)
+          it2->f[i] = it2->f[0];
         it2->t = expanded_token::ET_VECTOR;
+        for (int i = 0; i < AVX_LENGTH; ++i)
+          it2->f[i] = op(it2->f[i], it1->f[i]);        
         words.erase(it1, it + 1);
         return it2;
         }
@@ -521,6 +523,119 @@ namespace
     return it;
     }
 
+  std::vector<expanded_token>::iterator apply_over(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
+    {
+    auto sz = std::distance(words.begin(), it);
+    if (sz >= 2)
+      {
+      auto it1 = it - 1;
+      auto it2 = it - 2;
+      if ((it1->t == expanded_token::ET_VECTOR || it1->t == expanded_token::ET_FLOAT || it1->t == expanded_token::ET_INTEGER) &&
+        (it2->t == expanded_token::ET_VECTOR || it2->t == expanded_token::ET_FLOAT || it2->t == expanded_token::ET_INTEGER))
+        {
+        *it = *it2;
+        return it;
+        }
+      }
+    return it;
+    }
+
+  std::vector<expanded_token>::iterator apply_rot(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it, bool positive)
+    {
+    auto sz = std::distance(words.begin(), it);
+    if (sz >= 3)
+      {
+      auto it1 = it - 1;
+      auto it2 = it - 2;
+      auto it3 = it - 3;
+      if ((it1->t == expanded_token::ET_VECTOR || it1->t == expanded_token::ET_FLOAT || it1->t == expanded_token::ET_INTEGER) &&
+        (it2->t == expanded_token::ET_VECTOR || it2->t == expanded_token::ET_FLOAT || it2->t == expanded_token::ET_INTEGER) &&
+        (it3->t == expanded_token::ET_VECTOR || it3->t == expanded_token::ET_FLOAT || it3->t == expanded_token::ET_INTEGER))
+        {
+        if (positive)
+          {
+          auto tmp = *it3;
+          *it3 = *it2;
+          *it2 = *it1;
+          *it1 = tmp;
+          }
+        else
+          {
+          auto tmp = *it1;
+          *it1 = *it2;
+          *it2 = *it3;
+          *it3 = tmp;
+          }
+        words.erase(it);
+        return it1;
+        }
+      }
+    return it;
+    }
+
+  std::vector<expanded_token>::iterator apply_fmod(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
+    {
+    auto sz = std::distance(words.begin(), it);
+    if (sz >= 2)
+      {
+      auto it1 = it - 1;
+      auto it2 = it - 2;
+      if (it1->t == expanded_token::ET_FLOAT && it2->t == expanded_token::ET_FLOAT)
+        {
+        float it2divit1 = std::floor(it2->f[0] / it1->f[0]);
+        float remainder = it2->f[0] - it2divit1 * it1->f[0];
+        it2->f[0] = remainder;
+        it1->f[0] = it2divit1;
+        words.erase(it);
+        return it1;
+        }      
+      if (it1->t == expanded_token::ET_FLOAT && it2->t == expanded_token::ET_VECTOR)
+        {
+        for (int i = 1; i < AVX_LENGTH; ++i)
+          it1->f[i] = it1->f[0];
+        it1->t = expanded_token::ET_VECTOR;
+        for (int i = 0; i < AVX_LENGTH; ++i)
+          {
+          float it2divit1 = std::floor(it2->f[i] / it1->f[i]);
+          float remainder = it2->f[i] - it2divit1 * it1->f[i];
+          it2->f[i] = remainder;
+          it1->f[i] = it2divit1;
+          }
+        words.erase(it);
+        return it1;
+        }
+      if (it1->t == expanded_token::ET_VECTOR && it2->t == expanded_token::ET_FLOAT)
+        {
+        for (int i = 1; i < AVX_LENGTH; ++i)
+          it2->f[i] = it2->f[0];
+        it2->t = expanded_token::ET_VECTOR;
+        for (int i = 0; i < AVX_LENGTH; ++i)
+          {
+          float it2divit1 = std::floor(it2->f[i] / it1->f[i]);
+          float remainder = it2->f[i] - it2divit1 * it1->f[i];
+          it2->f[i] = remainder;
+          it1->f[i] = it2divit1;
+          }
+        it2->t = expanded_token::ET_VECTOR;
+        words.erase(it);
+        return it1;
+        }
+      if (it1->t == expanded_token::ET_VECTOR && it2->t == expanded_token::ET_VECTOR)
+        {
+        for (int i = 0; i < AVX_LENGTH; ++i)
+          {
+          float it2divit1 = std::floor(it2->f[i] / it1->f[i]);
+          float remainder = it2->f[i] - it2divit1 * it1->f[i];
+          it2->f[i] = remainder;
+          it1->f[i] = it2divit1;
+          }
+        words.erase(it);
+        return it1;
+        }
+      }
+    return it;
+    }
+
   std::vector<expanded_token>::iterator apply_drop(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
     {
     auto sz = std::distance(words.begin(), it);
@@ -635,6 +750,14 @@ void constant_folding(std::vector<expanded_token>& words)
         it = apply_dup(words, it);
       else if (it->prim == &primitive_swap)
         it = apply_swap(words, it);
+      else if (it->prim == &primitive_over)
+        it = apply_over(words, it);
+      else if (it->prim == &primitive_rot)
+        it = apply_rot(words, it, true);
+      else if (it->prim == &primitive_minrot)
+        it = apply_rot(words, it, false);
+      else if (it->prim == &primitive_fmod)
+        it = apply_fmod(words, it);
       else if (it->prim == &primitive_drop)
         {
         it = apply_drop(words, it);
