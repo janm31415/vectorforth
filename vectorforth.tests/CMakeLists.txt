@@ -2,6 +2,7 @@
 set(HDRS
 compile_tests.h
 debug_tests.h
+optimize_tests.h
 test_assert.h
 tokenize_tests.h
     )
@@ -9,6 +10,7 @@ tokenize_tests.h
 set(SRCS
 compile_tests.cpp
 debug_tests.cpp
+optimize_tests.cpp
 test_assert.cpp
 test.cpp
 tokenize_tests.cpp

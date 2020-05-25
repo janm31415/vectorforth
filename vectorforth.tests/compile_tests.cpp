@@ -12,7 +12,6 @@
 #include <vectorforth/stdlib.h>
 #include <vectorforth/tokenize.h>
 #include <vectorforth/avx_mathfun.h>
-
 #include <immintrin.h>
 
 #include <iostream>

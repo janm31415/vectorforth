@@ -1,5 +1,4 @@
 #include "debug.h"
-
 #include <immintrin.h>
 
 VF_BEGIN

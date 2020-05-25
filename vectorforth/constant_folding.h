@@ -1,10 +1,11 @@
 #pragma once
 
 #include "expand.h"
+#include "vectorforth_api.h"
 #include <vector>
 
 VF_BEGIN
 
-void constant_folding(std::vector<expanded_token>& words);
+VECTOR_FORTH_API void constant_folding(std::vector<expanded_token>& words);
 
 VF_END
