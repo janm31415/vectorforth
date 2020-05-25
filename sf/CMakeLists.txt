@@ -37,7 +37,7 @@ endif (UNIX)
 # general build definitions
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-#add_definitions(-DAVX512)
+add_definitions(-DAVX512)
 
 add_executable(sf ${HDRS} ${SRCS})
 source_group("Header Files" FILES ${hdrs})

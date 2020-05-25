@@ -844,7 +844,7 @@ static inline VTYPE atan_f(VTYPE const y, VTYPE const x) {
 
     if constexpr (T2 == 1) {                               // atan2(y,x)
 
-#if (_MSC_VER < 1920)         // [JanM]: Didn't test this on VS2019. I assume the bug is fixed there, but should be checked.
+#if (_MSC_VER > 1900 && _MSC_VER < 1920)         // [JanM]: Didn't test this on VS2019. I assume the bug is fixed there, but should be checked.
       x1 = abs(x);            // [JanM]: This has been computed before, but I'm adding it here again to trick the compiler. Otherwise AVX512 compiler bug on VS2017.
       y1 = abs(y);            // [JanM]: This has been computed before, but I'm adding it here again to trick the compiler. Otherwise AVX512 compiler bug on VS2017.
       swapxy = (y1 > x1);     // [JanM]: This has been computed before, but I'm adding it here again to trick the compiler. Otherwise AVX512 compiler bug on VS2017.
