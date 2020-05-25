@@ -45,7 +45,7 @@ __m512 _VECTORCALL tan_avx_ps(__m512 x)
 __m512 _VECTORCALL atan2_avx_ps(__m512 y, __m512 x)
   {
   Vec16f vx(x), vy(y);
-  Vec16f p = atan2_janm(vy, vx); // Trick the VS2017 compiler. I suspect there is an optimization bug in VS2017 related to AVX512.
+  Vec16f p = atan2(vy, vx); // Trick the VS2017 compiler, see atan2 implementation and look for comment [JanM]. I suspect there is an optimization bug in VS2017 related to AVX512.
   return p.operator __m512();  
   }
 
