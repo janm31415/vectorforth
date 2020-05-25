@@ -843,13 +843,6 @@ static inline VTYPE atan_f(VTYPE const y, VTYPE const x) {
     re = mul_add(re, zz * z, z) + s;
 
     if constexpr (T2 == 1) {                               // atan2(y,x)
-
-#if (_MSC_VER > 1900 && _MSC_VER < 1920)         // [JanM]: Didn't test this on VS2019. I assume the bug is fixed there, but should be checked.
-      x1 = abs(x);            // [JanM]: This has been computed before, but I'm adding it here again to trick the compiler. Otherwise AVX512 compiler bug on VS2017.
-      y1 = abs(y);            // [JanM]: This has been computed before, but I'm adding it here again to trick the compiler. Otherwise AVX512 compiler bug on VS2017.
-      swapxy = (y1 > x1);     // [JanM]: This has been computed before, but I'm adding it here again to trick the compiler. Otherwise AVX512 compiler bug on VS2017.
-#endif
-
         // move back in place
         re = select(swapxy, float(VM_PI_2) - re, re);
         re = select((x | y) == 0.f, 0.f, re);              // atan2(0,+0) = 0 by convention
@@ -860,6 +853,73 @@ static inline VTYPE atan_f(VTYPE const y, VTYPE const x) {
 
     return re;
 }
+
+template<typename VTYPE>
+static inline VTYPE atan2_janm(VTYPE const y, VTYPE const x) {
+
+  // define constants
+  const float P3atanf = 8.05374449538E-2f;
+  const float P2atanf = -1.38776856032E-1f;
+  const float P1atanf = 1.99777106478E-1f;
+  const float P0atanf = -3.33329491539E-1f;
+
+  typedef decltype (x > x) BVTYPE;             // boolean vector type
+  VTYPE  t, x1, x2, y1, y2, s, a, b, z, zz, re;// data vectors
+  BVTYPE swapxy, notbig, notsmal;              // boolean vectors
+
+  
+  // move in first octant
+  x1 = abs(x);
+  y1 = abs(y);
+  swapxy = (y1 > x1);
+  // swap x and y if y1 > x1
+  x2 = select(swapxy, y1, x1);
+  y2 = select(swapxy, x1, y1);
+
+  // check for special case: x and y are both +/- INF
+  BVTYPE both_infinite = is_inf(x) & is_inf(y);   // x and Y are both infinite
+  if (horizontal_or(both_infinite)) {             // at least one element has both infinite
+    VTYPE mone = VTYPE(-1.0f);
+    x2 = select(both_infinite, x2 & mone, x2);  // get 1.0 with the sign of x
+    y2 = select(both_infinite, y2 & mone, y2);  // get 1.0 with the sign of y
+    }
+
+  // x = y = 0 will produce NAN. No problem, fixed below
+  t = y2 / x2;
+ 
+  // atan2(y,x)
+  // small:  z = t / 1.0;
+  // medium: z = (t-1.0) / (t+1.0);
+  notsmal = t >= float(VM_SQRT2 - 1.);
+  a = if_add(notsmal, t, -1.f);
+  b = if_add(notsmal, 1.f, t);
+  s = notsmal & VTYPE(float(VM_PI_4));
+  z = a / b;
+    
+
+  zz = z * z;
+
+  // Taylor expansion
+  re = polynomial_3(zz, P0atanf, P1atanf, P2atanf, P3atanf);
+  re = mul_add(re, zz * z, z) + s;
+
+  // move back in place
+
+#if (_MSC_VER > 1900 && _MSC_VER < 1920)         // [JanM]: Didn't test this on VS2019. I assume the bug is fixed there, but should be checked.
+  x1 = abs(x);            // [JanM]: This has been computed before, but I'm adding it here again to trick the compiler. Otherwise AVX512 compiler bug on VS2017.
+  y1 = abs(y);            // [JanM]: This has been computed before, but I'm adding it here again to trick the compiler. Otherwise AVX512 compiler bug on VS2017.
+  swapxy = (y1 > x1);     // [JanM]: This has been computed before, but I'm adding it here again to trick the compiler. Otherwise AVX512 compiler bug on VS2017.
+#endif
+  re = select(swapxy, float(VM_PI_2) - re, re);
+  re = select((x | y) == 0.f, 0.f, re);              // atan2(0,+0) = 0 by convention
+  re = select(sign_bit(x), float(VM_PI) - re, re);   // also for x = -0.
+    
+  // get sign bit
+  re = sign_combine(re, y);
+
+
+  return re;
+  }
 
 // instantiations of atan_f template:
 
