@@ -3,6 +3,7 @@
 
 
 #include <vectorforth/context.h>
+#include <vectorforth/compiler.h>
 #include <vectorforth/debug.h>
 #include <vectorforth/dictionary.h>
 #include <vectorforth/expand.h>
@@ -47,6 +48,14 @@ struct compile_fixture
 
     return expanded;
     }
+
+  void print_asm(std::ostream& os, const std::string& script)
+    {
+    ASM::asmcode code;
+    auto words = tokenize(script);
+    compile(code, dict, ed, words);
+    code.stream(os);
+    }
   
   };
 
@@ -63,6 +72,8 @@ struct optimize_1 : public compile_fixture
     TEST_EQ((int)1, (int)res.size());
     TEST_ASSERT(res.front().t == expanded_token::ET_FLOAT);
     TEST_EQ(55.f, res.front().f[0]);
+
+    print_asm(std::cout, "1");
     }
   };
 

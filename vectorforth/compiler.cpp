@@ -382,13 +382,16 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       }
       case expanded_token::ET_INTEGER:
       {
+      code.add(asmcode::COMMENT, "BEGIN PUSH ADDRESS ON THE STACK");
       code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, word.int_value);
       code.add(asmcode::MOV, MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::RAX);
       code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+      code.add(asmcode::COMMENT, "END PUSH ADDRESS ON THE STACK");
       break;
       }
       case expanded_token::ET_FLOAT:
       {
+      code.add(asmcode::COMMENT, "BEGIN PUSH FLOAT ON THE STACK");
       uint32_t v = *(reinterpret_cast<uint32_t*>(&word.f[0]));
       uint64_t v64 = (uint64_t)v;
       uint64_t v2 = (v64 << 32) | v64;
@@ -404,10 +407,12 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(8), asmcode::RAX);
 #endif
       code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+      code.add(asmcode::COMMENT, "END PUSH FLOAT ON THE STACK");
       break;
       }
       case expanded_token::ET_VECTOR:
       {
+      code.add(asmcode::COMMENT, "BEGIN PUSH FLOAT VECTOR ON THE STACK");
       for (int i = 0; i < AVX_LENGTH/2; ++i)
         {
         uint64_t v1_64, v2_64;
@@ -422,45 +427,54 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
         code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(i + 1), asmcode::RAX);
         }
       code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+      code.add(asmcode::COMMENT, "END PUSH FLOAT VECTOR ON THE STACK");
       break;
       }
       case expanded_token::ET_OVERWRITE_VARIABLE:
       {
+      code.add(asmcode::COMMENT, "BEGIN OVERWRITE EXISTING VARIABLE");
       code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.binding_space_offset);
       code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
       code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, (word.binding_space_offset - word.variable_address));
       code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+      code.add(asmcode::COMMENT, "END OVERWRITE EXISTING VARIABLE");
       break;
       }
       case expanded_token::ET_UPDATE_VARIABLE:
       {
+      code.add(asmcode::COMMENT, "BEGIN UPDATE VARIABLE VALUE");
       code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
       if (word.variable_address)
         code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.variable_address);
       code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
       code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
       code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+      code.add(asmcode::COMMENT, "END UPDATE VARIABLE VALUE");
       break;
       }
       case expanded_token::ET_VARIABLE:
       {
+      code.add(asmcode::COMMENT, "BEGIN PUSH VARIABLE ADDRESS OR VALUE ON STACK");
       code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
       if (word.variable_address)
         code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.variable_address);
       code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
       code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
       code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+      code.add(asmcode::COMMENT, "END PUSH VARIABLE ADDRESS OR VALUE ON STACK");
       break;
       }
       case expanded_token::ET_CREATE_VARIABLE:
       {
+      code.add(asmcode::COMMENT, "BEGIN CREATE VARIABLE");
       code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
       if (word.binding_space_offset)
         code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, word.binding_space_offset);
       code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
       code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
       code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+      code.add(asmcode::COMMENT, "END CREATE VARIABLE");
       break;
       }
       } // switch
@@ -489,6 +503,7 @@ void compile(ASM::asmcode& code, dictionary& d, expand_data& ed, const std::vect
   First parameter (rcx) points to the context.
   We store the pointer to the context in register r10.
   */
+  code.add(asmcode::COMMENT, "CONTEXT POINTER (INPUT) IS SAVED IN REGISTER R10");
   code.add(asmcode::MOV, CONTEXT, asmcode::RCX);
 #else
   /*
@@ -502,26 +517,36 @@ void compile(ASM::asmcode& code, dictionary& d, expand_data& ed, const std::vect
   /*
   Save the current content of the registers in the context
   */
+  code.add(asmcode::COMMENT, "STORE THE REGISTERS THAT NEED TO REMAIN UNCHANGED BY CALLING CONVENTIONS");
   store_registers(code);
 
+  code.add(asmcode::COMMENT, "SAVE THE STACK POINTER IN ITS ASSIGNED REGISTER");
   code.add(asmcode::MOV, STACK_REGISTER, STACK_POINTER);
 
+  code.add(asmcode::COMMENT, "SAVE THE HERE POINTER (HEAP) IN ITS ASSIGNED REGISTER");
   code.add(asmcode::MOV, HERE, HERE_POINTER);
 
   /*
   Align stack with 64 byte boundary
   */
+  code.add(asmcode::COMMENT, "ALIGN RSP TO 64 BYTE BOUNDARY");
   code.add(asmcode::AND, asmcode::RSP, asmcode::NUMBER, 0xFFFFFFFFFFFFFFC0);
 
+  code.add(asmcode::COMMENT, "STORE THE RETURN STACK TOP");
   code.add(asmcode::MOV, RSP_TOP, asmcode::RSP);
 
+  code.add(asmcode::COMMENT, "START COMPILATION OF WORDS");
   compile_words(code, cd, expanded);
+  code.add(asmcode::COMMENT, "END COMPILATION OF WORDS");
 
+  code.add(asmcode::COMMENT, "SAVE CURRENT STACK POINTER IN CONTEXT");
   code.add(asmcode::MOV, STACK_POINTER, STACK_REGISTER);
 
   /*Restore the registers to their original state*/
+  code.add(asmcode::COMMENT, "RESTORE THE REGISTERS THAT WERE STORED BEFORE");
   load_registers(code);
 
+  code.add(asmcode::COMMENT, "RETURN TO CALLER");
   /*Return to the caller*/
   code.add(asmcode::RET);
   }
