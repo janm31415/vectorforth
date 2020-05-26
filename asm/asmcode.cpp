@@ -3772,7 +3772,7 @@ namespace
     return opcode::none;
     }
 
-  uint64_t fill_default(uint8_t* opcode_stream, const asmcode::instruction& code, opcode o, opcode::opcode_operand_type op1d, opcode::opcode_operand_type op2d, opcode::opcode_operand_type op3d)
+  uint64_t fill_default(uint8_t* opcode_stream, asmcode::instruction code, opcode o, opcode::opcode_operand_type op1d, opcode::opcode_operand_type op2d, opcode::opcode_operand_type op3d)
     {
 
     if (op1d == opcode::m32 || op2d == opcode::m32)
@@ -3888,7 +3888,7 @@ namespace
       push1byte(stream, sib);
     if (is_memory_operand_type(op1d))
       {
-      if (code.operand1_mem || code.operand1 == asmcode::MEM_RBP || code.operand1 == asmcode::MEM_R13 || code.operand1 == asmcode::BYTE_MEM_RBP || code.operand1 == asmcode::BYTE_MEM_R13) // [rbp] and [r13] are exception 
+      if (code.operand1_mem || code.operand1 == asmcode::MEM_RBP || code.operand1 == asmcode::MEM_R13 || code.operand1 == asmcode::MEM_EBP || code.operand1 == asmcode::DWORD_MEM_RBP || code.operand1 == asmcode::BYTE_MEM_RBP || code.operand1 == asmcode::BYTE_MEM_R13) // [rbp] and [r13] are exception 
         {
         if (is_8_bit(code.operand1_mem))
           push1byte(stream, (uint8_t)code.operand1_mem);
@@ -3928,7 +3928,7 @@ namespace
       }
     else if (is_memory_operand_type(op2d))
       {
-      if (code.operand2_mem || code.operand2 == asmcode::MEM_RBP || code.operand2 == asmcode::MEM_R13 || code.operand2 == asmcode::BYTE_MEM_RBP || code.operand2 == asmcode::BYTE_MEM_R13) // [rbp] and [r13] are exception 
+      if (code.operand2_mem || code.operand2 == asmcode::MEM_RBP || code.operand2 == asmcode::MEM_R13 || code.operand2 == asmcode::MEM_EBP || code.operand2 == asmcode::BYTE_MEM_RBP || code.operand2 == asmcode::DWORD_MEM_RBP || code.operand2 == asmcode::BYTE_MEM_R13) // [rbp] and [r13] are exception 
         {
         if (is_8_bit(code.operand2_mem))
           push1byte(stream, (uint8_t)code.operand2_mem);
@@ -3957,7 +3957,7 @@ namespace
     return stream - opcode_stream;
     }
 
-  uint64_t fill_vex(uint8_t* opcode_stream, const asmcode::instruction& code, opcode o, opcode::opcode_operand_type op1d, opcode::opcode_operand_type op2d, opcode::opcode_operand_type op3d, opcode::opcode_operand_type op4d)
+  uint64_t fill_vex(uint8_t* opcode_stream, asmcode::instruction code, opcode o, opcode::opcode_operand_type op1d, opcode::opcode_operand_type op2d, opcode::opcode_operand_type op3d, opcode::opcode_operand_type op4d)
     {
     if (op1d == opcode::m32 || op2d == opcode::m32)
       {
@@ -4097,7 +4097,7 @@ namespace
       }
     else if (is_memory_operand_type(op3d))
       {
-      if (code.operand3_mem || code.operand3 == asmcode::MEM_RBP) // [rbp] is exception 
+      if (code.operand3_mem || code.operand3 == asmcode::MEM_RBP || code.operand3 == asmcode::MEM_EBP || code.operand3 == asmcode::DWORD_MEM_RBP) // [rbp] is exception 
         {
         if (is_8_bit(code.operand3_mem))
           push1byte(stream, (uint8_t)code.operand3_mem);
@@ -4122,7 +4122,7 @@ namespace
       }
     else if (is_memory_operand_type(op2d))
       {
-      if (code.operand2_mem || code.operand2 == asmcode::MEM_RBP) // [rbp] is exception 
+      if (code.operand2_mem || code.operand2 == asmcode::MEM_RBP || code.operand2 == asmcode::MEM_EBP || code.operand2 == asmcode::DWORD_MEM_RBP) // [rbp] is exception 
         {
         if (is_8_bit(code.operand2_mem))
           push1byte(stream, (uint8_t)code.operand2_mem);
@@ -4132,7 +4132,7 @@ namespace
       }
     else if (is_memory_operand_type(op1d))
       {
-      if (code.operand1_mem || code.operand1 == asmcode::MEM_RBP) // [rbp] is exception 
+      if (code.operand1_mem || code.operand1 == asmcode::MEM_RBP || code.operand1 == asmcode::MEM_EBP || code.operand1 == asmcode::DWORD_MEM_RBP) // [rbp] is exception 
         {
         if (is_8_bit(code.operand1_mem))
           push1byte(stream, (uint8_t)code.operand1_mem);

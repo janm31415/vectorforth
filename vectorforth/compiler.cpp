@@ -393,6 +393,12 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       {
       code.add(asmcode::COMMENT, "BEGIN PUSH FLOAT ON THE STACK");
       uint32_t v = *(reinterpret_cast<uint32_t*>(&word.f[0]));
+      code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+      code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+      /*
+      uint32_t v = *(reinterpret_cast<uint32_t*>(&word.f[0]));
       uint64_t v64 = (uint64_t)v;
       uint64_t v2 = (v64 << 32) | v64;
       code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v2);
@@ -407,6 +413,7 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(8), asmcode::RAX);
 #endif
       code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+      */
       code.add(asmcode::COMMENT, "END PUSH FLOAT ON THE STACK");
       break;
       }
@@ -517,7 +524,7 @@ void compile(ASM::asmcode& code, dictionary& d, expand_data& ed, const std::vect
   /*
   Save the current content of the registers in the context
   */
-  code.add(asmcode::COMMENT, "STORE THE REGISTERS THAT NEED TO REMAIN UNCHANGED BY CALLING CONVENTIONS");
+  code.add(asmcode::COMMENT, "STORE REGISTERS AS REQUESTED BY THE CALLING CONVENTIONS");
   store_registers(code);
 
   code.add(asmcode::COMMENT, "SAVE THE STACK POINTER IN ITS ASSIGNED REGISTER");
@@ -543,7 +550,7 @@ void compile(ASM::asmcode& code, dictionary& d, expand_data& ed, const std::vect
   code.add(asmcode::MOV, STACK_POINTER, STACK_REGISTER);
 
   /*Restore the registers to their original state*/
-  code.add(asmcode::COMMENT, "RESTORE THE REGISTERS THAT WERE STORED BEFORE");
+  code.add(asmcode::COMMENT, "RESTORE THE REGISTERS AS REQUESTED BY THE CALLING CONVENTIONS");
   load_registers(code);
 
   code.add(asmcode::COMMENT, "RETURN TO CALLER");

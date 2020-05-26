@@ -1294,6 +1294,8 @@ namespace
 
     code.add(asmcode::VBROADCASTSS, asmcode::ZMM0, asmcode::XMM0);
 
+    code.add(asmcode::VBROADCASTSS, asmcode::YMM0, asmcode::DWORD_MEM_RBP);
+
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC4, 0xE2, 0x7D, 0x18, 0x44, 0x24, 0xE0 });
@@ -1301,6 +1303,8 @@ namespace
     _check_buffer(buffer, size, { 0xC4, 0xE2, 0x7D, 0x18, 0xA9, 0x00, 0x04, 0x00, 0x00 });
     size = code.get_instructions_list().front()[2].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0x62, 0xF2, 0x7D, 0x48, 0x18, 0xC0 });
+    size = code.get_instructions_list().front()[3].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0xC4, 0xE2, 0x7D, 0x18, 0x45, 0x00 });
     }
 
   void asmcode_vmovaps()
