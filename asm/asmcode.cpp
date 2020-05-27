@@ -427,14 +427,14 @@ namespace
       case asmcode::YMM5: return "ymm5";
       case asmcode::YMM6: return "ymm6";
       case asmcode::YMM7: return "ymm7";
-      case asmcode::ZMM0: return m == asmcode::k0 ? "zmm0" : "zmm0"+ _to_string(m);
-      case asmcode::ZMM1: return m == asmcode::k0 ? "zmm1" : "zmm1"+ _to_string(m);
-      case asmcode::ZMM2: return m == asmcode::k0 ? "zmm2" : "zmm2"+ _to_string(m);
-      case asmcode::ZMM3: return m == asmcode::k0 ? "zmm3" : "zmm3"+ _to_string(m);
-      case asmcode::ZMM4: return m == asmcode::k0 ? "zmm4" : "zmm4"+ _to_string(m);
-      case asmcode::ZMM5: return m == asmcode::k0 ? "zmm5" : "zmm5"+ _to_string(m);
-      case asmcode::ZMM6: return m == asmcode::k0 ? "zmm6" : "zmm6"+ _to_string(m);
-      case asmcode::ZMM7: return m == asmcode::k0 ? "zmm7" : "zmm7"+ _to_string(m);
+      case asmcode::ZMM0: return m == asmcode::k0 ? "zmm0" : "zmm0" + _to_string(m);
+      case asmcode::ZMM1: return m == asmcode::k0 ? "zmm1" : "zmm1" + _to_string(m);
+      case asmcode::ZMM2: return m == asmcode::k0 ? "zmm2" : "zmm2" + _to_string(m);
+      case asmcode::ZMM3: return m == asmcode::k0 ? "zmm3" : "zmm3" + _to_string(m);
+      case asmcode::ZMM4: return m == asmcode::k0 ? "zmm4" : "zmm4" + _to_string(m);
+      case asmcode::ZMM5: return m == asmcode::k0 ? "zmm5" : "zmm5" + _to_string(m);
+      case asmcode::ZMM6: return m == asmcode::k0 ? "zmm6" : "zmm6" + _to_string(m);
+      case asmcode::ZMM7: return m == asmcode::k0 ? "zmm7" : "zmm7" + _to_string(m);
       case asmcode::K0: return "k0";
       case asmcode::K1: return "k1";
       case asmcode::K2: return "k2";
@@ -4173,12 +4173,18 @@ namespace
     return stream - opcode_stream;
     }
 
-  uint64_t get_compressed_displacement(const asmcode::instruction& code, opcode o, opcode::opcode_operand_type op1d, opcode::opcode_operand_type op2d, opcode::opcode_operand_type op3d, opcode::opcode_operand_type op4d)
+  bool mem_is_64_bit_or_higher(opcode::opcode_operand_type op)
     {
-    code; o; op1d; op2d; op3d; op4d;
+    return ((op & opcode::m64) == opcode::m64);
+    }
+
+  uint64_t get_compressed_displacement(opcode::opcode_operand_type op)
+    {    
     /*
     Table 2-34 and 2-35 in Intel guide. Todo
     */
+    if ((op & opcode::m32) == opcode::m32)
+      return 4;
     return 64;
     }
 
@@ -4188,17 +4194,16 @@ namespace
     //
     // not complete
 
-    /*disp8 compression mode for evex instructions*/
-    uint64_t N = get_compressed_displacement(code, o, op1d, op2d, op3d, op4d);
+    /*disp8 compression mode for evex instructions*/    
 
-    if (code.operand1 != asmcode::NUMBER && is_8_bit((int64_t)code.operand1_mem / (int64_t)N))
-      code.operand1_mem = (int64_t)code.operand1_mem / (int64_t)N;
+    if (code.operand1 != asmcode::NUMBER && is_8_bit((int64_t)code.operand1_mem / (int64_t)get_compressed_displacement(op1d)))
+      code.operand1_mem = (int64_t)code.operand1_mem / (int64_t)get_compressed_displacement(op1d);
 
-    if (code.operand2 != asmcode::NUMBER && is_8_bit((int64_t)code.operand2_mem / (int64_t)N))
-      code.operand2_mem = (int64_t)code.operand2_mem / (int64_t)N;
+    if (code.operand2 != asmcode::NUMBER && is_8_bit((int64_t)code.operand2_mem / (int64_t)get_compressed_displacement(op2d)))
+      code.operand2_mem = (int64_t)code.operand2_mem / (int64_t)get_compressed_displacement(op2d);
 
-    if (code.operand3 != asmcode::NUMBER && is_8_bit((int64_t)code.operand3_mem / (int64_t)N))
-      code.operand3_mem = (int64_t)code.operand3_mem / (int64_t)N;
+    if (code.operand3 != asmcode::NUMBER && is_8_bit((int64_t)code.operand3_mem / (int64_t)get_compressed_displacement(op3d)))
+      code.operand3_mem = (int64_t)code.operand3_mem / (int64_t)get_compressed_displacement(op3d);
 
     uint8_t* stream = opcode_stream;
 
@@ -4511,7 +4516,7 @@ uint64_t asmcode::instruction::fill_opcode(uint8_t* opcode_stream) const
     case asmcode::JGS: return fill(opcode_stream, *this, g_table.find("JGS")->second);
     case asmcode::JGES: return fill(opcode_stream, *this, g_table.find("JGES")->second);
     case asmcode::JNES: return fill(opcode_stream, *this, g_table.find("JNES")->second);
-    case asmcode::JMPS: return fill(opcode_stream, *this, g_table.find("JMPS")->second);    
+    case asmcode::JMPS: return fill(opcode_stream, *this, g_table.find("JMPS")->second);
     case asmcode::KMOVW: return fill(opcode_stream, *this, g_table.find("KMOVW")->second);
     case asmcode::MOV: return fill(opcode_stream, *this, g_table.find("MOV")->second);
     case asmcode::MOVAPS: return fill(opcode_stream, *this, g_table.find("MOVAPS")->second);

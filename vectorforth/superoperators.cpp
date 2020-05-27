@@ -11,7 +11,7 @@ namespace
 
   std::vector<expanded_token>::iterator combine_floats(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
     {
-    auto sz = std::distance(it, words.end());
+    auto sz = std::distance(it, words.end());    
     if (sz >= 6)
       {
       auto it1 = it + 1;
@@ -65,7 +65,7 @@ namespace
        it = words.erase(it, it3);
        return it;
        }
-     }
+     }     
     if (sz >= 3)
       {
       auto it1 = it + 1;
@@ -79,7 +79,7 @@ namespace
         it = words.erase(it, it2);
         return it;
         }
-      }
+      }    
    if (sz >= 2)
      {
      auto it1 = it + 1;
