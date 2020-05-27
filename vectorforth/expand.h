@@ -22,7 +22,13 @@ struct expanded_token
     ET_OVERWRITE_VARIABLE,
     ET_VARIABLE,
     ET_CREATE_VARIABLE,
-    ET_UPDATE_VARIABLE
+    ET_UPDATE_VARIABLE,
+    // superoperators
+    ET_FLOAT2,
+    ET_FLOAT3,
+    ET_FLOAT4,
+    ET_FLOAT5,
+    ET_FLOAT6
     };
 
   expanded_token(e_type type) : t(type) {}

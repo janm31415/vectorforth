@@ -16,6 +16,7 @@ namespace.h
 primitives.h
 stdlib.h
 strength_reduction.h
+superoperators.h
 tokenize.h
 vectorforth_api.h
 )
@@ -33,6 +34,7 @@ dictionary.cpp
 primitives.cpp
 stdlib.cpp
 strength_reduction.cpp
+superoperators.cpp
 tokenize.cpp
 )
 

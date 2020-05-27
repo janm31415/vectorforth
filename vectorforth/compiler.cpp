@@ -7,6 +7,7 @@
 #include "expand_data.h"
 #include "primitives.h"
 #include "strength_reduction.h"
+#include "superoperators.h"
 #include "asm_aux.h"
 #include "tokenize.h"
 
@@ -30,12 +31,14 @@ void compile_primitive_single_pass(asmcode& code, dictionary& d, expand_data& ed
     if (ed.create_called)
       throw std::runtime_error(compile_error_text(VF_ERROR_CREATE_WAS_ALREADY_CALLED, word.line_nr, word.column_nr).c_str());
     ed.create_called = true;
+    code.add(asmcode::COMMENT, "BEGIN CREATE VARIABLE");
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
     if (ed.binding_space_offset)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, ed.binding_space_offset);
     code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
     code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
     code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+    code.add(asmcode::COMMENT, "END CREATE VARIABLE");
     }
   else if (word.value == "to")
     {
@@ -70,6 +73,7 @@ void compile_variable_single_pass(asmcode& code, expand_data& ed, uint64_t addre
   {
   if (ed.to_called)
     {
+    code.add(asmcode::COMMENT, "BEGIN UPDATE VARIABLE VALUE");
     ed.to_called = false;
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
     if (address)
@@ -77,15 +81,18 @@ void compile_variable_single_pass(asmcode& code, expand_data& ed, uint64_t addre
     code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
     code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
     code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+    code.add(asmcode::COMMENT, "END UPDATE VARIABLE VALUE");
     }
   else
     {
+    code.add(asmcode::COMMENT, "BEGIN PUSH VARIABLE ADDRESS OR VALUE ON STACK");
     code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
     if (address)
       code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, address);
     code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
     code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
     code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+    code.add(asmcode::COMMENT, "END PUSH VARIABLE ADDRESS OR VALUE ON STACK");
     }
   }
 
@@ -105,11 +112,13 @@ void compile_word_single_pass(asmcode& code, dictionary& d, expand_data& ed, com
       {
       if (ed.create_called)  // overwriting existing variable
         {
+        code.add(asmcode::COMMENT, "BEGIN OVERWRITE EXISTING VARIABLE");
         code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
         code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, ed.binding_space_offset);
         code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
         code.add(asmcode::SUB, asmcode::RAX, asmcode::NUMBER, (ed.binding_space_offset - e.address));
         code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+        code.add(asmcode::COMMENT, "END OVERWRITE EXISTING VARIABLE");
         ed.create_called = false;
         return;
         }
@@ -132,27 +141,20 @@ void compile_word_single_pass(asmcode& code, dictionary& d, expand_data& ed, com
 
 void compile_float_single_pass(asmcode& code, token word)
   {
+  code.add(asmcode::COMMENT, "BEGIN PUSH FLOAT ON THE STACK");
   assert(word.type == token::T_FLOAT);
   float f = to_float(word.value.c_str());
   uint32_t v = *(reinterpret_cast<uint32_t*>(&f));
-  uint64_t v64 = (uint64_t)v;
-  uint64_t v2 = (v64 << 32) | v64;
-  code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v2);
-  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(1), asmcode::RAX);
-  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(2), asmcode::RAX);
-  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(3), asmcode::RAX);
-  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(4), asmcode::RAX);
-#ifdef AVX512
-  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(5), asmcode::RAX);
-  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(6), asmcode::RAX);
-  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(7), asmcode::RAX);
-  code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(8), asmcode::RAX);
-#endif
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+  code.add(asmcode::COMMENT, "BEGIN END FLOAT ON THE STACK");
   }
 
 void compile_integer_single_pass(asmcode& code, token word)
   {
+  code.add(asmcode::COMMENT, "BEGIN PUSH ADDRESS ON THE STACK");
   assert(word.type == token::T_INTEGER);
   std::stringstream ss;
   ss << word.value;
@@ -161,10 +163,12 @@ void compile_integer_single_pass(asmcode& code, token word)
   code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v);
   code.add(asmcode::MOV, MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::RAX);
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::COMMENT, "END PUSH FLOAT ON THE STACK");
   }
 
 void compile_vector_single_pass(asmcode& code, const std::vector<token>& words)
   {
+  code.add(asmcode::COMMENT, "BEGIN PUSH VECTOR ON THE STACK");
   assert(words.size() == AVX_LENGTH);
   for (int i = 0; i < AVX_LENGTH/2; ++i)
     {
@@ -205,6 +209,7 @@ void compile_vector_single_pass(asmcode& code, const std::vector<token>& words)
     code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(i + 1), asmcode::RAX);
     }
   code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::COMMENT, "END PUSH FLOAT ON THE STACK");
   }
 
 void compile_definition_single_pass(dictionary& d, std::vector<token>& words, int line_nr, int column_nr)
@@ -397,24 +402,122 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
       code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER);
       code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
-      /*
-      uint32_t v = *(reinterpret_cast<uint32_t*>(&word.f[0]));
-      uint64_t v64 = (uint64_t)v;
-      uint64_t v2 = (v64 << 32) | v64;
-      code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, v2);
-      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(1), asmcode::RAX);
-      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(2), asmcode::RAX);
-      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(3), asmcode::RAX);
-      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(4), asmcode::RAX);
-#ifdef AVX512
-      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(5), asmcode::RAX);
-      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(6), asmcode::RAX);
-      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(7), asmcode::RAX);
-      code.add(asmcode::MOV, MEM_STACK_REGISTER, -CELLS(8), asmcode::RAX);
-#endif
-      code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
-      */
       code.add(asmcode::COMMENT, "END PUSH FLOAT ON THE STACK");
+      break;
+      }
+      case expanded_token::ET_FLOAT2:
+      {
+      code.add(asmcode::COMMENT, "BEGIN PUSH TWO FLOATS ON THE STACK");
+      uint32_t v1 = *(reinterpret_cast<uint32_t*>(&word.f[1]));
+      uint32_t v2 = *(reinterpret_cast<uint32_t*>(&word.f[0]));     
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::NUMBER, v1);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
+      code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1));
+      code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(1), AVX_REG1);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(2), AVX_REG0);
+      code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+      code.add(asmcode::COMMENT, "END PUSH TWO FLOATS ON THE STACK");
+      break;
+      }
+      case expanded_token::ET_FLOAT3:
+      {
+      code.add(asmcode::COMMENT, "BEGIN PUSH THREE FLOATS ON THE STACK");
+      uint32_t v1 = *(reinterpret_cast<uint32_t*>(&word.f[2]));
+      uint32_t v2 = *(reinterpret_cast<uint32_t*>(&word.f[1]));
+      uint32_t v3 = *(reinterpret_cast<uint32_t*>(&word.f[0]));
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1), asmcode::NUMBER, v1);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1) - 8, asmcode::NUMBER, v3);
+      code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1));
+      code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1) - 4);
+      code.add(asmcode::VBROADCASTSS, AVX_REG2, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1) - 8);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, - AVX_CELLS(1), AVX_REG2);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, - AVX_CELLS(2), AVX_REG1);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, - AVX_CELLS(3), AVX_REG0);
+      code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(3));
+      code.add(asmcode::COMMENT, "END PUSH THREE FLOATS ON THE STACK");
+      break;
+      }
+      case expanded_token::ET_FLOAT4:
+      {
+      code.add(asmcode::COMMENT, "BEGIN PUSH FOUR FLOATS ON THE STACK");
+      uint32_t v1 = *(reinterpret_cast<uint32_t*>(&word.f[3]));
+      uint32_t v2 = *(reinterpret_cast<uint32_t*>(&word.f[2]));
+      uint32_t v3 = *(reinterpret_cast<uint32_t*>(&word.f[1]));
+      uint32_t v4 = *(reinterpret_cast<uint32_t*>(&word.f[0]));
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::NUMBER, v1);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8, asmcode::NUMBER, v3);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 12, asmcode::NUMBER, v4);
+      code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1));
+      code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4);
+      code.add(asmcode::VBROADCASTSS, AVX_REG2, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8);
+      code.add(asmcode::VBROADCASTSS, AVX_REG3, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 12);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(1), AVX_REG3);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(2), AVX_REG2);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(3), AVX_REG1);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(4), AVX_REG0);
+      code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(4));
+      code.add(asmcode::COMMENT, "END PUSH FOUR FLOATS ON THE STACK");
+      break;
+      }
+      case expanded_token::ET_FLOAT5:
+      {
+      code.add(asmcode::COMMENT, "BEGIN PUSH FIVE FLOATS ON THE STACK");
+      uint32_t v1 = *(reinterpret_cast<uint32_t*>(&word.f[4]));
+      uint32_t v2 = *(reinterpret_cast<uint32_t*>(&word.f[3]));
+      uint32_t v3 = *(reinterpret_cast<uint32_t*>(&word.f[2]));
+      uint32_t v4 = *(reinterpret_cast<uint32_t*>(&word.f[1]));
+      uint32_t v5 = *(reinterpret_cast<uint32_t*>(&word.f[0]));
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::NUMBER, v1);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8, asmcode::NUMBER, v3);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 12, asmcode::NUMBER, v4);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 16, asmcode::NUMBER, v5);
+      code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1));
+      code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4);
+      code.add(asmcode::VBROADCASTSS, AVX_REG2, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8);
+      code.add(asmcode::VBROADCASTSS, AVX_REG3, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 12);
+      code.add(asmcode::VBROADCASTSS, AVX_REG4, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 16);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(1), AVX_REG4);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(2), AVX_REG3);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(3), AVX_REG2);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(4), AVX_REG1);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(5), AVX_REG0);
+      code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(5));
+      code.add(asmcode::COMMENT, "END PUSH FIVE FLOATS ON THE STACK");
+      break;
+      }
+      case expanded_token::ET_FLOAT6:
+      {
+      code.add(asmcode::COMMENT, "BEGIN PUSH SIX FLOATS ON THE STACK");
+      uint32_t v1 = *(reinterpret_cast<uint32_t*>(&word.f[5]));
+      uint32_t v2 = *(reinterpret_cast<uint32_t*>(&word.f[4]));
+      uint32_t v3 = *(reinterpret_cast<uint32_t*>(&word.f[3]));
+      uint32_t v4 = *(reinterpret_cast<uint32_t*>(&word.f[2]));
+      uint32_t v5 = *(reinterpret_cast<uint32_t*>(&word.f[1]));
+      uint32_t v6 = *(reinterpret_cast<uint32_t*>(&word.f[0]));
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::NUMBER, v1);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8, asmcode::NUMBER, v3);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 12, asmcode::NUMBER, v4);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 16, asmcode::NUMBER, v5);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 20, asmcode::NUMBER, v6);
+      code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1));
+      code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4);
+      code.add(asmcode::VBROADCASTSS, AVX_REG2, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8);
+      code.add(asmcode::VBROADCASTSS, AVX_REG3, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 12);
+      code.add(asmcode::VBROADCASTSS, AVX_REG4, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 16);
+      code.add(asmcode::VBROADCASTSS, AVX_REG5, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 20);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(1), AVX_REG5);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(2), AVX_REG4);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(3), AVX_REG3);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(4), AVX_REG2);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(5), AVX_REG1);
+      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(6), AVX_REG0);
+      code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(6));
+      code.add(asmcode::COMMENT, "END PUSH SIX FLOATS ON THE STACK");
       break;
       }
       case expanded_token::ET_VECTOR:
@@ -500,6 +603,7 @@ void compile(ASM::asmcode& code, dictionary& d, expand_data& ed, const std::vect
     strength_reduction(expanded);
     constant_folding(expanded);
     }
+  superoperators(expanded);
 
   std::reverse(expanded.begin(), expanded.end());
 
