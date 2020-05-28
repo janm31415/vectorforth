@@ -29,6 +29,60 @@ void superoperator_address_addi(asmcode& code, const expanded_token& et)
   code.add(asmcode::COMMENT, "END SUPEROPERATOR #addr #+");
   }
 
+void superoperator_address_subi_fetch(asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR #addr #- @");
+
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, et.int_value);
+  code.add(asmcode::SUB, asmcode::RAX, asmcode::R11);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR #addr #- @");
+  }
+
+void superoperator_address_addi_fetch(asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR #addr #+ @");
+
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, et.int_value);
+  code.add(asmcode::ADD, asmcode::RAX, asmcode::R11);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR #addr #+ @");
+  }
+
+void superoperator_stacktopfetch_address_subi_fetch(asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR st@ #addr #- @");
+
+  code.add(asmcode::MOV, asmcode::RAX, STACK_TOP);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, et.int_value);
+  code.add(asmcode::SUB, asmcode::RAX, asmcode::R11);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR st@ #addr #- @");
+  }
+
+void superoperator_stacktopfetch_address_addi_fetch(asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR st@ #addr #+ @");
+
+  code.add(asmcode::MOV, asmcode::RAX, STACK_TOP);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, et.int_value);
+  code.add(asmcode::ADD, asmcode::RAX, asmcode::R11);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR st@ #addr #+ @");
+  }
+
 namespace
   {
   bool is_float(std::vector<expanded_token>::iterator it)
@@ -54,6 +108,16 @@ namespace
   bool is_addi(std::vector<expanded_token>::iterator it)
     {
     return is_primitive(it) && (it->prim == &primitive_addi);
+    }
+
+  bool is_fetch(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_fetch);
+    }
+
+  bool is_stack_top_fetch(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_stack_top_fetch);
     }
 
   std::vector<expanded_token>::iterator combine_floats(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
@@ -145,12 +209,58 @@ namespace
 
   std::vector<expanded_token>::iterator combine_primitives(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
     {
+    auto sz = std::distance(it, words.end());
+    if (sz >= 4)
+      {
+      auto it1 = it + 1;
+      auto it2 = it + 2;
+      auto it3 = it + 3;
+      if (is_stack_top_fetch(it) && is_integer(it1) && is_subi(it2) && is_fetch(it3))
+        {
+        it->int_value = it1->int_value;
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_stacktopfetch_address_subi_fetch;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_stack_top_fetch(it) && is_integer(it1) && is_addi(it2) && is_fetch(it3))
+        {
+        it->int_value = it1->int_value;
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_stacktopfetch_address_addi_fetch;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      }
     return it;
     }
 
   std::vector<expanded_token>::iterator combine_address_ops(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
     {
     auto sz = std::distance(it, words.end());
+    if (sz >= 3)
+      {
+      auto it1 = it + 1;
+      auto it2 = it + 2;
+      if (is_subi(it1) && is_fetch(it2))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_address_subi_fetch;
+        *it2 = *it;
+        it = words.erase(it, it2);
+        return it;
+        }
+      if (is_addi(it1) && is_fetch(it2))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_address_addi_fetch;
+        *it2 = *it;
+        it = words.erase(it, it2);
+        return it;
+        }
+      }
     if (sz >= 2)
       {
       auto it1 = it + 1;
