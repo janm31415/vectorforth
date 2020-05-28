@@ -47,6 +47,7 @@ struct expanded_token
   uint64_t variable_address; // used by all ET_<...>_VARIABLE types.
 
   prim_fun prim; // used by ET_PRIMITIVE. Contains pointer to primitive operation.
+  int64_t reserve1;
 
   superoperator_fun supop; // used by ET_SUPEROPERATOR.
   };

@@ -69,18 +69,25 @@ void superoperator_stacktopfetch_address_subi_fetch(asmcode& code, const expande
   code.add(asmcode::COMMENT, "END SUPEROPERATOR st@ #addr #- @");
   }
 
-void superoperator_stacktopfetch_address_addi_fetch(asmcode& code, const expanded_token& et)
+
+void superoperator_stacktopfetch_address_subi_fetch_twice(asmcode& code, const expanded_token& et)
   {
-  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR st@ #addr #+ @");
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR st@ #addr #- @ st@ #addr #- @");
 
   code.add(asmcode::MOV, asmcode::RAX, STACK_TOP);
   code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, et.int_value);
-  code.add(asmcode::ADD, asmcode::RAX, asmcode::R11);
+  code.add(asmcode::MOV, asmcode::RCX, asmcode::NUMBER, et.reserve1);
+  code.add(asmcode::SUB, asmcode::RCX, asmcode::R11);
+  code.add(asmcode::SUB, asmcode::RAX, asmcode::R11);
   code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
-  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+  code.add(asmcode::SUB, asmcode::RAX, asmcode::RCX);
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RAX);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(1), AVX_REG0);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(2), AVX_REG1);
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  
 
-  code.add(asmcode::COMMENT, "END SUPEROPERATOR st@ #addr #+ @");
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR st@ #addr #- @ st@ #addr #- @");
   }
 
 namespace
@@ -210,6 +217,26 @@ namespace
   std::vector<expanded_token>::iterator combine_primitives(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
     {
     auto sz = std::distance(it, words.end());
+    if (sz >= 8)
+      {
+      auto it1 = it + 1;
+      auto it2 = it + 2;
+      auto it3 = it + 3;
+      auto it4 = it + 4;
+      auto it5 = it + 5;
+      auto it6 = it + 6;
+      auto it7 = it + 7;
+      if (is_stack_top_fetch(it) && is_integer(it1) && is_subi(it2) && is_fetch(it3) && is_stack_top_fetch(it4) && is_integer(it5) && is_subi(it6) && is_fetch(it7))
+        {
+        it->int_value = it1->int_value;
+        it->reserve1 = it5->int_value;
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_stacktopfetch_address_subi_fetch_twice;
+        *it7 = *it;
+        it = words.erase(it, it7);
+        return it;
+        }
+      }
     if (sz >= 4)
       {
       auto it1 = it + 1;
@@ -223,16 +250,7 @@ namespace
         *it3 = *it;
         it = words.erase(it, it3);
         return it;
-        }
-      if (is_stack_top_fetch(it) && is_integer(it1) && is_addi(it2) && is_fetch(it3))
-        {
-        it->int_value = it1->int_value;
-        it->t = expanded_token::ET_SUPEROPERATOR;
-        it->supop = &superoperator_stacktopfetch_address_addi_fetch;
-        *it3 = *it;
-        it = words.erase(it, it3);
-        return it;
-        }
+        }     
       }
     return it;
     }
