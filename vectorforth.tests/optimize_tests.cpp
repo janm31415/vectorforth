@@ -74,9 +74,9 @@ struct optimize_1 : public compile_fixture
     TEST_EQ(55.f, res.front().f[0]);
 
     std::string script = R"(
-: u st@ #160- @ ;
-: v st@ #192- @ ;
-: t st@ #224- @ ;
+: u st@ #160 #- @ ;
+: v st@ #192 #- @ ;
+: t st@ #224 #- @ ;
 0.5 t u + cos +
 0.5 t v 2 + + cos +
 0.5 t u 4 + + cos +

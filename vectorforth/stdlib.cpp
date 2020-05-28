@@ -38,6 +38,27 @@ namespace
 void add_stdlib_to_dictionary(dictionary& d)
   {
   register_definition(d, ": pi 3.14159265359 ;");
+
+  register_definition(d, ": #1+ #1 #+ ;");
+  register_definition(d, ": #32+ #32 #+ ;");
+  register_definition(d, ": #64+ #64 #+ ;");
+  register_definition(d, ": #96+ #96 #+ ;");
+  register_definition(d, ": #128+ #128 #+ ;");
+  register_definition(d, ": #160+ #160 #+ ;");
+  register_definition(d, ": #192+ #192 #+ ;");
+  register_definition(d, ": #224+ #224 #+ ;");
+  register_definition(d, ": #256+ #256 #+ ;");
+
+  register_definition(d, ": #1- #1 #- ;");
+  register_definition(d, ": #32- #32 #- ;");
+  register_definition(d, ": #64- #64 #- ;");
+  register_definition(d, ": #96- #96 #- ;");
+  register_definition(d, ": #128- #128 #- ;");
+  register_definition(d, ": #160- #160 #- ;");
+  register_definition(d, ": #192- #192 #- ;");
+  register_definition(d, ": #224- #224 #- ;");
+  register_definition(d, ": #256- #256 #- ;");
+
   register_definition(d, ": mod fm/mod drop ;");
   register_definition(d, ": div fm/mod swap drop ;");
   register_definition(d, ": nip ( x y -- y ) swap drop ;");

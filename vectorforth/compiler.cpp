@@ -385,6 +385,11 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       word.prim(code, cd);
       break;
       }
+      case expanded_token::ET_SUPEROPERATOR:
+      {
+      word.supop(code, word);
+      break;
+      }
       case expanded_token::ET_INTEGER:
       {
       code.add(asmcode::COMMENT, "BEGIN PUSH ADDRESS ON THE STACK");
@@ -586,7 +591,7 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
       code.add(asmcode::COMMENT, "END CREATE VARIABLE");
       break;
-      }
+      }      
       } // switch
     }
   }

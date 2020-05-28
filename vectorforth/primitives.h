@@ -63,26 +63,6 @@ void primitive_addi(ASM::asmcode& code, compile_data& cd);
 void primitive_subi(ASM::asmcode& code, compile_data&);
 void primitive_muli(ASM::asmcode& code, compile_data&);
 void primitive_divi(ASM::asmcode& code, compile_data&);
-void primitive_incri(ASM::asmcode& code, compile_data& cd);
-void primitive_decri(ASM::asmcode& code, compile_data& cd);
-void primitive_incr32i(ASM::asmcode& code, compile_data& cd);
-void primitive_decr32i(ASM::asmcode& code, compile_data& cd);
-void primitive_incr64i(ASM::asmcode& code, compile_data& cd);
-void primitive_decr64i(ASM::asmcode& code, compile_data& cd);
-void primitive_incr96i(ASM::asmcode& code, compile_data& cd);
-void primitive_decr96i(ASM::asmcode& code, compile_data& cd);
-void primitive_incr128i(ASM::asmcode& code, compile_data& cd);
-void primitive_decr128i(ASM::asmcode& code, compile_data& cd);
-void primitive_incr160i(ASM::asmcode& code, compile_data& cd);
-void primitive_decr160i(ASM::asmcode& code, compile_data& cd);
-void primitive_incr192i(ASM::asmcode& code, compile_data& cd);
-void primitive_decr192i(ASM::asmcode& code, compile_data& cd);
-void primitive_incr224i(ASM::asmcode& code, compile_data& cd);
-void primitive_decr224i(ASM::asmcode& code, compile_data& cd);
-void primitive_incr256i(ASM::asmcode& code, compile_data& cd);
-void primitive_decr256i(ASM::asmcode& code, compile_data& cd);
-
-
 
 void primitive_equ(ASM::asmcode& code, compile_data& cd);
 void primitive_nequ(ASM::asmcode& code, compile_data& cd);

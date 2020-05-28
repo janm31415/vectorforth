@@ -7,9 +7,9 @@
 VF_BEGIN
 
 /*
-This step introduces superoperators: an optimization technique for bytecoded interpreters.
-Superoperators are virtual machine operations automatically synthesized from smaller 
-operations to avoid costly per-operation overhead.
+This step introduces superoperators: an optimization technique for bytecoded interpreters.
+Superoperators are virtual machine operations automatically synthesized from smaller
+operations to avoid costly per-operation overhead.
 
 For instance: three floats pushed on the stack as three seperate operations can be replaced
 by one operator that pushes the 3 values on the stack at once.
@@ -23,6 +23,13 @@ Sources: https://www.complang.tuwien.ac.at/forth/peep/
   pages =	 "322--332"
 }
 */
+
+struct compile_data;
+struct expanded_token;
+
+void superoperator_address_subi(ASM::asmcode& code, const expanded_token& et);
+void superoperator_address_addi(ASM::asmcode& code, const expanded_token& et);
+
 VECTOR_FORTH_API void superoperators(std::vector<expanded_token>& words);
 
 VF_END

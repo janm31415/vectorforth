@@ -158,10 +158,10 @@ int main(int argc, char** argv)
 
 #ifdef AVX512
   std::string main = R"(
-: x st@ #64- @ ;
-: y st@ #128- @ ;
-: rx st@ #192- @ ;
-: ry st@ #256- @ ;
+: x st@ #64 #- @ ;
+: y st@ #128 #- @ ;
+: rx st@ #192 #- @ ;
+: ry st@ #256 #- @ ;
 : u st@ #320 #- @ ;
 : v st@ #384 #- @ ;
 : t st@ #448 #- @ ;
@@ -174,14 +174,14 @@ int main(int argc, char** argv)
 )";
 #else
   std::string main = R"(
-: x st@ #32- @ ;
-: y st@ #64- @ ;
-: rx st@ #96- @ ;
-: ry st@ #128- @ ;
-: u st@ #160- @ ;
-: v st@ #192- @ ;
-: t st@ #224- @ ;
-: dt st@ #256- @ ;
+: x st@ #32 #- @ ;
+: y st@ #64 #- @ ;
+: rx st@ #96 #- @ ;
+: ry st@ #128 #- @ ;
+: u st@ #160 #- @ ;
+: v st@ #192 #- @ ;
+: t st@ #224 #- @ ;
+: dt st@ #256 #- @ ;
 : frame st@ #288 #- @ ;
 : mx st@ #320 #- @ ;
 : my st@ #352 #- @ ;
