@@ -27,7 +27,7 @@ namespace
 
 #ifdef AVX512
 
-  int32_t get_avx2_i32(__m512i v, int i)
+  inline int32_t get_avx2_i32(__m512i v, int i)
     {
 #ifdef _WIN32
     return v.m512i_i32[i];
@@ -37,7 +37,7 @@ namespace
 #endif
     }
 
-  uint64_t get_avx2_u64(__m512i v, int i)
+  inline uint64_t get_avx2_u64(__m512i v, int i)
     {
 #ifdef _WIN32
     return v.m512i_u64[i];
@@ -47,7 +47,7 @@ namespace
 #endif
     }
 
-  float get_avx2_f32(__m512 v, int i)
+  inline float get_avx2_f32(__m512 v, int i)
     {
 #ifdef _WIN32
     return v.m512_f32[i];
@@ -56,13 +56,13 @@ namespace
 #endif
     }
 
-  int32_t get_avx2_i32(__m512 v, int i)
+  inline int32_t get_avx2_i32(__m512 v, int i)
     {
     float f = get_avx2_f32(v, i);
     return *reinterpret_cast<int32_t*>(&f);
     }
 
-  uint64_t get_avx2_u64(__m512 v, int i)
+  inline uint64_t get_avx2_u64(__m512 v, int i)
     {
 #ifdef _WIN32    
     return *reinterpret_cast<uint64_t*>(&v.m512_f32[i]);
@@ -73,7 +73,7 @@ namespace
 
 #else
 
-  int32_t get_avx2_i32(__m256i v, int i)
+  inline int32_t get_avx2_i32(__m256i v, int i)
     {
 #ifdef _WIN32
     return v.m256i_i32[i];
@@ -83,7 +83,7 @@ namespace
 #endif
     }
 
-  uint64_t get_avx2_u64(__m256i v, int i)
+  inline uint64_t get_avx2_u64(__m256i v, int i)
     {
 #ifdef _WIN32
     return v.m256i_u64[i];
@@ -93,7 +93,7 @@ namespace
 #endif
     }
 
-  float get_avx2_f32(__m256 v, int i)
+  inline float get_avx2_f32(__m256 v, int i)
     {
 #ifdef _WIN32
     return v.m256_f32[i];
@@ -102,13 +102,13 @@ namespace
 #endif
     }
 
-  int32_t get_avx2_i32(__m256 v, int i)
+  inline int32_t get_avx2_i32(__m256 v, int i)
     {    
     float f = get_avx2_f32(v, i);
     return *reinterpret_cast<int32_t*>(&f);
     }
 
-  uint64_t get_avx2_u64(__m256 v, int i)
+  inline uint64_t get_avx2_u64(__m256 v, int i)
     {
 #ifdef _WIN32    
     return *reinterpret_cast<uint64_t*>(&v.m256_f32[i]);
@@ -2171,6 +2171,7 @@ struct stdlib_tests : public compile_fixture
     TEST_EQ(2, get_stack_valuei(0));
     
     run("v16 0 0.5 1 1.5 2 2.5 3 3.5 0 0.5 1 1.5 2 2.5 3 3.5 1 3 clamp");
+    print_stack(std::cout, ctxt);
     auto v = get_last_stack_value();
     TEST_EQ(1.f, get_avx2_f32(v, 7));
     TEST_EQ(1.f, get_avx2_f32(v, 6));

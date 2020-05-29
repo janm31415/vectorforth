@@ -408,9 +408,9 @@ int main(int argc, char** argv)
         for (int i = 0; i < 8; ++i)
 #endif
           {
-          uint32_t red = (uint64_t)(clamp(r[i], 0.f, 1.f) * 255.f);
-          uint32_t green = (uint64_t)(clamp(g[i], 0.f, 1.f) * 255.f);
-          uint32_t blue = (uint64_t)(clamp(b[i], 0.f, 1.f) * 255.f);
+          uint32_t red = (uint32_t)(clamp(r[i], 0.f, 1.f) * 255.f);
+          uint32_t green = (uint32_t)(clamp(g[i], 0.f, 1.f) * 255.f);
+          uint32_t blue = (uint32_t)(clamp(b[i], 0.f, 1.f) * 255.f);
           *p_im++ = 0xff000000 | (red << 16) | (green << 8) | blue;
           }
         }
