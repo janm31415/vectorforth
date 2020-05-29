@@ -332,6 +332,7 @@ namespace
       case asmcode::TEST: return "test";
       case asmcode::UCOMISD: return "ucomisd";
       case asmcode::VADDPS: return "vaddps";
+      case asmcode::VANDPS: return "vandps";
       case asmcode::VORPS: return "vorps";
       case asmcode::VCMPPS: return "vcmpps";
       case asmcode::VDIVPS: return "vdivps";

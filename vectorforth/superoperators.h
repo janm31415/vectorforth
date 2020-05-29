@@ -45,6 +45,23 @@ void superoperator_swap_over(ASM::asmcode& code, const expanded_token& et);
 void superoperator_swap_over_address_addi_store(ASM::asmcode& code, const expanded_token& et);
 void superoperator_here_fetch_swap_here_addstorei(ASM::asmcode& code, const expanded_token& et);
 void superoperator_dup_floor_sub(ASM::asmcode& code, const expanded_token& et);
+void superoperator_variable_fetch(ASM::asmcode& code, const expanded_token& et);
+void superoperator_variable_integer_addi_fetch(ASM::asmcode& code, const expanded_token& et);
+void superoperator_rtpopop(ASM::asmcode& code, const expanded_token& et);
+void superoperator_rtpopopop(ASM::asmcode& code, const expanded_token& et);
+
+void superoperator_mulmul(ASM::asmcode& code, const expanded_token& et);
+void superoperator_addadd(ASM::asmcode& code, const expanded_token& et);
+void superoperator_subsub(ASM::asmcode& code, const expanded_token& et);
+void superoperator_divdiv(ASM::asmcode& code, const expanded_token& et);
+void superoperator_mulmulmul(ASM::asmcode& code, const expanded_token& et);
+void superoperator_addaddadd(ASM::asmcode& code, const expanded_token& et);
+void superoperator_subsubsub(ASM::asmcode& code, const expanded_token& et);
+void superoperator_divdivdiv(ASM::asmcode& code, const expanded_token& et);
+
+void superoperator_dupup(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dupupup(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dupupupup(ASM::asmcode& code, const expanded_token& et);
 
 VECTOR_FORTH_API void superoperators(std::vector<expanded_token>& words);
 

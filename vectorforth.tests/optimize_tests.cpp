@@ -81,7 +81,26 @@ struct optimize_1 : public compile_fixture
 0.5 t v 2 + + cos +
 0.5 t u 4 + + cos +
 )";
-    print_asm(std::cout, script);
+
+    std::string script2 = R"(
+: u st@ #160 #- @ ;
+: v st@ #192 #- @ ;
+: t st@ #224 #- @ ;
+: x u ;
+: y v ;
+
+( Make harmonique )
+: harm ( a b c d x - a+b*sin[x*d+c] ) * + sin * + ;
+
+( Fourier Series )
+0
+1 3 t 2 / + 8 t x + harm
+.7 2 t 3 * + 3 t 4 / x + harm
+.5 3 t 7 * + 17 t x + harm
+.7 6 t 11 * + 13 t 13 / x + harm
+5 / .5 + y - abs 0.01 - 1 - negate abs dup 4 ** swap 20 **
+)";
+    print_asm(std::cout, script2);
     }
   };
 
