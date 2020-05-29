@@ -222,6 +222,32 @@ void superoperator_swap_over_address_addi_store(ASM::asmcode& code, const expand
   code.add(asmcode::COMMENT, "END SUPEROPERATOR swap over #addr #+ store");
   }
 
+void superoperator_here_fetch_swap_here_addstorei(ASM::asmcode& code, const expanded_token& et)
+  {
+  // speeds up allot
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR here @ swap here #+!");
+
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
+  code.add(asmcode::MOV, asmcode::RCX, MEM_HERE);
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RCX);
+  code.add(asmcode::ADD, MEM_HERE, asmcode::RAX);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR here @ swap here #+!");
+  }
+
+void superoperator_dup_floor_sub(ASM::asmcode& code, const expanded_token& et)
+  {
+  // speeds up fract
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+#ifdef AVX512
+  code.add(asmcode::VRNDSCALEPS, AVX_REG1, AVX_REG0, asmcode::NUMBER, 1 + 8);
+#else
+  code.add(asmcode::VROUNDPS, AVX_REG1, AVX_REG0, asmcode::NUMBER, 1);
+#endif
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+  }
+
 namespace
   {
   bool is_float(std::vector<expanded_token>::iterator it)
@@ -309,9 +335,29 @@ namespace
     return is_primitive(it) && (it->prim == &primitive_drop);
     }
 
+  bool is_dup(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_dup);
+    }
+
   bool is_store(std::vector<expanded_token>::iterator it)
     {
     return is_primitive(it) && (it->prim == &primitive_store);
+    }
+
+  bool is_addstorei(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_addstorei);
+    }
+
+  bool is_here(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_here);
+    }
+
+  bool is_floor(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_floor);
     }
 
   std::vector<expanded_token>::iterator combine_floats(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
@@ -456,7 +502,7 @@ namespace
         return it;
         }
       }
-    if (sz >= 4)
+    if (sz >= 5)
       {
       auto it1 = it + 1;
       auto it2 = it + 2;
@@ -469,6 +515,17 @@ namespace
           it->int_value = it2->int_value;
           it->t = expanded_token::ET_SUPEROPERATOR;
           it->supop = &superoperator_swap_over_address_addi_store;
+          *it4 = *it;
+          it = words.erase(it, it4);
+          return it;
+          }
+        }
+      if (is_here(it))
+        {
+        if (is_fetch(it1) && is_swap(it2) && is_here(it3) && is_addstorei(it4))
+          {
+          it->t = expanded_token::ET_SUPEROPERATOR;
+          it->supop = &superoperator_here_fetch_swap_here_addstorei;
           *it4 = *it;
           it = words.erase(it, it4);
           return it;
@@ -489,6 +546,23 @@ namespace
         it = words.erase(it, it3);
         return it;
         }     
+      }
+    if (sz >= 3)
+      {
+      auto it1 = it + 1;
+      auto it2 = it + 2;
+      if (is_dup(it))
+        {
+        if (is_floor(it1) && is_sub(it2))
+          {
+          it->t = expanded_token::ET_SUPEROPERATOR;
+          it->supop = &superoperator_dup_floor_sub;
+          *it2 = *it;
+          it = words.erase(it, it2);
+          return it;
+          return it;
+          }
+        }
       }
     if (sz >= 2)
       {
