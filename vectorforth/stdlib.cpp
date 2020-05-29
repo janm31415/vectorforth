@@ -123,7 +123,7 @@ void add_stdlib_to_dictionary(dictionary& d)
 #endif
 
   register_definition(d, R"(
-  : clamp (  c a b clamp returns c if a < c and c < b, or a if c < a, or b if c > b )
+  : clamp2 (  c a b clamp returns c if a < c and c < b, or a if c < a, or b if c > b )
       -rot     ( b c a )
       over     ( b c a c )
       over     ( b c a c a )

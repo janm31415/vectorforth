@@ -1235,6 +1235,63 @@ void primitive_repeat(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::COMMENT, "END PRIMITIVE repeat");
   }
 
+void primitive_clamp(ASM::asmcode& code, compile_data& cd)
+  {
+  // c a b clamp returns c if a < c and c < b, or a if c < a, or b if c > b
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER); // b
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1)); // a
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(2)); // c
+
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2); // a <= c
+  code.add(asmcode::VMOVAPS, AVX_REG3, NO_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG7, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG3, asmcode::k1, AVX_REG7);
+
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG2, asmcode::NUMBER, 2); // c <= b
+  code.add(asmcode::VMOVAPS, AVX_REG4, NO_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG4, asmcode::k1, AVX_REG7);
+
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 1); // c < a
+  code.add(asmcode::VMOVAPS, AVX_REG5, NO_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG5, asmcode::k1, AVX_REG7);
+
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG2, AVX_REG0, asmcode::NUMBER, 1); // b < c
+  code.add(asmcode::VMOVAPS, AVX_REG6, NO_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG6, asmcode::k1, AVX_REG7);
+
+#else
+  code.add(asmcode::VCMPPS, AVX_REG3, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2); // a <= c
+  code.add(asmcode::VCMPPS, AVX_REG4, AVX_REG0, AVX_REG2, asmcode::NUMBER, 2); // c <= b
+  code.add(asmcode::VCMPPS, AVX_REG5, AVX_REG0, AVX_REG1, asmcode::NUMBER, 1); // c < a
+  code.add(asmcode::VCMPPS, AVX_REG6, AVX_REG2, AVX_REG0, asmcode::NUMBER, 1); // b < c
+
+  code.add(asmcode::VCVTDQ2PS, AVX_REG3, AVX_REG3);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG4, AVX_REG4);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG5, AVX_REG5);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG6, AVX_REG6);
+
+  code.add(asmcode::VMOVAPS, AVX_REG7, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG3, AVX_REG3, AVX_REG7);
+  code.add(asmcode::VANDPS, AVX_REG4, AVX_REG4, AVX_REG7);
+  code.add(asmcode::VANDPS, AVX_REG5, AVX_REG5, AVX_REG7);
+  code.add(asmcode::VANDPS, AVX_REG6, AVX_REG6, AVX_REG7);
+#endif
+
+  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG3, AVX_REG4); // a < c && c < b
+
+  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG3, AVX_REG0);
+  code.add(asmcode::VMULPS, AVX_REG5, AVX_REG5, AVX_REG1);
+  code.add(asmcode::VMULPS, AVX_REG6, AVX_REG6, AVX_REG2);
+
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG3, AVX_REG5);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG6);
+
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+  }
+
 prim_map generate_primitives_map()
   {
   prim_map pm;
@@ -1329,6 +1386,8 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("begin", &primitive_begin));
   pm.insert(std::pair<std::string, prim_fun>("while", &primitive_while));
   pm.insert(std::pair<std::string, prim_fun>("repeat", &primitive_repeat));
+
+  pm.insert(std::pair<std::string, prim_fun>("clamp", &primitive_clamp));
 
   return pm;
   }

@@ -48,6 +48,8 @@ VF_BEGIN
 #define AVX_REG3 ASM::asmcode::ZMM3
 #define AVX_REG4 ASM::asmcode::ZMM4
 #define AVX_REG5 ASM::asmcode::ZMM5
+#define AVX_REG6 ASM::asmcode::ZMM6
+#define AVX_REG7 ASM::asmcode::ZMM7
 #define AVX_CELLS(n) (n)*64
 #define AVX_ALIGNMENT 64
 #define AVX_LENGTH 16
@@ -58,6 +60,8 @@ VF_BEGIN
 #define AVX_REG3 ASM::asmcode::YMM3
 #define AVX_REG4 ASM::asmcode::YMM4
 #define AVX_REG5 ASM::asmcode::YMM5
+#define AVX_REG6 ASM::asmcode::YMM6
+#define AVX_REG7 ASM::asmcode::YMM7
 #define AVX_CELLS(n) (n)*32
 #define AVX_ALIGNMENT 32
 #define AVX_LENGTH 8
