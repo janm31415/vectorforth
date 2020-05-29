@@ -47,6 +47,23 @@ namespace
         ++it;
         return it;
         }
+      // replace 0.5 pow by sqrt
+      if (it1->t == expanded_token::ET_FLOAT && it1->f[0] == 0.5f)
+        {
+        it->t = expanded_token::ET_PRIMITIVE;
+        it->prim = &primitive_sqrt;
+        it = words.erase(it1);
+        return it;
+        }
+      // replace 0.25 pow by sqrt sqrt
+      if (it1->t == expanded_token::ET_FLOAT && it1->f[0] == 0.25f)
+        {
+        it->t = expanded_token::ET_PRIMITIVE;
+        it->prim = &primitive_sqrt;
+        it1->t = expanded_token::ET_PRIMITIVE;
+        it1->prim = &primitive_sqrt;
+        return it;
+        }
       }
     return it;
     }

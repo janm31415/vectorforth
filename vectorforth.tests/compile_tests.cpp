@@ -2662,6 +2662,12 @@ struct strength_reduction_tests : public compile_fixture
 
     run("val #4 #/");
     TEST_EQ(5, get_stack_valuei(0));
+
+    run("4 0.5 pow");
+    TEST_EQ(2.f, get_stack_valuef(0));
+
+    run("16 0.25 pow");
+    TEST_EQ(2.f, get_stack_valuef(0));
     }
   };
 

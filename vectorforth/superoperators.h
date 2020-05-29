@@ -80,6 +80,10 @@ void superoperator_dupup(ASM::asmcode& code, const expanded_token& et);
 void superoperator_dupupup(ASM::asmcode& code, const expanded_token& et);
 void superoperator_dupupupup(ASM::asmcode& code, const expanded_token& et);
 
+void superoperator_rtpush_2dup_addr_addi_fetch(ASM::asmcode& code, const expanded_token& et);
+void superoperator_rtpush_addr_addi_fetch(ASM::asmcode& code, const expanded_token& et);
+
+
 VECTOR_FORTH_API void superoperators(std::vector<expanded_token>& words);
 
 VF_END

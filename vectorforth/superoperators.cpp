@@ -624,6 +624,47 @@ void superoperator_addmuladd(ASM::asmcode& code, const expanded_token& et)
   code.add(asmcode::COMMENT, "END SUPEROPERATOR + * +");
   }
 
+void superoperator_rtpush_2dup_addr_addi_fetch(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR >r 2dup #addr #+ @");
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RSP, AVX_REG0);
+
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(2));
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::MOV, asmcode::RCX, asmcode::NUMBER, et.int_value);
+  code.add(asmcode::ADD, asmcode::RAX, asmcode::RCX);
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR >r 2dup #addr #+ @");
+  }
+
+void superoperator_rtpush_addr_addi_fetch(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR >r #addr #+ @");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER); 
+  code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RSP, AVX_REG0);
+
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::MOV, asmcode::RCX, asmcode::NUMBER, et.int_value);
+  code.add(asmcode::ADD, asmcode::RAX, asmcode::RCX);
+
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR >r #addr #+ @");
+  }
+
 namespace
   {
   bool is_float(std::vector<expanded_token>::iterator it)
@@ -721,6 +762,11 @@ namespace
     return is_primitive(it) && (it->prim == &primitive_dup);
     }
 
+  bool is_2dup(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_twodup);
+    }
+
   bool is_store(std::vector<expanded_token>::iterator it)
     {
     return is_primitive(it) && (it->prim == &primitive_store);
@@ -744,6 +790,11 @@ namespace
   bool is_return_stack_pop(std::vector<expanded_token>::iterator it)
     {
     return is_primitive(it) && (it->prim == &primitive_return_stack_pop);
+    }
+
+  bool is_return_stack_push(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_return_stack_push);
     }
 
   std::vector<expanded_token>::iterator combine_variable_ops(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
@@ -939,6 +990,18 @@ namespace
           return it;
           }
         }
+      if (is_return_stack_push(it))
+        {
+        if (is_2dup(it1) && is_integer(it2) && is_addi(it3) && is_fetch(it4))
+          {
+          it->t = expanded_token::ET_SUPEROPERATOR;
+          it->int_value = it2->int_value;
+          it->supop = &superoperator_rtpush_2dup_addr_addi_fetch;
+          *it4 = *it;
+          it = words.erase(it, it4);
+          return it;
+          }
+        }
       if (is_here(it))
         {
         if (is_fetch(it1) && is_swap(it2) && is_here(it3) && is_addstorei(it4))
@@ -971,6 +1034,18 @@ namespace
           {
           it->t = expanded_token::ET_SUPEROPERATOR;
           it->supop = &superoperator_dupupupup;
+          *it3 = *it;
+          it = words.erase(it, it3);
+          return it;
+          }
+        }
+      if (is_return_stack_push(it))
+        {
+        if (is_integer(it1) && is_addi(it2) && is_fetch(it3))
+          {
+          it->t = expanded_token::ET_SUPEROPERATOR;
+          it->int_value = it1->int_value;
+          it->supop = &superoperator_rtpush_addr_addi_fetch;
           *it3 = *it;
           it = words.erase(it, it3);
           return it;
