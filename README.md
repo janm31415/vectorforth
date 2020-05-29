@@ -190,6 +190,10 @@ The binding space is used for binding words to data space locations. This memory
 
 `#/`    ( #a #b -- #a*#b )  Pop two 64-bit addresses from the stack, and push their quotient on the stack.
 
+`#<<`    ( #a #b -- #a<<#b )  Pop two 64-bit addresses from the stack, left-shift them, and put the result on the stack.
+
+`#>>`    ( #a #b -- #a>>#b )  Pop two 64-bit addresses from the stack, right-shift them, and put the result on the stack.
+
 `#1+`    ( #a -- #a+1)  Pop the top item (an address typically) from the stack and add one. Push the result on the stack.
 
 `#1-`    ( #a -- #a-1)  Pop the top item (an address typically) from the stack and subtract one. Push the result on the stack.
