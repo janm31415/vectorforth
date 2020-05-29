@@ -36,7 +36,10 @@ void superoperator_address_subi_fetch(ASM::asmcode& code, const expanded_token& 
 void superoperator_address_addi_fetch(ASM::asmcode& code, const expanded_token& et);
 void superoperator_stacktopfetch_address_subi_fetch(ASM::asmcode& code, const expanded_token& et);
 void superoperator_stacktopfetch_address_subi_fetch_twice(ASM::asmcode& code, const expanded_token& et);
-
+void superoperator_float_add(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_sub(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_mul(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_div(ASM::asmcode& code, const expanded_token& et);
 
 VECTOR_FORTH_API void superoperators(std::vector<expanded_token>& words);
 

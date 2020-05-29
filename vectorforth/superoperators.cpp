@@ -126,6 +126,62 @@ void superoperator_stacktopfetch_address_subi_fetch_twice(asmcode& code, const e
   code.add(asmcode::COMMENT, "END SUPEROPERATOR st@ #addr #- @ st@ #addr #- @");
   }
 
+void superoperator_float_add(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float +");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float +");
+  }
+
+void superoperator_float_sub(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float -");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float -");
+  }
+
+void superoperator_float_mul(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float *");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float *");
+  }
+
+void superoperator_float_div(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float /");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float /");
+  }
+
 namespace
   {
   bool is_float(std::vector<expanded_token>::iterator it)
@@ -176,6 +232,26 @@ namespace
   bool is_stack_top_fetch(std::vector<expanded_token>::iterator it)
     {
     return is_primitive(it) && (it->prim == &primitive_stack_top_fetch);
+    }
+
+  bool is_mul(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_mul);
+    }
+
+  bool is_div(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_div);
+    }
+
+  bool is_add(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_add);
+    }
+
+  bool is_sub(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_sub);
     }
 
   std::vector<expanded_token>::iterator combine_floats(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
@@ -256,6 +332,38 @@ namespace
        {
        it->f[1] = it1->f[0];
        it->t = expanded_token::ET_FLOAT2;
+       *it1 = *it;
+       it = words.erase(it, it1);
+       return it;
+       }
+     if (is_add(it1))
+       {
+       it->t = expanded_token::ET_SUPEROPERATOR;
+       it->supop = &superoperator_float_add;
+       *it1 = *it;
+       it = words.erase(it, it1);
+       return it;
+       }
+     if (is_sub(it1))
+       {
+       it->t = expanded_token::ET_SUPEROPERATOR;
+       it->supop = &superoperator_float_sub;
+       *it1 = *it;
+       it = words.erase(it, it1);
+       return it;
+       }
+     if (is_mul(it1))
+       {
+       it->t = expanded_token::ET_SUPEROPERATOR;
+       it->supop = &superoperator_float_mul;
+       *it1 = *it;
+       it = words.erase(it, it1);
+       return it;
+       }
+     if (is_div(it1))
+       {
+       it->t = expanded_token::ET_SUPEROPERATOR;
+       it->supop = &superoperator_float_div;
        *it1 = *it;
        it = words.erase(it, it1);
        return it;
