@@ -40,6 +40,9 @@ void superoperator_float_add(ASM::asmcode& code, const expanded_token& et);
 void superoperator_float_sub(ASM::asmcode& code, const expanded_token& et);
 void superoperator_float_mul(ASM::asmcode& code, const expanded_token& et);
 void superoperator_float_div(ASM::asmcode& code, const expanded_token& et);
+void superoperator_swap_drop(ASM::asmcode& code, const expanded_token& et);
+void superoperator_swap_over(ASM::asmcode& code, const expanded_token& et);
+void superoperator_swap_over_address_addi_store(ASM::asmcode& code, const expanded_token& et);
 
 VECTOR_FORTH_API void superoperators(std::vector<expanded_token>& words);
 
