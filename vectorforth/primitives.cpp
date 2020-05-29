@@ -57,6 +57,28 @@ void primitive_divi(asmcode& code, compile_data&)
   code.add(asmcode::COMMENT, "END PRIMITIVE #/");
   }
 
+void primitive_shiftlefti(asmcode& code, compile_data&)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE #<<");
+  code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER);
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::SHL, asmcode::RAX, asmcode::CL);
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
+  code.add(asmcode::COMMENT, "END PRIMITIVE #<<");
+  }
+
+void primitive_shiftrighti(asmcode& code, compile_data&)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE #>>");
+  code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER);
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::SHR, asmcode::RAX, asmcode::CL);
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
+  code.add(asmcode::COMMENT, "END PRIMITIVE #>>");
+  }
+
 void primitive_add(asmcode& code, compile_data&)
   {  
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE +");
@@ -1273,6 +1295,8 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("#-", &primitive_subi));
   pm.insert(std::pair<std::string, prim_fun>("#*", &primitive_muli));
   pm.insert(std::pair<std::string, prim_fun>("#/", &primitive_divi));
+  pm.insert(std::pair<std::string, prim_fun>("#<<", &primitive_shiftlefti));
+  pm.insert(std::pair<std::string, prim_fun>("#>>", &primitive_shiftrighti));
 
   pm.insert(std::pair<std::string, prim_fun>("=", &primitive_equ));
   pm.insert(std::pair<std::string, prim_fun>("<>", &primitive_nequ));

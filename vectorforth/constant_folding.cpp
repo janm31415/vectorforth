@@ -39,6 +39,22 @@ namespace
       }
     };
 
+  struct shiftlefti_op
+    {
+    int64_t operator () (uint64_t a, uint64_t b)
+      {
+      return a << b;
+      }
+    };
+
+  struct shiftrighti_op
+    {
+    int64_t operator () (uint64_t a, uint64_t b)
+      {
+      return a >> b;
+      }
+    };
+
   struct add_op
     {
     float operator () (float a, float b)
@@ -815,6 +831,10 @@ void constant_folding(std::vector<expanded_token>& words)
         it = apply_2_integers<muli_op>(words, it);
       else if (it->prim == &primitive_divi)
         it = apply_2_integers<divi_op>(words, it);
+      else if (it->prim == &primitive_shiftlefti)
+        it = apply_2_integers<shiftlefti_op>(words, it);
+      else if (it->prim == &primitive_shiftrighti)
+        it = apply_2_integers<shiftrighti_op>(words, it);
       else if (it->prim == &primitive_fcast)
         it = apply_fcast(words, it);
       else if (it->prim == &primitive_icast)

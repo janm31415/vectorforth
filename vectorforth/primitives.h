@@ -62,6 +62,8 @@ void primitive_addi(ASM::asmcode& code, compile_data& cd);
 void primitive_subi(ASM::asmcode& code, compile_data&);
 void primitive_muli(ASM::asmcode& code, compile_data&);
 void primitive_divi(ASM::asmcode& code, compile_data&);
+void primitive_shiftlefti(ASM::asmcode& code, compile_data&);
+void primitive_shiftrighti(ASM::asmcode& code, compile_data&);
 
 void primitive_equ(ASM::asmcode& code, compile_data& cd);
 void primitive_nequ(ASM::asmcode& code, compile_data& cd);

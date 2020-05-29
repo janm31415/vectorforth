@@ -29,6 +29,42 @@ void superoperator_address_addi(asmcode& code, const expanded_token& et)
   code.add(asmcode::COMMENT, "END SUPEROPERATOR #addr #+");
   }
 
+void superoperator_address_muli(asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR #addr #*");
+
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, et.int_value);
+  code.add(asmcode::IMUL, asmcode::R11);
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR #addr #*");
+  }
+
+void superoperator_address_shiftlefti(asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR #addr #<<");
+
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
+  code.add(asmcode::MOV, asmcode::RCX, asmcode::NUMBER, et.int_value);
+  code.add(asmcode::SHL, asmcode::RAX, asmcode::CL);
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR #addr #<<");
+  }
+
+void superoperator_address_shiftrighti(asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR #addr #>>");
+
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
+  code.add(asmcode::MOV, asmcode::RCX, asmcode::NUMBER, et.int_value);
+  code.add(asmcode::SHR, asmcode::RAX, asmcode::CL);
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR #addr #>>");
+  }
+
 void superoperator_address_subi_fetch(asmcode& code, const expanded_token& et)
   {
   code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR #addr #- @");
@@ -115,6 +151,21 @@ namespace
   bool is_addi(std::vector<expanded_token>::iterator it)
     {
     return is_primitive(it) && (it->prim == &primitive_addi);
+    }
+
+  bool is_muli(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_muli);
+    }
+
+  bool is_shiftlefti(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_shiftlefti);
+    }
+
+  bool is_shiftrighti(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_shiftrighti);
     }
 
   bool is_fetch(std::vector<expanded_token>::iterator it)
@@ -294,6 +345,30 @@ namespace
         {
         it->t = expanded_token::ET_SUPEROPERATOR;
         it->supop = &superoperator_address_addi;
+        *it1 = *it;
+        it = words.erase(it, it1);
+        return it;
+        }
+      if (is_muli(it1))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_address_muli;
+        *it1 = *it;
+        it = words.erase(it, it1);
+        return it;
+        }      
+      if (is_shiftlefti(it1))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_address_shiftlefti;
+        *it1 = *it;
+        it = words.erase(it, it1);
+        return it;
+        }
+      if (is_shiftrighti(it1))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_address_shiftrighti;
         *it1 = *it;
         it = words.erase(it, it1);
         return it;

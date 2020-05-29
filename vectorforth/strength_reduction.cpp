@@ -126,7 +126,7 @@ namespace
                 ++it_else;
               }
             if (it_else == words.end())
-              return it;            
+              return it;
             auto it_then = it_else;
             nr_of_ifs = 1;
             while (nr_of_ifs > 0 && it_then != words.end())
@@ -143,7 +143,7 @@ namespace
               }
             if (it_then == words.end())
               return it;
-            words.erase(it_else, it_then+1);
+            words.erase(it_else, it_then + 1);
             it = words.erase(it1, it + 1);
             return it;
             }
@@ -153,7 +153,57 @@ namespace
       }
     return it;
     }
+
+  bool is_power_of_two(uint64_t n)
+    {
+    return (n > 0 && ((n & (n - 1)) == 0));
+    }
+
+  int get_log2(uint64_t n)
+    {
+    int targetlevel = 0;
+    while (n >>= 1) 
+      ++targetlevel;
+    return targetlevel;
+    }
+
+  std::vector<expanded_token>::iterator reduce_muli(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
+    {
+    auto sz = std::distance(words.begin(), it);
+    if (sz >= 1)
+      {
+      auto it1 = it - 1;
+      if (it1->t == expanded_token::ET_INTEGER && is_power_of_two(it1->int_value))
+        {
+        it1->int_value = get_log2(it1->int_value);
+        it->prim = &primitive_shiftlefti;
+        return it;
+        }
+      }
+    return it;
+    }
+
+  std::vector<expanded_token>::iterator reduce_divi(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
+    {
+    auto sz = std::distance(words.begin(), it);
+    if (sz >= 1)
+      {
+      auto it1 = it - 1;
+      if (it1->t == expanded_token::ET_INTEGER && is_power_of_two(it1->int_value))
+        {
+        it1->int_value = get_log2(it1->int_value);
+        it->prim = &primitive_shiftrighti;
+        return it;
+        }
+      }
+    return it;
+    }
+
   }
+
+
+
+
 
 void strength_reduction(std::vector<expanded_token>& words)
   {
@@ -166,6 +216,10 @@ void strength_reduction(std::vector<expanded_token>& words)
         it = reduce_pow(words, it);
       else if (it->prim == &primitive_if)
         it = reduce_if(words, it);
+      else if (it->prim == &primitive_muli)
+        it = reduce_muli(words, it);
+      else if (it->prim == &primitive_divi)
+        it = reduce_divi(words, it);
       }
     ++it;
     }

@@ -1048,6 +1048,24 @@ struct integers : public compile_fixture
 
     run("#-70 #10 #/");
     TEST_EQ(-7, get_stack_valuei(0));
+
+    run("#40 #1 #<<");
+    TEST_EQ(80, get_stack_valuei(0));
+
+    run("#40 #4 #<<");
+    TEST_EQ(640, get_stack_valuei(0));
+
+    run("#40 #1 #>>");
+    TEST_EQ(20, get_stack_valuei(0));
+
+    run("#40 #4 #>>");
+    TEST_EQ(2, get_stack_valuei(0));
+
+    run("#-40 #2 #>>");
+    TEST_EQ(-10, get_stack_valuei(0));
+
+    run("#-40 #2 #<<");
+    TEST_EQ(-160, get_stack_valuei(0));
     }
   };
 
@@ -2638,6 +2656,12 @@ struct strength_reduction_tests : public compile_fixture
 
     run("2 3 > if 6 else 8 then");
     TEST_EQ(8.f, get_stack_valuef(0));
+
+    run("#20 to val val #4 #*");
+    TEST_EQ(80, get_stack_valuei(0));
+
+    run("val #4 #/");
+    TEST_EQ(5, get_stack_valuei(0));
     }
   };
 
