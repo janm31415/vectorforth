@@ -70,6 +70,12 @@ void add_stdlib_to_dictionary(dictionary& d)
 #endif
 
 #ifdef AVX512
+  register_definition(d, ": cells #64 #* ;");
+#else
+  register_definition(d, ": cells #32 #* ;");
+#endif
+
+#ifdef AVX512
   register_definition(d, ": true v16 #-1 #-1 #-1 #-1 #-1 #-1 #-1 #-1 #-1 #-1 #-1 #-1 #-1 #-1 #-1 #-1;");
 #else
   register_definition(d, ": true v8 #-1 #-1 #-1 #-1 #-1 #-1 #-1 #-1 ;");

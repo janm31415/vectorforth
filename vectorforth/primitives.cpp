@@ -836,19 +836,6 @@ void primitive_here(ASM::asmcode& code, compile_data&)
   code.add(asmcode::COMMENT, "END PRIMITIVE here");
   }
 
-void primitive_cells(ASM::asmcode& code, compile_data&)
-  {
-  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE cells");
-  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
-#ifdef AVX512
-  code.add(asmcode::SHL, asmcode::RAX, asmcode::NUMBER, 6);
-#else
-  code.add(asmcode::SHL, asmcode::RAX, asmcode::NUMBER, 5);
-#endif
-  code.add(asmcode::MOV, MEM_STACK_REGISTER, asmcode::RAX);
-  code.add(asmcode::COMMENT, "END PRIMITIVE cells");
-  }
-
 void primitive_comma(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE ,");
@@ -1303,8 +1290,7 @@ prim_map generate_primitives_map()
 
   pm.insert(std::pair<std::string, prim_fun>("st@", &primitive_stack_top_fetch));
   pm.insert(std::pair<std::string, prim_fun>("sp@", &primitive_stack_pointer_fetch));
-  pm.insert(std::pair<std::string, prim_fun>("here", &primitive_here));
-  pm.insert(std::pair<std::string, prim_fun>("cells", &primitive_cells));
+  pm.insert(std::pair<std::string, prim_fun>("here", &primitive_here));  
   pm.insert(std::pair<std::string, prim_fun>(",", &primitive_comma));
 
   pm.insert(std::pair<std::string, prim_fun>("@", &primitive_fetch));

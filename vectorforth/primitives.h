@@ -19,7 +19,6 @@ void primitive_addstorei(ASM::asmcode& code, compile_data& cd);
 void primitive_substorei(ASM::asmcode& code, compile_data& cd);
 
 void primitive_here(ASM::asmcode& code, compile_data& cd);
-void primitive_cells(ASM::asmcode& code, compile_data& cd);
 void primitive_comma(ASM::asmcode& code, compile_data& cd);
 
 void primitive_add(ASM::asmcode& code, compile_data& cd);
