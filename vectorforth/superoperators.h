@@ -54,10 +54,27 @@ void superoperator_mulmul(ASM::asmcode& code, const expanded_token& et);
 void superoperator_addadd(ASM::asmcode& code, const expanded_token& et);
 void superoperator_subsub(ASM::asmcode& code, const expanded_token& et);
 void superoperator_divdiv(ASM::asmcode& code, const expanded_token& et);
+
+void superoperator_muladd(ASM::asmcode& code, const expanded_token& et);
+void superoperator_mulsub(ASM::asmcode& code, const expanded_token& et);
+void superoperator_muldiv(ASM::asmcode& code, const expanded_token& et);
+void superoperator_addmul(ASM::asmcode& code, const expanded_token& et);
+void superoperator_addsub(ASM::asmcode& code, const expanded_token& et);
+void superoperator_adddiv(ASM::asmcode& code, const expanded_token& et);
+void superoperator_subadd(ASM::asmcode& code, const expanded_token& et);
+void superoperator_submul(ASM::asmcode& code, const expanded_token& et);
+void superoperator_subdiv(ASM::asmcode& code, const expanded_token& et);
+void superoperator_divadd(ASM::asmcode& code, const expanded_token& et);
+void superoperator_divmul(ASM::asmcode& code, const expanded_token& et);
+void superoperator_divsub(ASM::asmcode& code, const expanded_token& et);
+
+
 void superoperator_mulmulmul(ASM::asmcode& code, const expanded_token& et);
 void superoperator_addaddadd(ASM::asmcode& code, const expanded_token& et);
 void superoperator_subsubsub(ASM::asmcode& code, const expanded_token& et);
 void superoperator_divdivdiv(ASM::asmcode& code, const expanded_token& et);
+
+void superoperator_addmuladd(ASM::asmcode& code, const expanded_token& et);
 
 void superoperator_dupup(ASM::asmcode& code, const expanded_token& et);
 void superoperator_dupupup(ASM::asmcode& code, const expanded_token& et);

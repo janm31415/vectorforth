@@ -100,7 +100,29 @@ struct optimize_1 : public compile_fixture
 .7 6 t 11 * + 13 t 13 / x + harm
 5 / .5 + y - abs 0.01 - 1 - negate abs dup 4 ** swap 20 **
 )";
-    print_asm(std::cout, script2);
+
+    std::string script3 = R"(
+: u st@ #160 #- @ ;
+: v st@ #192 #- @ ;
+: rx st@ #96 #- @ ;
+: ry st@ #128 #- @ ;
+: t st@ #224 #- @ ;
+: x u rx ry / * rx ry / 1 - 2 / -;
+: y v ;
+
+: d dup ;
+: m 0.4 * 0.5 + - ;
+: a y - abs 0.1 f< x 0 f> * x 1 f< * x;
+: r t swap / d floor - 1.96 * 0.98 - d 0 f> 2 * 1 - * 0.01 + ;
+: e 2.9 r 0.94 * 0.03 + ;
+: f 3.7 r ;
+: p f 0.9 * 0.05 + d t ;
+e x - d * f y - d * + sqrt 0.02 f<
+p 3 * sin m e * - a 0.03 f< * 
+p 2 * cos m 1 e - * - a 0.97 f> * 
++ + d d
+)";
+    print_asm(std::cout, script3);
     }
   };
 
