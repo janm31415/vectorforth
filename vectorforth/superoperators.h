@@ -83,6 +83,20 @@ void superoperator_dupupupup(ASM::asmcode& code, const expanded_token& et);
 void superoperator_rtpush_2dup_addr_addi_fetch(ASM::asmcode& code, const expanded_token& et);
 void superoperator_rtpush_addr_addi_fetch(ASM::asmcode& code, const expanded_token& et);
 
+void superoperator_var_float_equ(ASM::asmcode& code, const expanded_token& et);
+void superoperator_var_float_nequ(ASM::asmcode& code, const expanded_token& et);
+void superoperator_var_float_lt(ASM::asmcode& code, const expanded_token& et);
+void superoperator_var_float_le(ASM::asmcode& code, const expanded_token& et);
+void superoperator_var_float_gt(ASM::asmcode& code, const expanded_token& et);
+void superoperator_var_float_ge(ASM::asmcode& code, const expanded_token& et);
+
+void superoperator_dup_float_equ(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dup_float_nequ(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dup_float_lt(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dup_float_le(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dup_float_gt(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dup_float_ge(ASM::asmcode& code, const expanded_token& et);
+
 
 VECTOR_FORTH_API void superoperators(std::vector<expanded_token>& words);
 
