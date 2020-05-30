@@ -485,8 +485,11 @@ void primitive_sqrt(asmcode& code, compile_data&)
 void primitive_abs(asmcode& code, compile_data&)
   {
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE abs"); 
+  code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x7fffffff);
+  code.add(asmcode::MOVD, asmcode::XMM0, asmcode::EAX);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM0);
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  //code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   code.add(asmcode::COMMENT, "END PRIMITIVE abs");

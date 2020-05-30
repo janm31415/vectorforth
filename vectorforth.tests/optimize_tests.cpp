@@ -122,7 +122,7 @@ p 3 * sin m e * - a 0.03 f< *
 p 2 * cos m 1 e - * - a 0.97 f> * 
 + + d d
 )";
-    print_asm(std::cout, script3);
+    //print_asm(std::cout, script3);
     }
   };
 

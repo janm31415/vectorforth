@@ -3205,6 +3205,12 @@ namespace
     //EVEX.512.66.0F38.W0 18 /r VBROADCASTSS zmm1{ k1 }{z}, xmm2 / m32
     t.add_opcode(make_evex_opcode("VBROADCASTSS", opcode::_512, opcode::_66, opcode::_0F38, opcode::W0, 0x18, opcode::r, opcode::zmm, opcode::xmm_m32));
 
+    //VEX.256.66.0F38.W0 18 /r VBROADCASTSS ymm1, xmm2
+    t.add_opcode(make_vex_opcode("VBROADCASTSS", opcode::_256, opcode::_66, opcode::_0F38, opcode::W0, 0x18, opcode::r, opcode::ymm, opcode::xmm_m128)); // hack, should be xmm, but for modrm byte fix, change to xmm_m128
+
+    //EVEX.512.66.0F38.W0 18 /r VBROADCASTSS zmm1{ k1 }{z}, xmm2 / m32
+    t.add_opcode(make_evex_opcode("VBROADCASTSS", opcode::_512, opcode::_66, opcode::_0F38, opcode::W0, 0x18, opcode::r, opcode::zmm, opcode::xmm_m128)); // hack, should be xmm, but for modrm byte fix, change to xmm_m128
+
     return t;
     }
 

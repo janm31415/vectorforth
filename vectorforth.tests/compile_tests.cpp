@@ -16,6 +16,8 @@
 
 #include <iostream>
 
+#include <chrono>
+
 #include <cmath>
 
 using namespace ASM;
@@ -2673,6 +2675,19 @@ struct strength_reduction_tests : public compile_fixture
     }
   };
 
+struct perf_tests : public compile_fixture
+  {
+  void test(const compiler_options& ops)
+    {
+    auto tic = std::chrono::high_resolution_clock::now();
+    run("0 value v begin v 10000 < while -2 abs -3 abs -4 abs -5 abs -6 abs -7 abs drop drop drop drop drop drop v 1 + to v repeat");
+    auto toc = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> diff = toc - tic;
+    double time = diff.count();
+    std::cout << "time: " << time << "s\n";
+    }
+  };
+
 void run_compile_tests(const compiler_options& ops)
   {
   empty_program().test(ops);
@@ -2699,6 +2714,7 @@ void run_compile_tests(const compiler_options& ops)
   data_space_tests().test(ops);
   vec3_tests().test(ops);
   strength_reduction_tests().test(ops);
+  perf_tests().test(ops);
   }
 
 void avx_mathfun_test()
