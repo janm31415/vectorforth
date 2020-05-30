@@ -485,11 +485,11 @@ void primitive_sqrt(asmcode& code, compile_data&)
 void primitive_abs(asmcode& code, compile_data&)
   {
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE abs"); 
-  code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x7fffffff);
-  code.add(asmcode::MOVD, asmcode::XMM0, asmcode::EAX);
-  code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM0);
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-  //code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  //code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x7fffffff);
+  //code.add(asmcode::MOVD, asmcode::XMM1, asmcode::EAX);
+  //code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM1);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   code.add(asmcode::COMMENT, "END PRIMITIVE abs");
@@ -500,6 +500,9 @@ void primitive_negate(asmcode& code, compile_data&)
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE NEGATE");
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
   code.add(asmcode::VMOVAPS, AVX_REG1, SIGN_BIT);
+  //code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x80000000);
+  //code.add(asmcode::MOVD, asmcode::XMM1, asmcode::EAX);
+  //code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM1);
   code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG1);
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   code.add(asmcode::COMMENT, "END PRIMITIVE NEGATE");
@@ -543,6 +546,9 @@ void primitive_not(asmcode& code, compile_data&)
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE not");
   code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
   code.add(asmcode::VMOVAPS, AVX_REG1, ALL_BITS);
+  //code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0xffffffff);
+  //code.add(asmcode::MOVD, asmcode::XMM1, asmcode::EAX);
+  //code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM1);
   code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG1);
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   code.add(asmcode::COMMENT, "END PRIMITIVE not");
@@ -674,6 +680,9 @@ void primitive_fequ(asmcode& code, compile_data&)
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  //code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x7fffffff);
+  //code.add(asmcode::MOVD, asmcode::XMM1, asmcode::EAX);
+  //code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM1);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
 #endif
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
@@ -696,6 +705,9 @@ void primitive_fnequ(asmcode& code, compile_data&)
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 4);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  //code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x7fffffff);
+  //code.add(asmcode::MOVD, asmcode::XMM1, asmcode::EAX);
+  //code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM1);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
 #endif
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
@@ -718,6 +730,9 @@ void primitive_flt(asmcode& code, compile_data&)
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 1);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  //code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x7fffffff);
+  //code.add(asmcode::MOVD, asmcode::XMM1, asmcode::EAX);
+  //code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM1);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
 #endif
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
@@ -740,6 +755,9 @@ void primitive_fgt(asmcode& code, compile_data&)
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG1, AVX_REG0, asmcode::NUMBER, 1);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  //code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x7fffffff);
+  //code.add(asmcode::MOVD, asmcode::XMM1, asmcode::EAX);
+  //code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM1);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
 #endif
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
@@ -762,6 +780,9 @@ void primitive_fle(asmcode& code, compile_data&)
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 2);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  //code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x7fffffff);
+  //code.add(asmcode::MOVD, asmcode::XMM1, asmcode::EAX);
+  //code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM1);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
 #endif
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
@@ -784,6 +805,9 @@ void primitive_fge(asmcode& code, compile_data&)
   code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2);
   code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
   code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  //code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x7fffffff);
+  //code.add(asmcode::MOVD, asmcode::XMM1, asmcode::EAX);
+  //code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM1);
   code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
 #endif
   code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
@@ -1271,6 +1295,9 @@ void primitive_clamp(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::VCVTDQ2PS, AVX_REG6, AVX_REG6);
 
   code.add(asmcode::VMOVAPS, AVX_REG7, NOT_SIGN_BIT);
+  //code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x7fffffff);
+  //code.add(asmcode::MOVD, asmcode::XMM7, asmcode::EAX);
+  //code.add(asmcode::VBROADCASTSS, AVX_REG7, asmcode::XMM7);  
   code.add(asmcode::VANDPS, AVX_REG3, AVX_REG3, AVX_REG7);
   code.add(asmcode::VANDPS, AVX_REG4, AVX_REG4, AVX_REG7);
   code.add(asmcode::VANDPS, AVX_REG5, AVX_REG5, AVX_REG7);
