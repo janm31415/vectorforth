@@ -105,7 +105,7 @@ void add_stdlib_to_dictionary(dictionary& d)
    ; )");
    */
   register_definition(d, R"(
-    : within (  c a b within returns true if a <= c and c < b) 
+    : within2 (  c a b within returns true if a <= c and c < b) 
         -rot     ( b c a )
         over     ( b c a c )
         f<=      ( b c (a<=c))
@@ -189,144 +189,6 @@ void add_stdlib_to_dictionary(dictionary& d)
 
   register_definition(d, ": vec3 #3 cells allot create ;");
 
-  /*
-#ifdef AVX512
-
-
-  register_definition(d, R"(
-: vec3! 
-tuck #128+ !
-tuck #64+ !
-!
-;
-)");
-
-  register_definition(d, R"(
-(dot product &a &b => x, where x is a*b with a,b of type vec3)
-
-: dot3   (&a &b)
-2dup     (&a &b &a &b)
-@ >r @ r> *   (&a &b  a_x*b_x)
->r 2dup       (&a &b &a &b)
-#64+ @ >r #64+ @ r> * (&a &b a_y*b_y)
->r            (&a &b)
-#128+ @ >r #128+ @ r> * (a_z*b_z)
-r> r> + +  (a_x*b_x + a_y*b_y + a_z*b_z)
-;
-)");
-
-  register_definition(d, R"(
-(cross product (&a &b &result => -), where result contains axb)
-
-: cross3   (&a &b &result)
->r
-2dup       (&a &b &a &b)
-@ >r #64+ @ r> * (&a &b a_y*b_x)
->r 2dup    (&a &b &a &b)
-#64+ @ >r @ r> * (a_x*b_y)
-r> -       (&a &b a_x*b_y - a_y*b_x)
->r 2dup    (&a &b &a &b)
-#128+ @ >r @ r> * (&a &b a_x*b_z)
->r 2dup    (&a &b &a &b)
-@ >r #128+ @ r> * (&a &b a_z*b_x)
-r> -       (&a &b a_z*b_x-a_x*b_z)
->r 2dup    (&a &b &a &b)
-#64+ @ >r #128+ @ r> * (&a &b a_z*b_y)
->r         (&a &b)
-#128+ @ >r #64+ @ r> * (&a &b a_y*b_z)
-r> -       (a_y*b_z-a_z*b_y)
-r> r>      (a_y*b_z-a_z*b_y  a_z*b_x-a_x*b_z   a_x*b_y - a_y*b_x)
-r>         (a_y*b_z-a_z*b_y  a_z*b_x-a_x*b_z   a_x*b_y - a_y*b_x   &result)
-vec3!
-;
-)");
-
-  register_definition(d, R"(
-(add 2 vec3s (&a &b &result => -), where result contains a+b)
-
-: add3   (&a &b &result)
->r
-2dup     (&a &b &a &b)
-#128+ @ >r #128+ @ r> + (&a &b a_z+b_z)
->r 2dup       (&a &b &a &b)
-#64+ @ >r #64+ @ r> + (&a &b a_y+b_y)
->r            (&a &b)
-@ >r @ r> +   (a_x+b_x)
-r> r>         (a_x+b_x  a_y+b_y  a_z+a_z )
-r>            (a_x+b_x  a_y+b_y  a_z+a_z &result)
-vec3!
-;
-)");
-
-  register_definition(d, R"(
-(subtract 2 vec3s (&a &b &result => -), where result contains a-b)
-
-: sub3   (&a &b &result)
->r
-2dup     (&a &b &a &b)
-#128+ @ >r #128+ @ r> - (&a &b a_z-b_z)
->r 2dup       (&a &b &a &b)
-#64+ @ >r #64+ @ r> - (&a &b a_y-b_y)
->r            (&a &b)
-@ >r @ r> -   (a_x-b_x)
-r> r>         (a_x-b_x  a_y-b_y  a_z-a_z )
-r>            (a_x-b_x  a_y-b_y  a_z-a_z &result)
-vec3!
-;
-)");
-
-  register_definition(d, R"(
-(multiply 2 vec3s componentwise (&a &b &result => -), where result contains a*b)
-
-: mul3   (&a &b &result)
->r
-2dup     (&a &b &a &b)
-#128+ @ >r #128+ @ r> * (&a &b a_z*b_z)
->r 2dup       (&a &b &a &b)
-#64+ @ >r #64+ @ r> * (&a &b a_y*b_y)
->r            (&a &b)
-@ >r @ r> *   (a_x*b_x)
-r> r>         (a_x*b_x  a_y*b_y  a_z*a_z )
-r>            (a_x*b_x  a_y*b_y  a_z*a_z &result)
-vec3!
-;
-)");
-
-  register_definition(d, R"(
-(divide 2 vec3s componentwise (&a &b &result => -), where result contains a/b)
-
-: div3   (&a &b &result)
->r
-2dup     (&a &b &a &b)
-#128+ @ >r #128+ @ r> / (&a &b a_z/b_z)
->r 2dup       (&a &b &a &b)
-#64+ @ >r #64+ @ r> / (&a &b a_y/b_y)
->r            (&a &b)
-@ >r @ r> /   (a_x/b_x)
-r> r>         (a_x/b_x  a_y/b_y  a_z/a_z )
-r>            (a_x/b_x  a_y/b_y  a_z/a_z &result)
-vec3!
-;
-)");
-
-  register_definition(d, R"(
-(multiply a vec3 with a scalar (t &v &result => -), where result contains t*v)
-
-: scalarmul3   (t &v &result)
->r
-2dup        (t &v t &v)
-#128+ @  *   (t &v t*v_z)
->r 2dup     (t &v t &v)
-#64+ @  *   (t &v t*v_y)
->r          (t &v)
-@ *         (t*v_x)
-r> r>       (t*v_x t*vy t*vz)
-r> vec3!
-;
-)");
-
-#else
-*/
   register_definition(d, R"(
 : vec3! 
 tuck #2 cells #+ !
@@ -458,7 +320,6 @@ r> r>       (t*v_x t*vy t*vz)
 r> vec3!
 ;
 )");
-//#endif
 
   register_definition(d, R"(
 (length of a vec3 (&v => length))

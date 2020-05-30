@@ -1292,6 +1292,31 @@ void primitive_clamp(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
+void primitive_within(ASM::asmcode& code, compile_data& cd)
+  {
+  //(c a b within returns true if a <= c and c < b)
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER); // b
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1)); // a
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(2)); // c
+#ifdef AVX512
+  code.add(asmcode::VMOVAPS, AVX_REG5, ALL_BITS);
+  code.add(asmcode::VXORPS, AVX_REG3, AVX_REG3, AVX_REG3);
+  code.add(asmcode::VXORPS, AVX_REG4, AVX_REG4, AVX_REG4);
+
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2); // a <= c    
+  code.add(asmcode::VMOVAPS, AVX_REG3, asmcode::k1, AVX_REG5);
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG2, asmcode::NUMBER, 1); // c < b
+  code.add(asmcode::VMOVAPS, AVX_REG4, asmcode::k1, AVX_REG5);
+
+#else
+  code.add(asmcode::VCMPPS, AVX_REG3, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2); // a <= c
+  code.add(asmcode::VCMPPS, AVX_REG4, AVX_REG0, AVX_REG2, asmcode::NUMBER, 1); // c < b
+#endif
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG3, AVX_REG4);
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+  }
+
 prim_map generate_primitives_map()
   {
   prim_map pm;
@@ -1388,6 +1413,7 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("repeat", &primitive_repeat));
 
   pm.insert(std::pair<std::string, prim_fun>("clamp", &primitive_clamp));
+  pm.insert(std::pair<std::string, prim_fun>("within", &primitive_within));
 
   return pm;
   }
