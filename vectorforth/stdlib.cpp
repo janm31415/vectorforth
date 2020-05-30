@@ -114,16 +114,12 @@ void add_stdlib_to_dictionary(dictionary& d)
         * negate icast 
    ; )");
 
-#ifdef AVX512
-  register_definition(d, ": depth st@ sp@ #- #64- #64 #/;");
-  register_definition(d, ": rdepth rt@ rp@ #- #64 #/;");
-#else
-  register_definition(d, ": depth st@ sp@ #- #32- #32 #/;");
-  register_definition(d, ": rdepth rt@ rp@ #- #32 #/;");
-#endif
+  register_definition(d, ": depth st@ sp@ #- #1 cells #- #1 cells #/;");
+  register_definition(d, ": rdepth rt@ rp@ #- #1 cells #/;");
 
+  /*
   register_definition(d, R"(
-  : clamp2 (  c a b clamp returns c if a < c and c < b, or a if c < a, or b if c > b )
+  : clamp (  c a b clamp returns c if a < c and c < b, or a if c < a, or b if c > b )
       -rot     ( b c a )
       over     ( b c a c )
       over     ( b c a c a )
@@ -146,7 +142,7 @@ void add_stdlib_to_dictionary(dictionary& d)
       rot      (b [c< b] [a+[a < c]*[c - a]-b])
       * +
   ; )");
-
+  */
   /*
                 float smoothstep(float edge0, float edge1, float x)
                 {
@@ -193,6 +189,7 @@ void add_stdlib_to_dictionary(dictionary& d)
 
   register_definition(d, ": vec3 #3 cells allot create ;");
 
+  /*
 #ifdef AVX512
 
 
@@ -329,11 +326,11 @@ r> vec3!
 )");
 
 #else
-
+*/
   register_definition(d, R"(
 : vec3! 
-tuck #64+ !
-tuck #32+ !
+tuck #2 cells #+ !
+tuck #1 cells #+ !
 !
 ;
 )");
@@ -345,9 +342,9 @@ tuck #32+ !
 2dup     (&a &b &a &b)
 @ >r @ r> *   (&a &b  a_x*b_x)
 >r 2dup       (&a &b &a &b)
-#32+ @ >r #32+ @ r> * (&a &b a_y*b_y)
+#1 cells #+ @ >r #1 cells #+ @ r> * (&a &b a_y*b_y)
 >r            (&a &b)
-#64+ @ >r #64+ @ r> * (a_z*b_z)
+#2 cells #+ @ >r #2 cells #+ @ r> * (a_z*b_z)
 r> r> + +  (a_x*b_x + a_y*b_y + a_z*b_z)
 ;
 )");
@@ -358,19 +355,19 @@ r> r> + +  (a_x*b_x + a_y*b_y + a_z*b_z)
 : cross3   (&a &b &result)
 >r
 2dup       (&a &b &a &b)
-@ >r #32+ @ r> * (&a &b a_y*b_x)
+@ >r #1 cells #+ @ r> * (&a &b a_y*b_x)
 >r 2dup    (&a &b &a &b)
-#32+ @ >r @ r> * (a_x*b_y)
+#1 cells #+ @ >r @ r> * (a_x*b_y)
 r> -       (&a &b a_x*b_y - a_y*b_x)
 >r 2dup    (&a &b &a &b)
-#64+ @ >r @ r> * (&a &b a_x*b_z)
+#2 cells #+ @ >r @ r> * (&a &b a_x*b_z)
 >r 2dup    (&a &b &a &b)
-@ >r #64+ @ r> * (&a &b a_z*b_x)
+@ >r #2 cells #+ @ r> * (&a &b a_z*b_x)
 r> -       (&a &b a_z*b_x-a_x*b_z)
 >r 2dup    (&a &b &a &b)
-#32+ @ >r #64+ @ r> * (&a &b a_z*b_y)
+#1 cells #+ @ >r #2 cells #+ @ r> * (&a &b a_z*b_y)
 >r         (&a &b)
-#64+ @ >r #32+ @ r> * (&a &b a_y*b_z)
+#2 cells #+ @ >r #1 cells #+ @ r> * (&a &b a_y*b_z)
 r> -       (a_y*b_z-a_z*b_y)
 r> r>      (a_y*b_z-a_z*b_y  a_z*b_x-a_x*b_z   a_x*b_y - a_y*b_x)
 r>         (a_y*b_z-a_z*b_y  a_z*b_x-a_x*b_z   a_x*b_y - a_y*b_x   &result)
@@ -384,9 +381,9 @@ vec3!
 : add3   (&a &b &result)
 >r
 2dup     (&a &b &a &b)
-#64+ @ >r #64+ @ r> + (&a &b a_z+b_z)
+#2 cells #+ @ >r #2 cells #+ @ r> + (&a &b a_z+b_z)
 >r 2dup       (&a &b &a &b)
-#32+ @ >r #32+ @ r> + (&a &b a_y+b_y)
+#1 cells #+ @ >r #1 cells #+ @ r> + (&a &b a_y+b_y)
 >r            (&a &b)
 @ >r @ r> +   (a_x+b_x)
 r> r>         (a_x+b_x  a_y+b_y  a_z+a_z )
@@ -401,9 +398,9 @@ vec3!
 : sub3   (&a &b &result)
 >r
 2dup     (&a &b &a &b)
-#64+ @ >r #64+ @ r> - (&a &b a_z-b_z)
+#2 cells #+ @ >r #2 cells #+ @ r> - (&a &b a_z-b_z)
 >r 2dup       (&a &b &a &b)
-#32+ @ >r #32+ @ r> - (&a &b a_y-b_y)
+#1 cells #+ @ >r #1 cells #+ @ r> - (&a &b a_y-b_y)
 >r            (&a &b)
 @ >r @ r> -   (a_x-b_x)
 r> r>         (a_x-b_x  a_y-b_y  a_z-a_z )
@@ -418,9 +415,9 @@ vec3!
 : mul3   (&a &b &result)
 >r
 2dup     (&a &b &a &b)
-#64+ @ >r #64+ @ r> * (&a &b a_z*b_z)
+#2 cells #+ @ >r #2 cells #+ @ r> * (&a &b a_z*b_z)
 >r 2dup       (&a &b &a &b)
-#32+ @ >r #32+ @ r> * (&a &b a_y*b_y)
+#1 cells #+ @ >r #1 cells #+ @ r> * (&a &b a_y*b_y)
 >r            (&a &b)
 @ >r @ r> *   (a_x*b_x)
 r> r>         (a_x*b_x  a_y*b_y  a_z*a_z )
@@ -435,9 +432,9 @@ vec3!
 : div3   (&a &b &result)
 >r
 2dup     (&a &b &a &b)
-#64+ @ >r #64+ @ r> / (&a &b a_z/b_z)
+#2 cells #+ @ >r #2 cells #+ @ r> / (&a &b a_z/b_z)
 >r 2dup       (&a &b &a &b)
-#32+ @ >r #32+ @ r> / (&a &b a_y/b_y)
+#1 cells #+ @ >r #1 cells #+ @ r> / (&a &b a_y/b_y)
 >r            (&a &b)
 @ >r @ r> /   (a_x/b_x)
 r> r>         (a_x/b_x  a_y/b_y  a_z/a_z )
@@ -452,16 +449,16 @@ vec3!
 : scalarmul3   (t &v &result)
 >r
 2dup        (t &v t &v)
-#64+ @  *   (t &v t*v_z)
+#2 cells #+ @  *   (t &v t*v_z)
 >r 2dup     (t &v t &v)
-#32+ @  *   (t &v t*v_y)
+#1 cells #+ @  *   (t &v t*v_y)
 >r          (t &v)
 @ *         (t*v_x)
 r> r>       (t*v_x t*vy t*vz)
 r> vec3!
 ;
 )");
-#endif
+//#endif
 
   register_definition(d, R"(
 (length of a vec3 (&v => length))
