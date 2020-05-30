@@ -1602,6 +1602,9 @@ namespace
 
     code.add(asmcode::VCMPPS, asmcode::YMM6, asmcode::YMM2, asmcode::YMM0, asmcode::NUMBER, 1);
     code.add(asmcode::VCMPPS, asmcode::K1, asmcode::ZMM2, asmcode::ZMM0, asmcode::NUMBER, 1);
+
+    code.add(asmcode::VCMPPS, asmcode::YMM13, asmcode::YMM12, asmcode::YMM10, asmcode::NUMBER, 2);
+    code.add(asmcode::VCMPPS, asmcode::K1, asmcode::ZMM12, asmcode::ZMM10, asmcode::NUMBER, 2);
       
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
@@ -1615,6 +1618,10 @@ namespace
     _check_buffer(buffer, size, { 0xC5, 0xEC, 0xC2, 0xF0, 0x01 });
     size = code.get_instructions_list().front()[4].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0x62, 0xF1, 0x6C, 0x48, 0xC2, 0xC8, 0x01 });
+    size = code.get_instructions_list().front()[5].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0xC4, 0x41, 0x1C, 0xC2, 0xEA, 0x02 });
+    size = code.get_instructions_list().front()[6].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xD1, 0x1C, 0x48, 0xC2, 0xCA, 0x02 });
 
     }
 

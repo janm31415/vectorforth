@@ -420,6 +420,14 @@ namespace
       case asmcode::XMM5: return "xmm5";
       case asmcode::XMM6: return "xmm6";
       case asmcode::XMM7: return "xmm7";
+      case asmcode::XMM8: return "xmm8";
+      case asmcode::XMM9: return "xmm9";
+      case asmcode::XMM10: return "xmm10";
+      case asmcode::XMM11: return "xmm11";
+      case asmcode::XMM12: return "xmm12";
+      case asmcode::XMM13: return "xmm13";
+      case asmcode::XMM14: return "xmm14";
+      case asmcode::XMM15: return "xmm15";
       case asmcode::YMM0: return "ymm0";
       case asmcode::YMM1: return "ymm1";
       case asmcode::YMM2: return "ymm2";
@@ -428,6 +436,14 @@ namespace
       case asmcode::YMM5: return "ymm5";
       case asmcode::YMM6: return "ymm6";
       case asmcode::YMM7: return "ymm7";
+      case asmcode::YMM8: return "ymm8";
+      case asmcode::YMM9: return "ymm9";
+      case asmcode::YMM10: return "ymm10";
+      case asmcode::YMM11: return "ymm11";
+      case asmcode::YMM12: return "ymm12";
+      case asmcode::YMM13: return "ymm13";
+      case asmcode::YMM14: return "ymm14";
+      case asmcode::YMM15: return "ymm15";
       case asmcode::ZMM0: return m == asmcode::k0 ? "zmm0" : "zmm0" + _to_string(m);
       case asmcode::ZMM1: return m == asmcode::k0 ? "zmm1" : "zmm1" + _to_string(m);
       case asmcode::ZMM2: return m == asmcode::k0 ? "zmm2" : "zmm2" + _to_string(m);
@@ -436,6 +452,14 @@ namespace
       case asmcode::ZMM5: return m == asmcode::k0 ? "zmm5" : "zmm5" + _to_string(m);
       case asmcode::ZMM6: return m == asmcode::k0 ? "zmm6" : "zmm6" + _to_string(m);
       case asmcode::ZMM7: return m == asmcode::k0 ? "zmm7" : "zmm7" + _to_string(m);
+      case asmcode::ZMM8: return m == asmcode::k0 ? "zmm8" : "zmm0" + _to_string(m);
+      case asmcode::ZMM9: return m == asmcode::k0 ? "zmm9" : "zmm9" + _to_string(m);
+      case asmcode::ZMM10: return m == asmcode::k0 ? "zmm10" : "zmm10" + _to_string(m);
+      case asmcode::ZMM11: return m == asmcode::k0 ? "zmm11" : "zmm11" + _to_string(m);
+      case asmcode::ZMM12: return m == asmcode::k0 ? "zmm12" : "zmm12" + _to_string(m);
+      case asmcode::ZMM13: return m == asmcode::k0 ? "zmm13" : "zmm13" + _to_string(m);
+      case asmcode::ZMM14: return m == asmcode::k0 ? "zmm14" : "zmm14" + _to_string(m);
+      case asmcode::ZMM15: return m == asmcode::k0 ? "zmm15" : "zmm15" + _to_string(m);
       case asmcode::K0: return "k0";
       case asmcode::K1: return "k1";
       case asmcode::K2: return "k2";
@@ -877,16 +901,40 @@ namespace
       case asmcode::BH:
       case asmcode::RDI: mod = 3; rm = 7;  break;
       case asmcode::R8D:
+      case asmcode::ZMM8:
+      case asmcode::YMM8:
+      case asmcode::XMM8:
       case asmcode::R8: mod = 3; rm = 0; add_rex_b(rex); break;
       case asmcode::R9D:
+      case asmcode::ZMM9:
+      case asmcode::YMM9:
+      case asmcode::XMM9:
       case asmcode::R9: mod = 3; rm = 1; add_rex_b(rex); break;
       case asmcode::R10D:
+      case asmcode::ZMM10:
+      case asmcode::YMM10:
+      case asmcode::XMM10:
       case asmcode::R10: mod = 3; rm = 2; add_rex_b(rex); break;
       case asmcode::R11D:
+      case asmcode::ZMM11:
+      case asmcode::YMM11:
+      case asmcode::XMM11:
       case asmcode::R11: mod = 3; rm = 3; add_rex_b(rex); break;
+      case asmcode::ZMM12:
+      case asmcode::YMM12:
+      case asmcode::XMM12:
       case asmcode::R12: mod = 3; rm = 4; add_rex_b(rex); break;
+      case asmcode::ZMM13:
+      case asmcode::YMM13:
+      case asmcode::XMM13:
       case asmcode::R13: mod = 3; rm = 5; add_rex_b(rex); break;
+      case asmcode::ZMM14:
+      case asmcode::YMM14:
+      case asmcode::XMM14:
       case asmcode::R14: mod = 3; rm = 6; add_rex_b(rex); break;
+      case asmcode::ZMM15:
+      case asmcode::YMM15:
+      case asmcode::XMM15:
       case asmcode::R15: mod = 3; rm = 7; add_rex_b(rex); break;
       case asmcode::MEM_EAX:
       case asmcode::DWORD_MEM_RAX:
@@ -1017,16 +1065,40 @@ namespace
       case asmcode::BH:
       case asmcode::RDI: mod = 3; rm = 7;  break;
       case asmcode::R8D:
+      case asmcode::ZMM8:
+      case asmcode::YMM8:
+      case asmcode::XMM8:
       case asmcode::R8: mod = 3; rm = 0; add_rex_b(rex); break;
       case asmcode::R9D:
+      case asmcode::ZMM9:
+      case asmcode::YMM9:
+      case asmcode::XMM9:
       case asmcode::R9: mod = 3; rm = 1; add_rex_b(rex); break;
       case asmcode::R10D:
+      case asmcode::ZMM10:
+      case asmcode::YMM10:
+      case asmcode::XMM10:
       case asmcode::R10: mod = 3; rm = 2; add_rex_b(rex); break;
       case asmcode::R11D:
+      case asmcode::ZMM11:
+      case asmcode::YMM11:
+      case asmcode::XMM11:
       case asmcode::R11: mod = 3; rm = 3; add_rex_b(rex); break;
+      case asmcode::ZMM12:
+      case asmcode::YMM12:
+      case asmcode::XMM12:
       case asmcode::R12: mod = 3; rm = 4; add_rex_b(rex); break;
+      case asmcode::ZMM13:
+      case asmcode::YMM13:
+      case asmcode::XMM13:
       case asmcode::R13: mod = 3; rm = 5; add_rex_b(rex); break;
+      case asmcode::ZMM14:
+      case asmcode::YMM14:
+      case asmcode::XMM14:
       case asmcode::R14: mod = 3; rm = 6; add_rex_b(rex); break;
+      case asmcode::ZMM15:
+      case asmcode::YMM15:
+      case asmcode::XMM15:
       case asmcode::R15: mod = 3; rm = 7; add_rex_b(rex); break;
       case asmcode::MEM_EAX:
       case asmcode::DWORD_MEM_RAX:
@@ -1147,16 +1219,40 @@ namespace
       case asmcode::BH:
       case asmcode::RDI: reg = 7;  break;
       case asmcode::R8D:
+      case asmcode::ZMM8:
+      case asmcode::YMM8:
+      case asmcode::XMM8:
       case asmcode::R8: add_rex_r(rex); reg = 0; break;
+      case asmcode::ZMM9:
+      case asmcode::YMM9:
+      case asmcode::XMM9:
       case asmcode::R9D:
       case asmcode::R9: add_rex_r(rex); reg = 1; break;
+      case asmcode::ZMM10:
+      case asmcode::YMM10:
+      case asmcode::XMM10:
       case asmcode::R10D:
       case asmcode::R10: add_rex_r(rex); reg = 2; break;
+      case asmcode::ZMM11:
+      case asmcode::YMM11:
+      case asmcode::XMM11:
       case asmcode::R11D:
       case asmcode::R11: add_rex_r(rex); reg = 3; break;
+      case asmcode::ZMM12:
+      case asmcode::YMM12:
+      case asmcode::XMM12:
       case asmcode::R12: add_rex_r(rex); reg = 4; break;
+      case asmcode::ZMM13:
+      case asmcode::YMM13:
+      case asmcode::XMM13:
       case asmcode::R13: add_rex_r(rex); reg = 5; break;
+      case asmcode::ZMM14:
+      case asmcode::YMM14:
+      case asmcode::XMM14:
       case asmcode::R14: add_rex_r(rex); reg = 6; break;
+      case asmcode::ZMM15:
+      case asmcode::YMM15:
+      case asmcode::XMM15:
       case asmcode::R15: add_rex_r(rex); reg = 7; break;
       default: throw std::logic_error("get_modrm_byte: not implemented");
       }
@@ -1235,13 +1331,37 @@ namespace
       case asmcode::XMM7:
       case asmcode::YMM7:
         return 8;
+      case asmcode::XMM8:
+      case asmcode::YMM8:
+        return 7;
+      case asmcode::XMM9:
+      case asmcode::YMM9:
+        return 6;
+      case asmcode::XMM10:
+      case asmcode::YMM10:
+        return 5;
+      case asmcode::XMM11:
+      case asmcode::YMM11:
+        return 4;
+      case asmcode::XMM12:
+      case asmcode::YMM12:
+        return 3;
+      case asmcode::XMM13:
+      case asmcode::YMM13:
+        return 2;
+      case asmcode::XMM14:
+      case asmcode::YMM14:
+        return 1;
+      case asmcode::XMM15:
+      case asmcode::YMM15:
+        return 0;
       default: throw std::logic_error("encode_vex_register: this register is not implemented");
       }
     }
 
   uint8_t encode_evex_register(uint8_t& vquote, const asmcode::operand& op)
     {
-    if (op >= asmcode::ZMM0 && op <= asmcode::ZMM7)
+    if (op >= asmcode::ZMM0 && op <= asmcode::ZMM15)
       vquote = 1;
     else
       vquote = 0;
@@ -1280,6 +1400,30 @@ namespace
       case asmcode::XMM7:
       case asmcode::YMM7:
       case asmcode::ZMM7: return 8;
+      case asmcode::XMM8:
+      case asmcode::YMM8:
+      case asmcode::ZMM8: return 7;
+      case asmcode::XMM9:
+      case asmcode::YMM9:
+      case asmcode::ZMM9: return 6;
+      case asmcode::XMM10:
+      case asmcode::YMM10:
+      case asmcode::ZMM10: return 5;
+      case asmcode::XMM11:
+      case asmcode::YMM11:
+      case asmcode::ZMM11: return 4;
+      case asmcode::XMM12:
+      case asmcode::YMM12:
+      case asmcode::ZMM12: return 3;
+      case asmcode::XMM13:
+      case asmcode::YMM13:
+      case asmcode::ZMM13: return 2;
+      case asmcode::XMM14:
+      case asmcode::YMM14:
+      case asmcode::ZMM14: return 1;
+      case asmcode::XMM15:
+      case asmcode::YMM15:
+      case asmcode::ZMM15: return 0;
       default: throw std::logic_error("encode_evex_register: this register is not implemented");
       }
     }
@@ -3746,6 +3890,14 @@ namespace
       case asmcode::XMM5: return opcode::xmm;
       case asmcode::XMM6: return opcode::xmm;
       case asmcode::XMM7: return opcode::xmm;
+      case asmcode::XMM8: return opcode::xmm;
+      case asmcode::XMM9: return opcode::xmm;
+      case asmcode::XMM10: return opcode::xmm;
+      case asmcode::XMM11: return opcode::xmm;
+      case asmcode::XMM12: return opcode::xmm;
+      case asmcode::XMM13: return opcode::xmm;
+      case asmcode::XMM14: return opcode::xmm;
+      case asmcode::XMM15: return opcode::xmm;
       case asmcode::YMM0: return opcode::ymm;
       case asmcode::YMM1: return opcode::ymm;
       case asmcode::YMM2: return opcode::ymm;
@@ -3754,6 +3906,14 @@ namespace
       case asmcode::YMM5: return opcode::ymm;
       case asmcode::YMM6: return opcode::ymm;
       case asmcode::YMM7: return opcode::ymm;
+      case asmcode::YMM8: return opcode::ymm;
+      case asmcode::YMM9: return opcode::ymm;
+      case asmcode::YMM10: return opcode::ymm;
+      case asmcode::YMM11: return opcode::ymm;
+      case asmcode::YMM12: return opcode::ymm;
+      case asmcode::YMM13: return opcode::ymm;
+      case asmcode::YMM14: return opcode::ymm;
+      case asmcode::YMM15: return opcode::ymm;
       case asmcode::ZMM0: return opcode::zmm;
       case asmcode::ZMM1: return opcode::zmm;
       case asmcode::ZMM2: return opcode::zmm;
@@ -3762,6 +3922,14 @@ namespace
       case asmcode::ZMM5: return opcode::zmm;
       case asmcode::ZMM6: return opcode::zmm;
       case asmcode::ZMM7: return opcode::zmm;
+      case asmcode::ZMM8: return opcode::zmm;
+      case asmcode::ZMM9: return opcode::zmm;
+      case asmcode::ZMM10: return opcode::zmm;
+      case asmcode::ZMM11: return opcode::zmm;
+      case asmcode::ZMM12: return opcode::zmm;
+      case asmcode::ZMM13: return opcode::zmm;
+      case asmcode::ZMM14: return opcode::zmm;
+      case asmcode::ZMM15: return opcode::zmm;
       case asmcode::K0: return opcode::k16;
       case asmcode::K1: return opcode::k16;
       case asmcode::K2: return opcode::k16;
