@@ -15,6 +15,9 @@ VF_BEGIN
 #define R14_STORE ASM::asmcode::MEM_R10, 56
 #define R15_STORE ASM::asmcode::MEM_R10, 64
 
+#define ZMM6_STORE ASM::asmcode::MEM_R10, 448
+#define ZMM7_STORE ASM::asmcode::MEM_R10, 512
+
 #define STACK_TOP ASM::asmcode::MEM_R10, 72
 #define STACK_POINTER ASM::asmcode::MEM_R10, 88
 

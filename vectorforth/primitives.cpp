@@ -1278,7 +1278,7 @@ void primitive_clamp(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::VANDPS, AVX_REG6, AVX_REG6, AVX_REG7);
 #endif
 
-  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG3, AVX_REG4); // a < c && c < b
+  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG3, AVX_REG4); // a <= c && c <= b
 
   code.add(asmcode::VMULPS, AVX_REG3, AVX_REG3, AVX_REG0);
   code.add(asmcode::VMULPS, AVX_REG5, AVX_REG5, AVX_REG1);

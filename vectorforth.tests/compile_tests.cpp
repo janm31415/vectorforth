@@ -2265,15 +2265,16 @@ struct stdlib_tests : public compile_fixture
     TEST_EQ(2, get_stack_valuei(0));
 
     run("v8 0 0.5 1 1.5 2 2.5 3 3.5 1 3 clamp");
+    print_stack(std::cout, ctxt);
     auto v = get_last_stack_value();
-    TEST_EQ(1.f, get_avx2_f32(v, 7));
-    TEST_EQ(1.f, get_avx2_f32(v, 6));
-    TEST_EQ(1.f, get_avx2_f32(v, 5));
-    TEST_EQ(1.5f, get_avx2_f32(v, 4));
-    TEST_EQ(2.f, get_avx2_f32(v, 3));
-    TEST_EQ(2.5f, get_avx2_f32(v, 2));
-    TEST_EQ(3.f, get_avx2_f32(v, 1));
-    TEST_EQ(3.f, get_avx2_f32(v, 0));
+    TEST_EQ((float)1.f, (float)get_avx2_f32(v, 7));
+    TEST_EQ((float)1.f, (float)get_avx2_f32(v, 6));
+    TEST_EQ((float)1.f, (float)get_avx2_f32(v, 5));
+    TEST_EQ((float)1.5f, (float)get_avx2_f32(v, 4));
+    TEST_EQ((float)2.f, (float)get_avx2_f32(v, 3));
+    TEST_EQ((float)2.5f, (float)get_avx2_f32(v, 2));
+    TEST_EQ((float)3.f, (float)get_avx2_f32(v, 1));
+    TEST_EQ((float)3.f, (float)get_avx2_f32(v, 0));
     }
 #endif
   };

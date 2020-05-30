@@ -3069,6 +3069,9 @@ namespace
     opcode_table t;
     //VEX.L0.0F.W0 93 / r KMOVW r32, k1
     t.add_opcode(make_vex_opcode("KMOVW", opcode::L0, opcode::_0F, opcode::W0, 0x93, opcode::r, opcode::r32, opcode::km16)); // hack: should be k16, but km16 to fix modrm byte
+
+    //VEX.L0.0F.W0 92 /rKMOVW k1, r32
+    t.add_opcode(make_vex_opcode("KMOVW", opcode::L0, opcode::_0F, opcode::W0, 0x92, opcode::r, opcode::k16, opcode::rm32)); // hack: should be r32, but rm32 to fix modrm byte
     return t;
     }
 

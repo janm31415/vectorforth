@@ -1600,6 +1600,9 @@ namespace
     code.add(asmcode::VCMPPS, asmcode::K0, asmcode::ZMM0, asmcode::ZMM1, asmcode::NUMBER, 0);
     code.add(asmcode::VCMPPS, asmcode::K3, asmcode::ZMM2, asmcode::ZMM7, asmcode::NUMBER, 255);
 
+    code.add(asmcode::VCMPPS, asmcode::YMM6, asmcode::YMM2, asmcode::YMM0, asmcode::NUMBER, 1);
+    code.add(asmcode::VCMPPS, asmcode::K1, asmcode::ZMM2, asmcode::ZMM0, asmcode::NUMBER, 1);
+      
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC5, 0xFC, 0xC2, 0xC1, 0xFF });
@@ -1608,6 +1611,11 @@ namespace
     _check_buffer(buffer, size, { 0x62, 0xF1, 0x7C, 0x48, 0xC2, 0xC1, 0x00 });
     size = code.get_instructions_list().front()[2].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0x62, 0xF1, 0x6C, 0x48, 0xC2, 0xDF, 0xFF });
+    size = code.get_instructions_list().front()[3].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0xC5, 0xEC, 0xC2, 0xF0, 0x01 });
+    size = code.get_instructions_list().front()[4].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0x62, 0xF1, 0x6C, 0x48, 0xC2, 0xC8, 0x01 });
+
     }
 
   void asmcode_vlogicps()
@@ -1688,12 +1696,18 @@ namespace
     asmcode code; uint8_t buffer[255];
     code.add(asmcode::KMOVW, asmcode::EAX, asmcode::K1);
     code.add(asmcode::KMOVW, asmcode::ECX, asmcode::K3);
+    code.add(asmcode::KMOVW, asmcode::K1, asmcode::EAX);
+    code.add(asmcode::KMOVW, asmcode::K3, asmcode::ECX);
 
     uint64_t size;
     size = code.get_instructions_list().front()[0].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC5, 0xF8, 0x93, 0xC1 });
     size = code.get_instructions_list().front()[1].fill_opcode(buffer);
     _check_buffer(buffer, size, { 0xC5, 0xF8, 0x93, 0xCB });
+    size = code.get_instructions_list().front()[2].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0xC5, 0xF8, 0x92, 0xC8 });
+    size = code.get_instructions_list().front()[3].fill_opcode(buffer);
+    _check_buffer(buffer, size, { 0xC5, 0xF8, 0x92, 0xD9 });
     }
 
   }

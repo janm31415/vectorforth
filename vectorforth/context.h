@@ -43,6 +43,9 @@ struct context
   uint64_t no_bits[8]; // offset 320
   uint64_t onef_bits[8]; // offset 384
 
+  uint64_t store_zmm6[8]; // offset 448
+  uint64_t store_zmm7[8]; // offset 512
+
   char* memory_allocated;  
   }
 #ifndef _WIN32 // linux alignment in gcc

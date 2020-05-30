@@ -17,7 +17,7 @@ void store_registers(asmcode& code)
   {
   /*
   linux: r12, r13, r14, r15, rbx, rsp, rbp should be preserved
-  windows: r12, r13, r14, r15, rbx, rsp, rbp, rdi, rsi
+  windows: r12, r13, r14, r15, rbx, rsp, rbp, rdi, rsi, x/y/zmm6, x/y/zmm7
   */
   code.add(asmcode::MOV, RBX_STORE, asmcode::RBX);
   //code.add(asmcode::MOV, RDI_STORE, asmcode::RDI);
@@ -28,6 +28,11 @@ void store_registers(asmcode& code)
   //code.add(asmcode::MOV, R13_STORE, asmcode::R13);
   //code.add(asmcode::MOV, R14_STORE, asmcode::R14);
   code.add(asmcode::MOV, R15_STORE, asmcode::R15);
+
+#ifdef _WIN32
+  code.add(asmcode::VMOVAPS, ZMM6_STORE, AVX_REG6);
+  code.add(asmcode::VMOVAPS, ZMM7_STORE, AVX_REG7);
+#endif
   }
 
 void load_registers(asmcode& code)
@@ -45,6 +50,11 @@ void load_registers(asmcode& code)
   //code.add(asmcode::MOV, asmcode::R13, R13_STORE);
   //code.add(asmcode::MOV, asmcode::R14, R14_STORE);
   code.add(asmcode::MOV, asmcode::R15, R15_STORE);
+
+#ifdef _WIN32
+  code.add(asmcode::VMOVAPS, AVX_REG6, ZMM6_STORE);
+  code.add(asmcode::VMOVAPS, AVX_REG7, ZMM7_STORE);
+#endif
   }
 
 VF_END
