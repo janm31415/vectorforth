@@ -49,6 +49,6 @@ class view
     settings _settings;
     std::chrono::high_resolution_clock::time_point _start;
     int _line_nr, _col_nr;
-    
+    bool _optimize;
     shader_program _program;
   };

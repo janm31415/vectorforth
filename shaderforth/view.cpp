@@ -53,7 +53,8 @@ namespace
 
 view::view() : _w(1600), _h(900), 
 _viewport_w(800), _viewport_h(450), _viewport_pos_x(50), _viewport_pos_y(50), 
-_quit(false), _pause(false), _line_nr(1), _col_nr(1), _program(_viewport_w, _viewport_h)
+_quit(false), _pause(false), _line_nr(1), _col_nr(1), _program(_viewport_w, _viewport_h),
+_optimize(true)
   {
   SDL_DisplayMode DM;
   SDL_GetCurrentDisplayMode(0, &DM);
@@ -82,7 +83,7 @@ _quit(false), _pause(false), _line_nr(1), _col_nr(1), _program(_viewport_w, _vie
     throw std::runtime_error("SDL can't create a window");
 
   SDL_GLContext gl_context = SDL_GL_CreateContext(_window);
-  SDL_GL_SetSwapInterval(1); // Enable vsync
+  //SDL_GL_SetSwapInterval(1); // Enable vsync
 
 
   IMGUI_CHECKVERSION();
@@ -148,7 +149,7 @@ void view::set_shader_code(const std::string& shader)
   if (compiled_shader_code != shader)
     {
     _reset_time();
-    if (!_program.compile(shader))
+    if (!_program.compile(shader, _optimize))
       {
       return;
       }
@@ -439,6 +440,13 @@ void view::_script_window()
   if (ImGui::Button("Save"))
     {
     save_script = true;
+    }
+  ImGui::SameLine();
+  ImGui::Checkbox("Optimize", &_optimize);
+  ImGui::SameLine();
+  if (ImGui::Button("Asm"))
+    {
+    _program.log_assembly(current_shader_code, _optimize);
     }
 
   static ImGuiFs::Dialog open_script_dlg(false, true, true);

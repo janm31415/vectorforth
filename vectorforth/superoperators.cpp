@@ -182,6 +182,311 @@ void superoperator_float_div(ASM::asmcode& code, const expanded_token& et)
   code.add(asmcode::COMMENT, "END SUPEROPERATOR float /");
   }
 
+void superoperator_float_add_float_add(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float + float +");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float + float +");
+  }
+void superoperator_float_sub_float_add(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float - float +");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float - float +");
+  }
+void superoperator_float_mul_float_add(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float * float +");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float * float +");
+  }
+void superoperator_float_div_float_add(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float / float +");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float / float +");
+  }
+void superoperator_float_add_float_sub(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float + float -");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float + float -");
+  }
+void superoperator_float_sub_float_sub(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float - float -");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float - float -");
+  }
+void superoperator_float_mul_float_sub(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float * float -");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float * float -");
+  }
+void superoperator_float_div_float_sub(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float / float -");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float / float -");
+  }
+void superoperator_float_add_float_mul(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float + float *");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float + float *");
+  }
+void superoperator_float_sub_float_mul(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float - float *");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float - float *");
+  }
+void superoperator_float_mul_float_mul(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float * float *");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float * float *");
+  }
+void superoperator_float_div_float_mul(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float / float *");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float / float *");
+  }
+void superoperator_float_add_float_div(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float + float /");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float + float /");
+  }
+void superoperator_float_sub_float_div(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float - float /");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float - float /");
+  }
+void superoperator_float_mul_float_div(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float * float /");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float * float /");
+  }
+void superoperator_float_div_float_div(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float / float /");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1);
+
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float / float /");
+  }
+
 void superoperator_swap_drop(ASM::asmcode& code, const expanded_token& et)
   {
   code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR swap drop");
@@ -961,6 +1266,26 @@ void superoperator_dup_float_nequ(ASM::asmcode& code, const expanded_token& et)
 
   code.add(asmcode::COMMENT, "END SUPEROPERATOR dup float <>");
   }
+
+void superoperator_float_fmmod_drop(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float fm/mod drop");
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));  
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::VDIVPS, AVX_REG2, AVX_REG0, AVX_REG1); // quotient
+#ifdef AVX512
+  code.add(asmcode::VRNDSCALEPS, AVX_REG2, AVX_REG2, asmcode::NUMBER, 8 + 1); // floored quotient
+#else
+  code.add(asmcode::VROUNDPS, AVX_REG2, AVX_REG2, asmcode::NUMBER, 1); // floored quotient
+#endif
+  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG2, AVX_REG1); // floored quotient n3 times n1
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1); // remainder n2
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float fm/mod drop");
+  }
+
 namespace
   {
   bool is_float(std::vector<expanded_token>::iterator it)
@@ -1051,6 +1376,11 @@ namespace
   bool is_drop(std::vector<expanded_token>::iterator it)
     {
     return is_primitive(it) && (it->prim == &primitive_drop);
+    }
+
+  bool is_fmmod(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_fmod);
     }
 
   bool is_dup(std::vector<expanded_token>::iterator it)
@@ -1274,6 +1604,154 @@ namespace
         it = words.erase(it, it3);
         return it;
         }
+
+      if (is_add(it1) && is_float(it2) && is_add(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_add_float_add;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_add(it1) && is_float(it2) && is_sub(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_add_float_sub;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_add(it1) && is_float(it2) && is_mul(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_add_float_mul;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_add(it1) && is_float(it2) && is_div(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_add_float_div;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+
+      if (is_sub(it1) && is_float(it2) && is_add(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_sub_float_add;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_sub(it1) && is_float(it2) && is_sub(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_sub_float_sub;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_sub(it1) && is_float(it2) && is_mul(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_sub_float_mul;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_sub(it1) && is_float(it2) && is_div(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_sub_float_div;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+
+      if (is_mul(it1) && is_float(it2) && is_add(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_mul_float_add;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_mul(it1) && is_float(it2) && is_sub(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_mul_float_sub;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_mul(it1) && is_float(it2) && is_mul(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_mul_float_mul;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_mul(it1) && is_float(it2) && is_div(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_mul_float_div;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+
+      if (is_div(it1) && is_float(it2) && is_add(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_div_float_add;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_div(it1) && is_float(it2) && is_sub(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_div_float_sub;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_div(it1) && is_float(it2) && is_mul(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_div_float_mul;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
+      if (is_div(it1) && is_float(it2) && is_div(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_div_float_div;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
       }
     if (sz >= 3)
       {
@@ -1284,6 +1762,14 @@ namespace
         it->f[1] = it1->f[0];
         it->f[2] = it2->f[0];
         it->t = expanded_token::ET_FLOAT3;
+        *it2 = *it;
+        it = words.erase(it, it2);
+        return it;
+        }
+      if (is_fmmod(it1) && is_drop(it2))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_float_fmmod_drop;
         *it2 = *it;
         it = words.erase(it, it2);
         return it;

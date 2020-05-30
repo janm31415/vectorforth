@@ -19,7 +19,9 @@ class shader_program
     void set_shader_input(const shader_input& inp);
 
    
-    bool compile(const std::string& script);
+    bool compile(const std::string& script, bool optimize);
+
+    void log_assembly(const std::string& script, bool optimize);
 
     void run(image<uint32_t>& im);
 

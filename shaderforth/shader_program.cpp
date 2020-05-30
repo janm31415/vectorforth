@@ -48,6 +48,44 @@ namespace
       }
     return out;
     }
+
+  std::string get_header()
+    {
+#ifdef AVX512
+    std::string main = R"(
+: x st@ #64 #- @ ;
+: y st@ #128 #- @ ;
+: rx st@ #192 #- @ ;
+: ry st@ #256 #- @ ;
+: u st@ #320 #- @ ;
+: v st@ #384 #- @ ;
+: t st@ #448 #- @ ;
+: dt st@ #512 #- @ ;
+: frame st@ #576 #- @ ;
+: mx st@ #640 #- @ ;
+: my st@ #704 #- @ ;
+: mz st@ #768 #- @ ;
+: mw st@ #832 #- @ ;
+)";
+#else
+    std::string main = R"(
+: x st@ #32 #- @ ;
+: y st@ #64 #- @ ;
+: rx st@ #96 #- @ ;
+: ry st@ #128 #- @ ;
+: u st@ #160 #- @ ;
+: v st@ #192 #- @ ;
+: t st@ #224 #- @ ;
+: dt st@ #256 #- @ ;
+: frame st@ #288 #- @ ;
+: mx st@ #320 #- @ ;
+: my st@ #352 #- @ ;
+: mz st@ #384 #- @ ;
+: mw st@ #416 #- @ ;
+)";
+#endif
+    return main;
+    }
   }
 
 shader_program::shader_program(int w, int h) : _w(w), _h(h), _fun_size(0), _fun(nullptr)
@@ -64,45 +102,41 @@ shader_program::~shader_program()
     ASM::free_assembled_function((void*)_fun, _fun_size);
   }
 
-bool shader_program::compile(const std::string& script)
+void shader_program::log_assembly(const std::string& script, bool optimize)
+  {
+  std::string main = get_header();
+  int main_lines = (int)std::count(main.begin(), main.end(), '\n');
+
+  VF::dictionary dict;
+  add_stdlib_to_dictionary(dict);
+  VF::expand_data ed = VF::create_expand_data();
+  ASM::asmcode code;
+
+  std::string shader = main + script;
+  try
+    {
+    auto words = VF::tokenize(shader);
+    if (optimize)
+      VF::compile(code, dict, ed, words);
+    else
+      VF::compile_single_pass(code, dict, ed, words);
+    }
+  catch (std::runtime_error e)
+    {
+    Logging::Error() << "shader program: " << adapt_line_number_in_error_message(e.what(), main_lines) << "\n";    
+    return;
+    }
+  std::stringstream ss;
+  code.stream(ss);
+  Logging::GetInstance() << ss.str() << "\n";
+  }
+
+bool shader_program::compile(const std::string& script, bool optimize)
   {
   if (_fun)
     ASM::free_assembled_function((void*)_fun, _fun_size);
 
-
-#ifdef AVX512
-  std::string main = R"(
-: x st@ #64 #- @ ;
-: y st@ #128 #- @ ;
-: rx st@ #192 #- @ ;
-: ry st@ #256 #- @ ;
-: u st@ #320 #- @ ;
-: v st@ #384 #- @ ;
-: t st@ #448 #- @ ;
-: dt st@ #512 #- @ ;
-: frame st@ #576 #- @ ;
-: mx st@ #640 #- @ ;
-: my st@ #704 #- @ ;
-: mz st@ #768 #- @ ;
-: mw st@ #832 #- @ ;
-)";
-#else
-  std::string main = R"(
-: x st@ #32 #- @ ;
-: y st@ #64 #- @ ;
-: rx st@ #96 #- @ ;
-: ry st@ #128 #- @ ;
-: u st@ #160 #- @ ;
-: v st@ #192 #- @ ;
-: t st@ #224 #- @ ;
-: dt st@ #256 #- @ ;
-: frame st@ #288 #- @ ;
-: mx st@ #320 #- @ ;
-: my st@ #352 #- @ ;
-: mz st@ #384 #- @ ;
-: mw st@ #416 #- @ ;
-)";
-#endif
+  std::string main = get_header();
 
   int main_lines = (int)std::count(main.begin(), main.end(), '\n');
 
@@ -115,10 +149,14 @@ bool shader_program::compile(const std::string& script)
     VF::expand_data ed = VF::create_expand_data();
     ASM::asmcode code;
     auto words = VF::tokenize(shader);
-    VF::compile(code, dict, ed, words);
+    if (optimize)
+      VF::compile(code, dict, ed, words);
+    else
+      VF::compile_single_pass(code, dict, ed, words);
     ASM::first_pass_data d;
 
     _fun = (fun_ptr)assemble(_fun_size, d, code);
+    Logging::Info() << "shader program size: " << _fun_size << " bytes\n";
     }
   catch (std::runtime_error e)
     {
