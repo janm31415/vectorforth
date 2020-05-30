@@ -56,6 +56,24 @@ void superoperator_float_add_float_div(ASM::asmcode& code, const expanded_token&
 void superoperator_float_sub_float_div(ASM::asmcode& code, const expanded_token& et);
 void superoperator_float_mul_float_div(ASM::asmcode& code, const expanded_token& et);
 void superoperator_float_div_float_div(ASM::asmcode& code, const expanded_token& et);
+
+void superoperator_float_add_add(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_add_sub(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_add_mul(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_add_div(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_sub_add(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_sub_sub(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_sub_mul(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_sub_div(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_mul_add(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_mul_sub(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_mul_mul(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_mul_div(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_div_add(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_div_sub(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_div_mul(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_div_div(ASM::asmcode& code, const expanded_token& et);
+
 void superoperator_swap_drop(ASM::asmcode& code, const expanded_token& et);
 void superoperator_swap_over(ASM::asmcode& code, const expanded_token& et);
 void superoperator_swap_over_address_addi_store(ASM::asmcode& code, const expanded_token& et);
