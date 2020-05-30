@@ -40,11 +40,10 @@ struct context
   uint64_t signbit[8]; // offset 128
   uint64_t not_signbit[8]; // offset 192
   uint64_t all_bits[8]; // offset 256
-  uint64_t no_bits[8]; // offset 320
-  uint64_t onef_bits[8]; // offset 384
+  uint64_t onef_bits[8]; // offset 320
 
-  uint64_t store_zmm6[8]; // offset 448
-  uint64_t store_zmm7[8]; // offset 512
+  uint64_t store_zmm6[8]; // offset 384
+  uint64_t store_zmm7[8]; // offset 448
 
   char* memory_allocated;  
   }

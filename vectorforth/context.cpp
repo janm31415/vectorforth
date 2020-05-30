@@ -49,14 +49,6 @@ context create_context(uint64_t stack_size_in_bytes, uint64_t binding_space_in_b
   c.all_bits[5] = 0xffffffffffffffff;
   c.all_bits[6] = 0xffffffffffffffff;
   c.all_bits[7] = 0xffffffffffffffff;
-  c.no_bits[0] = 0x0;
-  c.no_bits[1] = 0x0;
-  c.no_bits[2] = 0x0;
-  c.no_bits[3] = 0x0;
-  c.no_bits[4] = 0x0;
-  c.no_bits[5] = 0x0;
-  c.no_bits[6] = 0x0;
-  c.no_bits[7] = 0x0;
   c.onef_bits[0] = 0x3f8000003f800000;
   c.onef_bits[1] = 0x3f8000003f800000;
   c.onef_bits[2] = 0x3f8000003f800000;
