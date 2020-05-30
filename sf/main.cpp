@@ -156,6 +156,8 @@ int main(int argc, char** argv)
   std::string line;
   std::string shader;
 
+  float total_time = 0.f;
+
 #ifdef AVX512
   std::string main = R"(
 : x st@ #64 #- @ ;
@@ -422,8 +424,8 @@ int main(int argc, char** argv)
       paint(wh, (const uint8_t*)image, w, -h, 4);
 
     os_restart_line();
-    printf("%.2f FPS     ", 1.f / time_delta);
-
+    printf("%.2f FPS     average: %.2f FPS             ", 1.f / time_delta, (float)frame/total_time);
+    total_time += time_delta;
     ++frame;
     }
 
