@@ -88,24 +88,9 @@ void add_stdlib_to_dictionary(dictionary& d)
 
   register_definition(d, ": value create ;");
 
-
-  /*
-  // old definition of within, uses if and thus branching, which is not recommended
+/*
   register_definition(d, R"(
-    : within_old (  c a b within returns true if a <= c and c < b) 
-        -rot     ( b c a )
-        over     ( b c a c )
-        <= if     ( b c )
-           2dup >  (b c b c -> b c result )
-           else
-           0       (b c 0 )
-           then
-         -rot    (b c result -> result b c)
-         2drop  (result b c - < result)
-   ; )");
-   */
-  register_definition(d, R"(
-    : within2 (  c a b within returns true if a <= c and c < b) 
+    : within (  c a b within returns true if a <= c and c < b) 
         -rot     ( b c a )
         over     ( b c a c )
         f<=      ( b c (a<=c))
@@ -113,7 +98,7 @@ void add_stdlib_to_dictionary(dictionary& d)
         f>       ((a<=c) (b>c))
         * negate icast 
    ; )");
-
+ */
   register_definition(d, ": depth st@ sp@ #- #1 cells #- #1 cells #/;");
   register_definition(d, ": rdepth rt@ rp@ #- #1 cells #/;");
 
