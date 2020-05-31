@@ -135,6 +135,8 @@ void add_stdlib_to_dictionary(dictionary& d)
                 return t * t * (3.f - 2.f * t);
                 }
   */
+
+  /*
   register_definition(d, R"(
   : smoothstep (  e0 e1 x smoothstep  )
     rot   (e1 x e0)
@@ -149,13 +151,14 @@ void add_stdlib_to_dictionary(dictionary& d)
     2 3 -rot      (t t 3 t 2)
     * - * *       (t*t*[3 - 2t])
   ;)");
-
+  */
   /*
   float mix(float x, float y, float a)
                 {
                 return x * (1 - a) + y * a;
                 }
   */
+  /*
   register_definition(d, R"(
   : mix    ( x y a mix )
   tuck  (x a y a)
@@ -165,7 +168,7 @@ void add_stdlib_to_dictionary(dictionary& d)
   * -        (y*a-x*[a-1])
   ;
 )");
-
+*/
   register_definition(d, R"(
   : step    ( edge x step, returns 0 if x < edge, and 1 otherwise )
   f<=

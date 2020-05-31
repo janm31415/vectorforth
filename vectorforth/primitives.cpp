@@ -1535,6 +1535,111 @@ void primitive_normalize3(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::VMOVAPS, asmcode::MEM_RCX, AVX_CELLS(2), AVX_REG2);
   }
 
+void primitive_mix(ASM::asmcode& code, compile_data& cd)
+  {
+  /*
+float mix(float x, float y, float a)
+              {
+              return x * (1 - a) + y * a;
+              }
+*/
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER); // a
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1)); // y
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, AVX_CELLS(2)); // x
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG3, ONEF_BITS);
+  code.add(asmcode::VSUBPS, AVX_REG3, AVX_REG3, AVX_REG0); // 1-a
+  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG2, AVX_REG3); // x*(1-a)
+  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG0); // y*a
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG1, AVX_REG2);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+  }
+
+void primitive_smoothstep(ASM::asmcode& code, compile_data& cd)
+  {
+  /*
+  float smoothstep(float edge0, float edge1, float x)
+    {
+    float t = clamp((x - edge0) / (edge1 - edge0), 0.f, 1.f);
+    return t * t * (3.f - 2.f * t);
+    }
+  */
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER); // x
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1)); // edge1
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, AVX_CELLS(2)); // edge0
+
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG2);
+  code.add(asmcode::VSUBPS, AVX_REG1, AVX_REG1, AVX_REG2);
+  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1); // (x - edge0) / (edge1 - edge0)
+
+  code.add(asmcode::VXORPS, AVX_REG1, AVX_REG1, AVX_REG1); // 0
+  code.add(asmcode::VMOVAPS, AVX_REG2, ONEF_BITS); // 1
+
+  // c a b clamp returns c if a < c and c < b, or a if c < a, or b if c > b
+
+#ifdef AVX512
+  code.add(asmcode::VXORPS, AVX_REG3, AVX_REG3, AVX_REG3);
+  code.add(asmcode::VXORPS, AVX_REG4, AVX_REG4, AVX_REG4);
+  code.add(asmcode::VXORPS, AVX_REG5, AVX_REG5, AVX_REG5);
+  code.add(asmcode::VXORPS, AVX_REG6, AVX_REG6, AVX_REG6);
+  code.add(asmcode::VMOVAPS, AVX_REG7, ONEF_BITS);
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2); // a <= c
+  code.add(asmcode::VMOVAPS, AVX_REG3, asmcode::k1, AVX_REG7);
+
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG2, asmcode::NUMBER, 2); // c <= b
+  code.add(asmcode::VMOVAPS, AVX_REG4, asmcode::k1, AVX_REG7);
+
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 1); // c < a
+  code.add(asmcode::VMOVAPS, AVX_REG5, asmcode::k1, AVX_REG7);
+
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG2, AVX_REG0, asmcode::NUMBER, 1); // b < c
+  code.add(asmcode::VMOVAPS, AVX_REG6, asmcode::k1, AVX_REG7);
+
+#else
+  code.add(asmcode::VCMPPS, AVX_REG3, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2); // a <= c
+  code.add(asmcode::VCMPPS, AVX_REG4, AVX_REG0, AVX_REG2, asmcode::NUMBER, 2); // c <= b
+  code.add(asmcode::VCMPPS, AVX_REG5, AVX_REG0, AVX_REG1, asmcode::NUMBER, 1); // c < a
+  code.add(asmcode::VCMPPS, AVX_REG6, AVX_REG2, AVX_REG0, asmcode::NUMBER, 1); // b < c
+
+  code.add(asmcode::VCVTDQ2PS, AVX_REG3, AVX_REG3);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG4, AVX_REG4);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG5, AVX_REG5);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG6, AVX_REG6);
+
+  code.add(asmcode::VMOVAPS, AVX_REG7, NOT_SIGN_BIT);
+  //code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x7fffffff);
+  //code.add(asmcode::MOVD, asmcode::XMM7, asmcode::EAX);
+  //code.add(asmcode::VBROADCASTSS, AVX_REG7, asmcode::XMM7);  
+  code.add(asmcode::VANDPS, AVX_REG3, AVX_REG3, AVX_REG7);
+  code.add(asmcode::VANDPS, AVX_REG4, AVX_REG4, AVX_REG7);
+  code.add(asmcode::VANDPS, AVX_REG5, AVX_REG5, AVX_REG7);
+  code.add(asmcode::VANDPS, AVX_REG6, AVX_REG6, AVX_REG7);
+#endif
+
+  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG3, AVX_REG4); // a <= c && c <= b
+
+  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG3, AVX_REG0);
+  code.add(asmcode::VMULPS, AVX_REG5, AVX_REG5, AVX_REG1);
+  code.add(asmcode::VMULPS, AVX_REG6, AVX_REG6, AVX_REG2);
+
+  code.add(asmcode::VORPS, AVX_REG0, AVX_REG3, AVX_REG5);
+  code.add(asmcode::VORPS, AVX_REG0, AVX_REG0, AVX_REG6);
+
+  //t * t * (3.f - 2.f * t);
+  code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x40000000); // 2
+  code.add(asmcode::MOVD, asmcode::XMM1, asmcode::EAX);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM1);
+  code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x40400000); // 3
+  code.add(asmcode::MOVD, asmcode::XMM2, asmcode::EAX);
+  code.add(asmcode::VBROADCASTSS, AVX_REG2, asmcode::XMM2);
+  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG0); // 2*t
+  code.add(asmcode::VSUBPS, AVX_REG1, AVX_REG2, AVX_REG1); // 3-2*t
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG0); // t*t
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1); // t*t*(3-2*t)
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+  }
+
 prim_map generate_primitives_map()
   {
   prim_map pm;
@@ -1642,6 +1747,8 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("scalarmul3", &primitive_scalarmul3));
   pm.insert(std::pair<std::string, prim_fun>("length3", &primitive_length3));
   pm.insert(std::pair<std::string, prim_fun>("normalize3", &primitive_normalize3));
+  pm.insert(std::pair<std::string, prim_fun>("mix", &primitive_mix));
+  pm.insert(std::pair<std::string, prim_fun>("smoothstep", &primitive_smoothstep));
 
   return pm;
   }

@@ -112,6 +112,9 @@ void primitive_div3(ASM::asmcode& code, compile_data& cd);
 void primitive_scalarmul3(ASM::asmcode& code, compile_data& cd);
 void primitive_length3(ASM::asmcode& code, compile_data& cd);
 void primitive_normalize3(ASM::asmcode& code, compile_data& cd);
+void primitive_mix(ASM::asmcode& code, compile_data& cd);
+void primitive_smoothstep(ASM::asmcode& code, compile_data& cd);
+
 
 typedef void(*prim_fun)(ASM::asmcode&, compile_data&);
 typedef std::map<std::string, prim_fun> prim_map;
