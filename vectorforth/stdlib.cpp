@@ -173,7 +173,7 @@ void add_stdlib_to_dictionary(dictionary& d)
 )");
 
   register_definition(d, ": vec3 #3 cells allot create ;");
-
+  /*
   register_definition(d, R"(
 : vec3! 
 tuck #2 cells #+ !
@@ -181,7 +181,9 @@ tuck #1 cells #+ !
 !
 ;
 )");
+*/
 
+  /*
   register_definition(d, R"(
 (dot product &a &b => x, where x is a*b with a,b of type vec3)
 
@@ -195,7 +197,8 @@ tuck #1 cells #+ !
 r> r> + +  (a_x*b_x + a_y*b_y + a_z*b_z)
 ;
 )");
-
+*/
+  /*
   register_definition(d, R"(
 (cross product (&a &b &result => -), where result contains axb)
 
@@ -221,7 +224,9 @@ r>         (a_y*b_z-a_z*b_y  a_z*b_x-a_x*b_z   a_x*b_y - a_y*b_x   &result)
 vec3!
 ;
 )");
+*/
 
+  /*
   register_definition(d, R"(
 (add 2 vec3s (&a &b &result => -), where result contains a+b)
 
@@ -238,7 +243,8 @@ r>            (a_x+b_x  a_y+b_y  a_z+a_z &result)
 vec3!
 ;
 )");
-
+*/
+  /*
   register_definition(d, R"(
 (subtract 2 vec3s (&a &b &result => -), where result contains a-b)
 
@@ -289,7 +295,7 @@ r>            (a_x/b_x  a_y/b_y  a_z/a_z &result)
 vec3!
 ;
 )");
-
+*/
   register_definition(d, R"(
 (multiply a vec3 with a scalar (t &v &result => -), where result contains t*v)
 
