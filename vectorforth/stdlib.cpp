@@ -296,6 +296,8 @@ vec3!
 ;
 )");
 */
+
+/*
   register_definition(d, R"(
 (multiply a vec3 with a scalar (t &v &result => -), where result contains t*v)
 
@@ -311,7 +313,9 @@ r> r>       (t*v_x t*vy t*vz)
 r> vec3!
 ;
 )");
+*/
 
+/*
   register_definition(d, R"(
 (length of a vec3 (&v => length))
 
@@ -319,7 +323,8 @@ r> vec3!
 dup dot3 sqrt
 ;
 )");
-
+*/
+/*
   register_definition(d, R"(
 (normalize a vec3 (&v &result => -), where result contains the normalized vec3 v)
 
@@ -331,7 +336,7 @@ swap r>        (1/le &v &result)
 scalarmul3
 ;
 )");
-
+*/
   }
 
 VF_END
