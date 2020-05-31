@@ -1626,17 +1626,15 @@ void primitive_smoothstep(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::VORPS, AVX_REG0, AVX_REG0, AVX_REG6);
 
   //t * t * (3.f - 2.f * t);
-  code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x40000000); // 2
-  code.add(asmcode::MOVD, asmcode::XMM1, asmcode::EAX);
-  code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::XMM1);
-  code.add(asmcode::MOV, asmcode::EAX, asmcode::NUMBER, 0x40400000); // 3
-  code.add(asmcode::MOVD, asmcode::XMM2, asmcode::EAX);
-  code.add(asmcode::VBROADCASTSS, AVX_REG2, asmcode::XMM2);
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, 0x40000000); // 2
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, 0x40400000); // 3
+  code.add(asmcode::VBROADCASTSS, AVX_REG2, DWORD_MEM_STACK_REGISTER);
   code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG0); // 2*t
   code.add(asmcode::VSUBPS, AVX_REG1, AVX_REG2, AVX_REG1); // 3-2*t
   code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG0); // t*t
-  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1); // t*t*(3-2*t)
-  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1); // t*t*(3-2*t)  
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   }
 
