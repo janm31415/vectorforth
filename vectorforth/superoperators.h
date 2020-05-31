@@ -126,6 +126,13 @@ void superoperator_var_float_le(ASM::asmcode& code, const expanded_token& et);
 void superoperator_var_float_gt(ASM::asmcode& code, const expanded_token& et);
 void superoperator_var_float_ge(ASM::asmcode& code, const expanded_token& et);
 
+void superoperator_var_float_fequ(ASM::asmcode& code, const expanded_token& et);
+void superoperator_var_float_fnequ(ASM::asmcode& code, const expanded_token& et);
+void superoperator_var_float_flt(ASM::asmcode& code, const expanded_token& et);
+void superoperator_var_float_fle(ASM::asmcode& code, const expanded_token& et);
+void superoperator_var_float_fgt(ASM::asmcode& code, const expanded_token& et);
+void superoperator_var_float_fge(ASM::asmcode& code, const expanded_token& et);
+
 void superoperator_dup_float_equ(ASM::asmcode& code, const expanded_token& et);
 void superoperator_dup_float_nequ(ASM::asmcode& code, const expanded_token& et);
 void superoperator_dup_float_lt(ASM::asmcode& code, const expanded_token& et);
@@ -133,6 +140,17 @@ void superoperator_dup_float_le(ASM::asmcode& code, const expanded_token& et);
 void superoperator_dup_float_gt(ASM::asmcode& code, const expanded_token& et);
 void superoperator_dup_float_ge(ASM::asmcode& code, const expanded_token& et);
 
+void superoperator_dup_float_fequ(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dup_float_fnequ(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dup_float_flt(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dup_float_fle(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dup_float_fgt(ASM::asmcode& code, const expanded_token& et);
+void superoperator_dup_float_fge(ASM::asmcode& code, const expanded_token& et);
+
+void superoperator_here_fetch(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_comma(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_comma_float_comma(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_comma_float_comma_float_comma(ASM::asmcode& code, const expanded_token& et);
 
 VECTOR_FORTH_API void superoperators(std::vector<expanded_token>& words);
 

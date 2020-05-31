@@ -1396,6 +1396,177 @@ void superoperator_var_float_ge(ASM::asmcode& code, const expanded_token& et)
   code.add(asmcode::COMMENT, "END SUPEROPERATOR var float >=");
   }
 
+void superoperator_var_float_fequ(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR var float f=");
+  code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+  if (et.variable_address)
+    code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, et.variable_address);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR var float f=");
+  }
+
+void superoperator_var_float_fnequ(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR var float f<>");
+  code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+  if (et.variable_address)
+    code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, et.variable_address);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 4);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 4);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR var float f<>");
+  }
+void superoperator_var_float_flt(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR var float f<");
+  code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+  if (et.variable_address)
+    code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, et.variable_address);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 1);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 1);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR var float f<");
+  }
+
+void superoperator_var_float_fle(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR var float f<=");
+  code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+  if (et.variable_address)
+    code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, et.variable_address);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 2);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 2);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR var float f<=");
+  }
+
+void superoperator_var_float_fgt(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR var float f>");
+  code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+  if (et.variable_address)
+    code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, et.variable_address);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG1, AVX_REG0, asmcode::NUMBER, 1);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG1, AVX_REG0, asmcode::NUMBER, 1);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR var float f>");
+  }
+
+void superoperator_var_float_fge(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR var float f>=");
+  code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
+  if (et.variable_address)
+    code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, et.variable_address);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR var float f>=");
+  }
+
 void superoperator_dup_float_lt(ASM::asmcode& code, const expanded_token& et)
   {
   code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR dup float <");
@@ -1540,6 +1711,170 @@ void superoperator_dup_float_nequ(ASM::asmcode& code, const expanded_token& et)
   code.add(asmcode::COMMENT, "END SUPEROPERATOR dup float <>");
   }
 
+void superoperator_dup_float_fequ(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR dup float f=");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 0);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR dup float f=");
+  }
+
+void superoperator_dup_float_fnequ(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR dup float f<>");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 4);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 4);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR dup float f<>");
+  }
+
+void superoperator_dup_float_flt(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR dup float f<");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 1);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 1);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR dup float f<");
+  }
+
+
+void superoperator_dup_float_fgt(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR dup float f>");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG1, AVX_REG0, asmcode::NUMBER, 1);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG1, AVX_REG0, asmcode::NUMBER, 1);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif  
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR dup float f>");
+  }
+
+void superoperator_dup_float_fle(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR dup float f<=");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG0, AVX_REG1, asmcode::NUMBER, 2);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG0, AVX_REG1, asmcode::NUMBER, 2);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR dup float f<=");
+  }
+
+
+void superoperator_dup_float_fge(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR dup float f>=");
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
+
+#ifdef AVX512
+  code.add(asmcode::VCMPPS, asmcode::K1, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2);
+  code.add(asmcode::VXORPS, AVX_REG0, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::k1, AVX_REG1);
+#else
+  code.add(asmcode::VCMPPS, AVX_REG0, AVX_REG1, AVX_REG0, asmcode::NUMBER, 2);
+  code.add(asmcode::VCVTDQ2PS, AVX_REG0, AVX_REG0);
+  code.add(asmcode::VMOVAPS, AVX_REG1, NOT_SIGN_BIT);
+  code.add(asmcode::VANDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+#endif  
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR dup float f>=");
+  }
+
 void superoperator_float_fmmod_drop(ASM::asmcode& code, const expanded_token& et)
   {
   code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float fm/mod drop");
@@ -1557,6 +1892,74 @@ void superoperator_float_fmmod_drop(ASM::asmcode& code, const expanded_token& et
   code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1); // remainder n2
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   code.add(asmcode::COMMENT, "END SUPEROPERATOR float fm/mod drop");
+  }
+
+void superoperator_here_fetch(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR here @");
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_HERE);
+  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR here @");
+  }
+
+void superoperator_float_comma(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float ,");  
+  code.add(asmcode::MOV, asmcode::RAX, MEM_HERE);  
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));  
+  code.add(asmcode::MOV, asmcode::DWORD_MEM_RAX, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG0, asmcode::DWORD_MEM_RAX);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+#ifdef AVX512
+  code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, 64);
+#else
+  code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, 32);
+#endif
+  code.add(asmcode::MOV, MEM_HERE, asmcode::RAX);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float ,");
+  }
+
+void superoperator_float_comma_float_comma(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float , float ,");
+  code.add(asmcode::MOV, asmcode::RAX, MEM_HERE);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, asmcode::DWORD_MEM_RAX, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG0, asmcode::DWORD_MEM_RAX);
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, asmcode::DWORD_MEM_RAX, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::DWORD_MEM_RAX);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(1), AVX_REG1);
+  code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::MOV, MEM_HERE, asmcode::RAX);
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float , float ,");
+  }
+
+void superoperator_float_comma_float_comma_float_comma(ASM::asmcode& code, const expanded_token& et)
+  {
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR float , float , float ,");
+  code.add(asmcode::MOV, asmcode::RAX, MEM_HERE);
+
+  uint32_t v = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  code.add(asmcode::MOV, asmcode::DWORD_MEM_RAX, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG0, asmcode::DWORD_MEM_RAX);
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
+  code.add(asmcode::MOV, asmcode::DWORD_MEM_RAX, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG1, asmcode::DWORD_MEM_RAX);
+  v = *(reinterpret_cast<const uint32_t*>(&et.f[2]));
+  code.add(asmcode::MOV, asmcode::DWORD_MEM_RAX, asmcode::NUMBER, v);
+  code.add(asmcode::VBROADCASTSS, AVX_REG2, asmcode::DWORD_MEM_RAX);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(1), AVX_REG1);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(2), AVX_REG2);
+  code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, AVX_CELLS(3));
+  code.add(asmcode::MOV, MEM_HERE, asmcode::RAX);
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR float , float , float ,");
   }
 
 namespace
@@ -1681,6 +2084,11 @@ namespace
     return is_primitive(it) && (it->prim == &primitive_here);
     }
 
+  bool is_comma(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_comma);
+    }
+
   bool is_floor(std::vector<expanded_token>::iterator it)
     {
     return is_primitive(it) && (it->prim == &primitive_floor);
@@ -1724,6 +2132,36 @@ namespace
   bool is_nequ(std::vector<expanded_token>::iterator it)
     {
     return is_primitive(it) && (it->prim == &primitive_nequ);
+    }
+
+  bool is_flt(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_flt);
+    }
+
+  bool is_fgt(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_fgt);
+    }
+
+  bool is_fle(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_fle);
+    }
+
+  bool is_fge(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_fge);
+    }
+
+  bool is_fequ(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_fequ);
+    }
+
+  bool is_fnequ(std::vector<expanded_token>::iterator it)
+    {
+    return is_primitive(it) && (it->prim == &primitive_fnequ);
     }
 
   std::vector<expanded_token>::iterator combine_variable_ops(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
@@ -1804,6 +2242,61 @@ namespace
           it = words.erase(it, it2);
           return it;
           }
+
+        if (is_flt(it2))
+          {
+          it->f[0] = it1->f[0];
+          it->t = expanded_token::ET_SUPEROPERATOR;
+          it->supop = &superoperator_var_float_flt;
+          *it2 = *it;
+          it = words.erase(it, it2);
+          return it;
+          }
+        if (is_fle(it2))
+          {
+          it->f[0] = it1->f[0];
+          it->t = expanded_token::ET_SUPEROPERATOR;
+          it->supop = &superoperator_var_float_fle;
+          *it2 = *it;
+          it = words.erase(it, it2);
+          return it;
+          }
+        if (is_fgt(it2))
+          {
+          it->f[0] = it1->f[0];
+          it->t = expanded_token::ET_SUPEROPERATOR;
+          it->supop = &superoperator_var_float_fgt;
+          *it2 = *it;
+          it = words.erase(it, it2);
+          return it;
+          }
+        if (is_fge(it2))
+          {
+          it->f[0] = it1->f[0];
+          it->t = expanded_token::ET_SUPEROPERATOR;
+          it->supop = &superoperator_var_float_fge;
+          *it2 = *it;
+          it = words.erase(it, it2);
+          return it;
+          }
+        if (is_fequ(it2))
+          {
+          it->f[0] = it1->f[0];
+          it->t = expanded_token::ET_SUPEROPERATOR;
+          it->supop = &superoperator_var_float_fequ;
+          *it2 = *it;
+          it = words.erase(it, it2);
+          return it;
+          }
+        if (is_fnequ(it2))
+          {
+          it->f[0] = it1->f[0];
+          it->t = expanded_token::ET_SUPEROPERATOR;
+          it->supop = &superoperator_var_float_fnequ;
+          *it2 = *it;
+          it = words.erase(it, it2);
+          return it;
+          }
         }
       }
     if (sz >= 2)
@@ -1831,6 +2324,17 @@ namespace
       auto it3 = it + 3;
       auto it4 = it + 4;
       auto it5 = it + 5;
+      if (is_comma(it1) && is_float(it2) && is_comma(it3) && is_float(it4) && is_comma(it5))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->f[2] = it4->f[0];
+        it->supop = &superoperator_float_comma_float_comma_float_comma;
+        *it5 = *it;
+        it = words.erase(it, it5);
+        return it;
+        }
+
       if (is_float(it5) && is_float(it4) && is_float(it3) && is_float(it2) && is_float(it1))
         {
         it->f[1] = it1->f[0];
@@ -1867,6 +2371,15 @@ namespace
       auto it1 = it + 1;
       auto it2 = it + 2;
       auto it3 = it + 3;
+      if (is_comma(it1) && is_float(it2) && is_comma(it3))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->f[1] = it2->f[0];
+        it->supop = &superoperator_float_comma_float_comma;
+        *it3 = *it;
+        it = words.erase(it, it3);
+        return it;
+        }
       if (is_float(it3) && is_float(it2) && is_float(it1))
         {
         it->f[1] = it1->f[0];
@@ -2191,6 +2704,14 @@ namespace
     if (sz >= 2)
       {
       auto it1 = it + 1;
+      if (is_comma(it1))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_float_comma;
+        *it1 = *it;
+        it = words.erase(it, it1);
+        return it;
+        }
       if (is_float(it1))
         {
         it->f[1] = it1->f[0];
@@ -2409,6 +2930,61 @@ namespace
             it = words.erase(it, it2);
             return it;
             }
+
+          if (is_fequ(it2))
+            {
+            it->t = expanded_token::ET_SUPEROPERATOR;
+            it->f[0] = it1->f[0];
+            it->supop = &superoperator_dup_float_fequ;
+            *it2 = *it;
+            it = words.erase(it, it2);
+            return it;
+            }
+          if (is_fnequ(it2))
+            {
+            it->t = expanded_token::ET_SUPEROPERATOR;
+            it->f[0] = it1->f[0];
+            it->supop = &superoperator_dup_float_fnequ;
+            *it2 = *it;
+            it = words.erase(it, it2);
+            return it;
+            }
+          if (is_flt(it2))
+            {
+            it->t = expanded_token::ET_SUPEROPERATOR;
+            it->f[0] = it1->f[0];
+            it->supop = &superoperator_dup_float_flt;
+            *it2 = *it;
+            it = words.erase(it, it2);
+            return it;
+            }
+          if (is_fle(it2))
+            {
+            it->t = expanded_token::ET_SUPEROPERATOR;
+            it->f[0] = it1->f[0];
+            it->supop = &superoperator_dup_float_fle;
+            *it2 = *it;
+            it = words.erase(it, it2);
+            return it;
+            }
+          if (is_fgt(it2))
+            {
+            it->t = expanded_token::ET_SUPEROPERATOR;
+            it->f[0] = it1->f[0];
+            it->supop = &superoperator_dup_float_fgt;
+            *it2 = *it;
+            it = words.erase(it, it2);
+            return it;
+            }
+          if (is_fge(it2))
+            {
+            it->t = expanded_token::ET_SUPEROPERATOR;
+            it->f[0] = it1->f[0];
+            it->supop = &superoperator_dup_float_fge;
+            *it2 = *it;
+            it = words.erase(it, it2);
+            return it;
+            }
           }
         }
       if (is_return_stack_pop(it))
@@ -2489,6 +3065,14 @@ namespace
     if (sz >= 2)
       {
       auto it1 = it + 1;
+      if (is_here(it) && is_fetch(it1))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_here_fetch;
+        *it1 = *it;
+        it = words.erase(it, it1);
+        return it;
+        }
       if (is_swap(it))
         {
         if (is_over(it1))
