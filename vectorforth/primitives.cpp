@@ -1825,6 +1825,43 @@ float mix3(vec3 x, vec3 y, float a)
   code.add(asmcode::COMMENT, "END PRIMITIVE mix3");
   }
 
+void primitive_mix2(ASM::asmcode& code, compile_data& cd)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE mix2");
+  /*
+float mix2(vec2 x, vec2 y, float a)
+              {
+              return x * (1 - a) + y * a;
+              }
+*/
+
+  code.add(asmcode::MOV, asmcode::R8, MEM_STACK_REGISTER); // result
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1)); // a
+  code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER, AVX_CELLS(2)); // y
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(3)); // x
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(4));
+
+
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VSUBPS, AVX_REG1, AVX_REG1, AVX_REG0); // 1-a
+
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RAX); // x_x
+  code.add(asmcode::VMOVAPS, AVX_REG3, asmcode::MEM_RCX); // y_x
+  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG1, AVX_REG2); // x_x (1-a)
+  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG0, AVX_REG3); // y_x a
+  code.add(asmcode::VADDPS, AVX_REG2, AVX_REG2, AVX_REG3);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_REG2);
+
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RAX, AVX_CELLS(1)); // x_y
+  code.add(asmcode::VMOVAPS, AVX_REG3, asmcode::MEM_RCX, AVX_CELLS(1)); // y_y
+  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG1, AVX_REG2); // x_y (1-a)
+  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG0, AVX_REG3); // y_y a
+  code.add(asmcode::VADDPS, AVX_REG2, AVX_REG2, AVX_REG3);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_CELLS(1), AVX_REG2);  
+
+  code.add(asmcode::COMMENT, "END PRIMITIVE mix2");
+  }
+
 void primitive_smoothstep(ASM::asmcode& code, compile_data& cd)
   {
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE smoothstep");
@@ -2030,6 +2067,7 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("smoothstep", &primitive_smoothstep));
   pm.insert(std::pair<std::string, prim_fun>("reflect3", &primitive_reflect3));
   pm.insert(std::pair<std::string, prim_fun>("mix3", &primitive_mix3));
+  pm.insert(std::pair<std::string, prim_fun>("mix2", &primitive_mix2));
 
   return pm;
   }

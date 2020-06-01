@@ -286,6 +286,8 @@ The binding space is used for binding words to data space locations. This memory
 
 `mix`    ( x y a -- v )  Pops x y a off the stack. Pushes the glsl function mix(x, y, a) on the stack ( x * (1 - a) + y\*a ).
 
+`mix2`    ( #x #y a #r -- )  Assumes #x #y and #r point to the address of a vec2. Computes #r = ( #x * (1 -a ) + #y\*a).
+
 `mix3`    ( #x #y a #r -- )  Assumes #x #y and #r point to the address of a vec3. Computes #r = ( #x * (1 -a ) + #y\*a).
 
 `reflect3`    ( #i #n #r -- )  Assumes #i, #n and #r point to the address of a vec3. Computes #r = #i - 2 dot3(#n, #i) * #n.
