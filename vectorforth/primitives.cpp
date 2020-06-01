@@ -1559,6 +1559,55 @@ void primitive_normalize3(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::COMMENT, "END PRIMITIVE normalize3");
   }
 
+void primitive_reflect3(ASM::asmcode& code, compile_data& cd)
+  {
+  /*
+  reflect (&i &n &result => - )
+  result = i - 2.0 * dot(n, i) * n
+  */
+
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE reflect3");
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(1)); // address n
+  code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER, AVX_CELLS(2)); // i
+  code.add(asmcode::MOV, asmcode::R8, MEM_STACK_REGISTER); // result
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RCX);
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RAX, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RCX, AVX_CELLS(1));
+  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG2);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RAX, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RCX, AVX_CELLS(2));
+  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG2);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1); // dot(n, i) in avx_reg0
+  
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG0); // 2dot(n,i) in avx_reg0
+  
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RAX); // nx
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RAX, AVX_CELLS(1)); // ny
+  code.add(asmcode::VMOVAPS, AVX_REG3, asmcode::MEM_RAX, AVX_CELLS(2)); // nz
+  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG0); // 2dot(n, i) * nx
+  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG2, AVX_REG0); // 2dot(n, i) * ny
+  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG3, AVX_REG0); // 2dot(n, i) * nz
+  
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RCX); // ix
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1); // ix - 2dot(n, i) * nx
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_REG0);
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RCX, AVX_CELLS(1)); // iy
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG2); // iy - 2dot(n, i) * ny
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_CELLS(1), AVX_REG0);
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RCX, AVX_CELLS(2)); // iz
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG3); // iz - 2dot(n, i) * nz
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_CELLS(2), AVX_REG0);
+
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(3));    
+
+  code.add(asmcode::COMMENT, "END PRIMITIVE reflect3");
+  }
+
 void primitive_mix(ASM::asmcode& code, compile_data& cd)
   {
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE mix");
@@ -1579,6 +1628,50 @@ float mix(float x, float y, float a)
   code.add(asmcode::VADDPS, AVX_REG0, AVX_REG1, AVX_REG2);
   code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
   code.add(asmcode::COMMENT, "END PRIMITIVE mix");
+  }
+
+void primitive_mix3(ASM::asmcode& code, compile_data& cd)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE mix3");
+  /*
+float mix3(vec3 x, vec3 y, float a)
+              {
+              return x * (1 - a) + y * a;
+              }
+*/
+
+  code.add(asmcode::MOV, asmcode::R8, MEM_STACK_REGISTER); // result
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(1)); // a
+  code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER, AVX_CELLS(2)); // y
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(3)); // x
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(4));
+
+  
+  code.add(asmcode::VMOVAPS, AVX_REG1, ONEF_BITS);
+  code.add(asmcode::VSUBPS, AVX_REG1, AVX_REG1, AVX_REG0); // 1-a
+
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RAX); // x_x
+  code.add(asmcode::VMOVAPS, AVX_REG3, asmcode::MEM_RCX); // y_x
+  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG1, AVX_REG2); // x_x (1-a)
+  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG0, AVX_REG3); // y_x a
+  code.add(asmcode::VADDPS, AVX_REG2, AVX_REG2, AVX_REG3);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_REG2);
+
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RAX, AVX_CELLS(1)); // x_y
+  code.add(asmcode::VMOVAPS, AVX_REG3, asmcode::MEM_RCX, AVX_CELLS(1)); // y_y
+  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG1, AVX_REG2); // x_y (1-a)
+  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG0, AVX_REG3); // y_y a
+  code.add(asmcode::VADDPS, AVX_REG2, AVX_REG2, AVX_REG3);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_CELLS(1), AVX_REG2);
+
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RAX, AVX_CELLS(2)); // x_z
+  code.add(asmcode::VMOVAPS, AVX_REG3, asmcode::MEM_RCX, AVX_CELLS(2)); // y_z
+  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG1, AVX_REG2); // x_z (1-a)
+  code.add(asmcode::VMULPS, AVX_REG3, AVX_REG0, AVX_REG3); // y_z a
+  code.add(asmcode::VADDPS, AVX_REG2, AVX_REG2, AVX_REG3);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_CELLS(2), AVX_REG2);
+  
+  code.add(asmcode::COMMENT, "END PRIMITIVE mix3");
   }
 
 void primitive_smoothstep(ASM::asmcode& code, compile_data& cd)
@@ -1775,6 +1868,8 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("normalize3", &primitive_normalize3));
   pm.insert(std::pair<std::string, prim_fun>("mix", &primitive_mix));
   pm.insert(std::pair<std::string, prim_fun>("smoothstep", &primitive_smoothstep));
+  pm.insert(std::pair<std::string, prim_fun>("reflect3", &primitive_reflect3));
+  pm.insert(std::pair<std::string, prim_fun>("mix3", &primitive_mix3));
 
   return pm;
   }

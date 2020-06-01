@@ -2641,6 +2641,13 @@ struct vec3_tests : public compile_fixture
     TEST_EQ(8.f/ std::sqrt(49.f + 64.f + 81.f), get_avx2_f32(dsv7, 0));
     TEST_EQ(9.f/ std::sqrt(49.f + 64.f + 81.f), get_avx2_f32(dsv8, 0));
 
+    run("1 2 3 v vec3! 0 2 sqrt 2 / 2 sqrt -2 / w vec3! v w result reflect3");
+    dsv6 = get_data_space_value(6);
+    dsv7 = get_data_space_value(7);
+    dsv8 = get_data_space_value(8);
+    TEST_EQ(1.f, get_avx2_f32(dsv6, 0));
+    TEST_EQ(3.f, get_avx2_f32(dsv7, 0));
+    TEST_EQ(2.f, get_avx2_f32(dsv8, 0));
     //print_stack(std::cout, ctxt);
     //print_data_space(std::cout, ctxt);
     }

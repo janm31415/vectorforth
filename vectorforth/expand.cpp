@@ -9,6 +9,8 @@
 
 VF_BEGIN
 
+void expand_word(std::vector<expanded_token>& expanded, dictionary& d, expand_data& ed, token word);
+
 void expand_primitive(std::vector<expanded_token>& expanded, dictionary& d, expand_data& ed, token word)
   {
   static prim_map pm = generate_primitives_map();
@@ -43,7 +45,16 @@ void expand_primitive(std::vector<expanded_token>& expanded, dictionary& d, expa
         return;
         }
       else
-        throw std::runtime_error(compile_error_text(VF_ERROR_WORD_UNKNOWN, word.line_nr, word.column_nr, word.value).c_str());
+        {
+        dictionary_entry e;
+        if (find(e, d, word.value))
+          {
+          expand_word(expanded, d, ed, word);
+          return;
+          }
+        else
+          throw std::runtime_error(compile_error_text(VF_ERROR_WORD_UNKNOWN, word.line_nr, word.column_nr, word.value).c_str());
+        }
       }
     expanded.emplace_back(expanded_token::ET_PRIMITIVE);
     expanded.back().prim = it->second;
