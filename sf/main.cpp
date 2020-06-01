@@ -305,9 +305,9 @@ int main(int argc, char** argv)
 
       if (ctxt.memory_allocated == nullptr)
 #ifdef AVX512
-        ctxt = VF::create_context(2048 * 1024, 4096, 2048 * 1024);
+        ctxt = VF::create_context(2048 * 1024, 4096*2, 2048 * 1024);
 #else
-        ctxt = VF::create_context(1024 * 1024, 2048, 1024 * 1024);
+        ctxt = VF::create_context(1024 * 1024, 2048*2, 1024 * 1024);
 #endif
 
       const float vrel = (float)y / (float)h;

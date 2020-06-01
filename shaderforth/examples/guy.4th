@@ -25,8 +25,12 @@ vec3 tmp1
 vec3 tmp2
 vec3 tmp3
 vec3 tmp4
+vec3 tmp5
+vec3 tmp6
 vec3 cen
 vec3 q
+vec3 r
+vec3 rad
 vec3 e1    
 vec3 e2        
 vec3 e3
@@ -47,6 +51,8 @@ vec3 eyeball_col
 vec2 mapres
 vec2 castres
 vec2 tmpres
+vec2 uu
+vec2 vv
 
 e 0 0 e1 vec3!
 0 e 0 e2 vec3!
@@ -74,6 +80,16 @@ t 0.9 * value time
 dup floor -
 ;
 
+: smin \ (a b k)
+-rot 2dup \ (k a b a b)
+- abs \ (k a b |a-b|)
+-rot \ (k |a-b| a b)
+min \ (k |a - b| min(a,b))
+-rot \ ( min(a,b) k |a-b|)
+over -rot - 0 max \ ( min(a,b) k  max(k-|a-b|, 0) )
+dup 0.25 * * swap / -
+;
+
 : sdEllipsoid (in vec3 pos, in vec3 rad)
 tuck (rad pos rad)
 tmp4 div3  (rad)
@@ -89,16 +105,50 @@ swap length3 swap -
 ;
 
 : map (in vec3 pos)
-\ ball
+
 dup
 time fract dup dup 1 swap - * 4 * value p
 2 * 1 - -4 * value pp
 
 0 p 0.1 + 0 cen vec3!
 
-cen q sub3
+\ body
 
-q 0.25 sdSphere 2 mapres vec2!
+1 pp negate uu vec2!
+uu uu normalize2
+uu #1 cells #+ @ negate uu @ vv vec2!
+
+0 0.4 p smoothstep \ smoothstep(0.0,0.4,p)
+p 0.5 * 0.5 + \ 0.5 + 0.5*p
+over * swap 1 - - \  smoothstep(0.0,0.4,p) * (0.5 + 0.5p) + (1 - smoothstep(0.0,0.4,p))
+value sy
+1 sy / value sz
+
+
+cen r sub3
+
+r @   uu r #1 cells #+ dot2  vv r #1 cells #+ dot2 q vec3!
+
+0.25 0.25 sy * 0.25 sz * rad vec3!
+
+q rad sdEllipsoid 2 mapres vec2!
+
+time 0.8 + fract 6.2831 * cos -0.5 * 0.5 + -0.2 * 0.05 + r #2 cells #+ @ + r #2 cells #+ !
+0.2 sy * 0.2 - r #1 cells #+ @ + r #1 cells #+ !
+
+\ head
+
+0 0.2 0.02 tmp5 vec3!
+r tmp5 tmp6 sub3
+0.08 0.2 0.15 rad vec3!
+tmp6 rad sdEllipsoid
+0 0.21 -0.1 tmp5 vec3! 
+r tmp5 tmp6 sub3
+0.2 0.2 0.2 rad vec3!
+tmp6 rad sdEllipsoid
+0.1 smin
+mapres @ 0.1 smin mapres !
+
 
 \ ground
 #1 cells #+ @ 0.1 +  (spheredist pos #32 @ 0.1 +)
