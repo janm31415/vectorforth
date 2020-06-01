@@ -62,10 +62,10 @@ struct listener : public IWindowListener
     {
     mx = (float)x;
     my = (float)y;
-    if (mw > 0)
+    if (mz > 0)
       {
-      mw = (float)x;
-      mz = (float)y;
+      mz = (float)x;
+      mw = (float)y;
       }
     }
 
@@ -73,16 +73,16 @@ struct listener : public IWindowListener
     {
     mx = (float)x;
     my = (float)y;
-    mw = (float)x;
-    mz = (float)y;
+    mz = (float)x;
+    mw = (float)y;
     }
 
   virtual void OnMouseLeftButtonUp(int x, int y)
     {
     mx = (float)x;
     my = (float)y;
-    mw = -(float)x;
-    mz = -(float)y;
+    mz = -(float)x;
+    mw = -(float)y;
     }
   };
 
