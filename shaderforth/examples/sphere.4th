@@ -1,3 +1,13 @@
+( Based on Step #1 of the LIVE Shade Deconstruction tutorial for "Happy Jumping"
+  by inigo quilez
+  License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+  
+  https://www.youtube.com/watch?v=Cfe5UQ-1L9Q
+
+  Step 1: https://www.shadertoy.com/view/Wl2SRw
+)
+
+
 : px x 2 * rx - ry / ;
 : py y 2 * ry - ry / ;
 : e 0.0005 ;
@@ -6,7 +16,6 @@ vec3 ta
 vec3 ro
 
 vec3 cw
-vec3 cp
 vec3 cu
 vec3 cv
 vec3 rd
@@ -29,7 +38,6 @@ vec3 bounce_col
 vec3 lin
 vec3 mix_col
 
-\vec3 ref
 
 e 0 0 e1 vec3!
 0 e 0 e2 vec3!
@@ -129,8 +137,6 @@ ro pos pos add3 (pos = pos + ro)
 
 pos calcnormal
 
-\rd norm ref reflect3
-
 0.15 0.15 0.15 col vec3!
 
 \ lighting
@@ -196,7 +202,6 @@ ta ro ro add3
 \ frame
 ta ro cw sub3
 cw cw normalize3
-\0 1 0 cp vec3!
 cw here @ 0 , 1 , 0 , cu cross3
 cu cu normalize3
 cu cw cv cross3

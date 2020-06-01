@@ -2653,6 +2653,60 @@ struct vec3_tests : public compile_fixture
     }
   };
 
+struct vec2_tests : public compile_fixture
+  {
+  void test(const compiler_options& ops)
+    {
+    c_ops = ops;
+
+    run("vec2 v 1 2 v vec2!");
+    auto dsv0 = get_data_space_value(0);
+    auto dsv1 = get_data_space_value(1);   
+    TEST_EQ(1.f, get_avx2_f32(dsv0, 0));
+    TEST_EQ(2.f, get_avx2_f32(dsv1, 0));    
+
+    run("vec2 w 7 8 w vec2!");
+    auto dsv2 = get_data_space_value(2);
+    auto dsv3 = get_data_space_value(3); 
+    TEST_EQ(7.f, get_avx2_f32(dsv2, 0));
+    TEST_EQ(8.f, get_avx2_f32(dsv3, 0));
+
+    run("v w dot2");
+    auto f = get_stack_value(0);
+    TEST_EQ(23.f, get_avx2_f32(f, 0));
+
+    run("vec2 result");
+   
+    run("v w result add2");
+    auto dsv4 = get_data_space_value(4);
+    auto dsv5 = get_data_space_value(5);
+    TEST_EQ(8.f, get_avx2_f32(dsv4, 0));
+    TEST_EQ(10.f, get_avx2_f32(dsv5, 0));
+    
+    run("3 11 v vec2! v w result sub2");
+    dsv4 = get_data_space_value(4);
+    dsv5 = get_data_space_value(5);
+    TEST_EQ(-4.f, get_avx2_f32(dsv4, 0));
+    TEST_EQ(3.f, get_avx2_f32(dsv5, 0));
+    
+    run("100 w result scalarmul2");
+    dsv4 = get_data_space_value(4);
+    dsv5 = get_data_space_value(5);
+    TEST_EQ(700.f, get_avx2_f32(dsv4, 0));
+    TEST_EQ(800.f, get_avx2_f32(dsv5, 0));
+    
+    run("w length2");
+    f = get_stack_value(0);
+    TEST_EQ(std::sqrt(49.f + 64.f), get_avx2_f32(f, 0));
+    
+    run("w result normalize2");
+    dsv4 = get_data_space_value(4);
+    dsv5 = get_data_space_value(5);
+    TEST_EQ(7.f / std::sqrt(49.f + 64.f), get_avx2_f32(dsv4, 0));
+    TEST_EQ(8.f / std::sqrt(49.f + 64.f), get_avx2_f32(dsv5, 0));
+    }
+  };
+
 struct strength_reduction_tests : public compile_fixture
   {
   void test(const compiler_options& ops)
@@ -2719,6 +2773,7 @@ void run_compile_tests(const compiler_options& ops)
   stdlib_tests().test(ops);
   begin_while_repeat_tests().test(ops);
   data_space_tests().test(ops);
+  vec2_tests().test(ops);
   vec3_tests().test(ops);
   strength_reduction_tests().test(ops);
   perf_tests().test(ops);

@@ -286,7 +286,31 @@ The binding space is used for binding words to data space locations. This memory
 
 `mix`    ( x y a -- v )  Pops x y a off the stack. Pushes the glsl function mix(x, y, a) on the stack ( x * (1 - a) + y\*a ).
 
+`mix3`    ( #x #y a #r -- )  Assumes #x #y and #r point to the address of a vec3. Computes #r = ( #x * (1 -a ) + #y\*a).
+
+`reflect3`    ( #i #n #r -- )  Assumes #i, #n and #r point to the address of a vec3. Computes #r = #i - 2 dot3(#n, #i) * #n.
+
 `step`    ( edge x -- v )  Generates a step function by comparing x to edge. 0 is returned if x < edge, and 1 is returned otherwise. This is similar to f<=.
+
+`vec2 <name>`    ( -- )  Reserves 2 cells on the data space (heap) and binds \<name\> to this memory.
+    
+`vec2!`    ( a b #v -- )  Moves values a, bc to the address #v. Typicall #v is obtained by providing a vec2 word.
+
+`dot2`    ( #a #b -- v )  Computes the dot product of the two vec2 objects whose addresses are given by #a and #b. The dot product is pushed on the stack.
+
+`add2`    ( #a #b #r -- )  Adds two vec2 objects whose addresses are given by #a and #b. The result is saved at memory location #r.
+
+`sub2`    ( #a #b #r -- )  Subtracts two vec2 objects whose addresses are given by #a and #b. The result is saved at memory location #r.
+
+`mul2`    ( #a #b #r -- )  Multiplies two vec2 objects componentwise whose addresses are given by #a and #b. The result is saved at memory location #r.
+
+`div2`    ( #a #b #r -- )  Divides two vec2 objects componentwise whose addresses are given by #a and #b. The result is saved at memory location #r.
+
+`scalarmul2`    ( t #a #r -- )  Multiplies a vec2 object with address #a with a scalar t. The result is saved at memory location #r.
+
+`length2`    ( #a -- )  Pushes the length of vec2 object with address #a on the stack.
+
+`normalize2`  ( #a #r -- )  Normalizes the vec2 object with address #a and saves the result at memory location #r.
 
 `vec3 <name>`    ( -- )  Reserves 3 cells on the data space (heap) and binds \<name\> to this memory.
     
