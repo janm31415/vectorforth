@@ -30,6 +30,7 @@ vec3 tmp6
 vec3 cen
 vec3 q
 vec3 r
+vec3 hq
 vec3 rad
 vec3 e1    
 vec3 e2        
@@ -90,6 +91,16 @@ over -rot - 0 max \ ( min(a,b) k  max(k-|a-b|, 0) )
 dup 0.25 * * swap / -
 ;
 
+: smax \ (a b k)
+-rot 2dup \ (k a b a b)
+- abs \ (k a b |a-b|)
+-rot \ (k |a-b| a b)
+max \ (k |a - b| max(a,b))
+-rot \ ( max(a,b) k |a-b|)
+over -rot - 0 max \ ( max(a,b) k  max(k-|a-b|, 0) )
+dup 0.25 * * swap / +
+;
+
 : sdEllipsoid (in vec3 pos, in vec3 rad)
 tuck (rad pos rad)
 tmp4 div3  (rad)
@@ -136,6 +147,8 @@ q rad sdEllipsoid 2 mapres vec2!
 time 0.8 + fract 6.2831 * cos -0.5 * 0.5 + -0.2 * 0.05 + r #2 cells #+ @ + r #2 cells #+ !
 0.2 sy * 0.2 - r #1 cells #+ @ + r #1 cells #+ !
 
+\r @ abs r #1 cells #+ r #2 cells #+ hq vec3!
+
 \ head
 
 0 0.2 0.02 tmp5 vec3!
@@ -149,6 +162,13 @@ tmp6 rad sdEllipsoid
 0.1 smin
 mapres @ 0.1 smin mapres !
 
+
+\ mouth
+0 r @ abs dup * 4 * 0.15 +  0.15 tmp5 vec3!
+r tmp5 tmp6 sub3
+0.1 0.04 0.2 rad vec3!
+tmp6 rad sdEllipsoid
+negate mapres @ 0.03 smax mapres !
 
 \ ground
 #1 cells #+ @ 0.1 +  (spheredist pos #32 @ 0.1 +)
