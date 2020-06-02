@@ -35,6 +35,7 @@ vec3 rad
 vec3 e1    
 vec3 e2        
 vec3 e3
+vec3 e4
 vec3 pos
 vec3 norm
 vec3 sun_lig   
@@ -63,9 +64,10 @@ vec2 tmpres
 vec2 uu
 vec2 vv
 
-e 0 0 e1 vec3!
-0 e 0 e2 vec3!
-0 0 e e3 vec3!
+0.5773 e * -0.5773 e * -0.5773 e * e1 vec3! 
+-0.5773 e * -0.5773 e * 0.5773 e * e2 vec3! 
+-0.5773 e * 0.5773 e * -0.5773 e * e3 vec3! 
+0.5773 e * 0.5773 e * 0.5773 e * e4 vec3! 
 
 0.6 0.35 0.5 sun_lig vec3!
 sun_lig sun_lig normalize3
@@ -237,12 +239,18 @@ mapres
 ;
 
 : calcnormal (in vec3 pos)
-dup e3 norm sub3 norm map @ >r
-dup e3 norm add3 norm map @ r> - >r
-dup e2 norm sub3 norm map @ >r
-dup e2 norm add3 norm map @ r> - >r
-dup e1 norm sub3 norm map @ >r
-    e1 norm add3 norm map @ r> - r> r> norm vec3! 
+dup e1 norm add3 norm map @ >r
+dup e2 norm add3 norm map @ >r
+dup e3 norm add3 norm map @ >r
+    e4 norm add3 norm map @ >r
+0 0 0 norm vec3!
+r> e4 norm scalarmul3
+r> e3 tmp4 scalarmul3
+tmp4 norm norm add3
+r> e2 tmp4 scalarmul3
+tmp4 norm norm add3
+r> e1 tmp4 scalarmul3
+tmp4 norm norm add3
 norm norm normalize3
 ;
 
