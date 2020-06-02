@@ -50,6 +50,12 @@ vec3 iris_col
 vec3 eyeball_col
 vec3 ear_a
 vec3 ear_b
+vec3 eye_center
+vec3 eyelid_center
+vec3 eyelid_rad
+vec3 cq
+vec3 iris_center
+vec3 eyeball_center
 
 vec2 mapres
 vec2 castres
@@ -73,6 +79,11 @@ sun_lig sun_lig normalize3
 0 0 0 eyeball_col vec3!
 
 0.15 0.32 -0.05 ear_a vec3!
+0.08 0.27 0.06 eye_center vec3!
+0.1 0.34 0.08 eyelid_center vec3!
+0.06 0.03 0.03 eyelid_rad vec3!
+0.08 0.28 0.08 iris_center vec3!
+0.075 0.28 0.102 eyeball_center vec3!
 
 0 value s 
 0 value i
@@ -189,6 +200,29 @@ r tmp5 tmp6 sub3
 0.1 0.04 0.2 rad vec3!
 tmp6 rad sdEllipsoid
 negate mapres @ 0.03 smax mapres !
+
+\ eye
+hq eye_center tmp3 sub3 
+tmp3 t 2.1 * sin 0.5 * 0.5 + 20 ** 0.02 * 0.065 + sdSphere
+mapres @ 0.01 smin mapres !
+
+\ eyelid
+hq eyelid_center cq sub3
+cq @ cq #1 cells #+ @  \ (x y)
+2dup  \ (x y x y)
+0.6 * swap 0.8 * - -rot 0.8 * swap 0.6 * + cq #2 cells #+ @ cq vec3!
+cq eyelid_rad sdEllipsoid
+mapres @ 0.03 smin mapres !
+
+\ iris
+hq iris_center cq sub3
+cq 0.06 sdSphere 3 tmpres vec2!
+mapres tmpres tmpres @ mapres @ f< mapres mix2
+
+\eyeball
+hq eyeball_center cq sub3
+cq 0.0395 sdSphere 4 tmpres vec2!
+mapres tmpres tmpres @ mapres @ f< mapres mix2
 
 \ ground
 #1 cells #+ @ 0.1 +  (spheredist pos #32 @ 0.1 +)
