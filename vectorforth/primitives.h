@@ -127,6 +127,14 @@ void primitive_reflect3(ASM::asmcode& code, compile_data& cd);
 void primitive_mix3(ASM::asmcode& code, compile_data& cd);
 void primitive_mix2(ASM::asmcode& code, compile_data& cd);
 
+void primitive_smin(ASM::asmcode& code, compile_data& cd);
+void primitive_smax(ASM::asmcode& code, compile_data& cd);
+
+void primitive_sdsphere(ASM::asmcode& code, compile_data& cd);
+void primitive_sdellipsoid(ASM::asmcode& code, compile_data& cd);
+void primitive_sdstick(ASM::asmcode& code, compile_data& cd);
+void primitive_sdcapsule(ASM::asmcode& code, compile_data& cd);
+
 typedef void(*prim_fun)(ASM::asmcode&, compile_data&);
 typedef std::map<std::string, prim_fun> prim_map;
 

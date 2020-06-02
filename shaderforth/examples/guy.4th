@@ -96,7 +96,7 @@ t 0.9 * value time
 dup floor -
 ;
 
-: smin \ (a b k)
+: sminold \ (a b k)
 -rot 2dup \ (k a b a b)
 - abs \ (k a b |a-b|)
 -rot \ (k |a-b| a b)
@@ -106,7 +106,7 @@ over -rot - 0 max \ ( min(a,b) k  max(k-|a-b|, 0) )
 dup 0.25 * * swap / -
 ;
 
-: smax \ (a b k)
+: smaxold \ (a b k)
 -rot 2dup \ (k a b a b)
 - abs \ (k a b |a-b|)
 -rot \ (k |a-b| a b)
@@ -116,7 +116,7 @@ over -rot - 0 max \ ( max(a,b) k  max(k-|a-b|, 0) )
 dup 0.25 * * swap / +
 ;
 
-: sdEllipsoid (in vec3 pos, in vec3 rad)
+: sdEllipsoidOld (in vec3 pos, in vec3 rad)
 tuck (rad pos rad)
 tmp4 div3  (rad)
 tmp4 length3 (rad k0)
@@ -136,7 +136,7 @@ tmp4 tmp3 tmp4 sub3 \ (r1 r2 h) tmp4 = pa - ba*h
 dup dup -2 * 3 + * * mix negate tmp4 length3 +
 ;
 
-: sdSphere (in vec3 p, in float s)
+: sdSphereold (in vec3 p, in float s)
 swap length3 swap -
 ;
 
@@ -167,7 +167,7 @@ r @   uu r #1 cells #+ dot2  vv r #1 cells #+ dot2 q vec3!
 
 0.25 0.25 sy * 0.25 sz * rad vec3!
 
-q rad sdEllipsoid 2 mapres vec2!
+q rad sdellipsoid 2 mapres vec2!
 
 time 0.8 + fract 6.2831 * cos -0.5 * 0.5 + -0.2 * 0.05 + r #2 cells #+ @ + r #2 cells #+ !
 0.2 sy * 0.2 - r #1 cells #+ @ + r #1 cells #+ !
@@ -179,18 +179,21 @@ r @ abs r #1 cells #+ @ r #2 cells #+ @ hq vec3!
 0 0.2 0.02 tmp5 vec3!
 r tmp5 tmp6 sub3
 0.08 0.2 0.15 rad vec3!
-tmp6 rad sdEllipsoid
+tmp6 rad sdellipsoid
 0 0.21 -0.1 tmp5 vec3! 
 r tmp5 tmp6 sub3
 0.2 0.2 0.2 rad vec3!
-tmp6 rad sdEllipsoid
+tmp6 rad sdellipsoid
 0.1 smin
 mapres @ 0.1 smin mapres !
 
 \ ear
 time 0.9 + fract dup negate 1 + * 4 * \ p3
 dup 0.05 * 0.2 + swap 0.2 * 0.2 + -0.07 ear_b vec3!
-0.01 0.04 hq ear_a ear_b sdStick
+\ 0.01 0.04 hq ear_a ear_b sdStick
+hq ear_a ear_b 0.01 0.04 sdstick
+\hq ear_a ear_b 0.04 sdcapsule
+
 mapres @ 0.01 smin mapres !
 
 
@@ -198,12 +201,12 @@ mapres @ 0.01 smin mapres !
 0 r @ abs dup * 4 * 0.15 +  0.15 tmp5 vec3!
 r tmp5 tmp6 sub3
 0.1 0.04 0.2 rad vec3!
-tmp6 rad sdEllipsoid
+tmp6 rad sdellipsoid
 negate mapres @ 0.03 smax mapres !
 
 \ eye
 hq eye_center tmp3 sub3 
-tmp3 t 2.1 * sin 0.5 * 0.5 + 20 ** 0.02 * 0.065 + sdSphere
+tmp3 t 2.1 * sin 0.5 * 0.5 + 20 ** 0.02 * 0.065 + sdsphere
 mapres @ 0.01 smin mapres !
 
 \ eyelid
@@ -211,17 +214,17 @@ hq eyelid_center cq sub3
 cq @ cq #1 cells #+ @  \ (x y)
 2dup  \ (x y x y)
 0.6 * swap 0.8 * - -rot 0.8 * swap 0.6 * + cq #2 cells #+ @ cq vec3!
-cq eyelid_rad sdEllipsoid
+cq eyelid_rad sdellipsoid
 mapres @ 0.03 smin mapres !
 
 \ iris
 hq iris_center cq sub3
-cq 0.06 sdSphere 3 tmpres vec2!
+cq 0.06 sdsphere 3 tmpres vec2!
 mapres tmpres tmpres @ mapres @ f< mapres mix2
 
 \eyeball
 hq eyeball_center cq sub3
-cq 0.0395 sdSphere 4 tmpres vec2!
+cq 0.0395 sdsphere 4 tmpres vec2!
 mapres tmpres tmpres @ mapres @ f< mapres mix2
 
 \ ground

@@ -23,6 +23,9 @@ VF_BEGIN
 // Singlepass compiler
 /////////////////////////////////////////////////////////////
 
+void compile_words_single_pass(asmcode& code, dictionary& d, expand_data& ed, compile_data& cd, std::vector<token>& words);
+void compile_word_single_pass(asmcode& code, dictionary& d, expand_data& ed, compile_data& cd, token word);
+
 void compile_primitive_single_pass(asmcode& code, dictionary& d, expand_data& ed, compile_data& cd, token word)
   {
   static prim_map pm = generate_primitives_map();
@@ -63,7 +66,16 @@ void compile_primitive_single_pass(asmcode& code, dictionary& d, expand_data& ed
         return;
         }
       else
-        throw std::runtime_error(compile_error_text(VF_ERROR_WORD_UNKNOWN, word.line_nr, word.column_nr, word.value).c_str());
+        {
+        dictionary_entry e;
+        if (find(e, d, word.value))
+          {
+          compile_word_single_pass(code, d, ed, cd, word);
+          return;
+          }
+        else
+          throw std::runtime_error(compile_error_text(VF_ERROR_WORD_UNKNOWN, word.line_nr, word.column_nr, word.value).c_str());
+        }
       }
     it->second(code, cd);
     }

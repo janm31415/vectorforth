@@ -13,8 +13,6 @@ VF_BEGIN
 struct expand_data;
 struct compile_data;
 
-void compile_words_single_pass(ASM::asmcode& code, dictionary& d, expand_data& ed, compile_data& cd, std::vector<token>& words);
-
 /*
 Compiles with a single pass: is fastest but no optimization possible.
 */
