@@ -48,6 +48,8 @@ vec3 body_col
 vec3 terrain_col
 vec3 iris_col
 vec3 eyeball_col
+vec3 ear_a
+vec3 ear_b
 
 vec2 mapres
 vec2 castres
@@ -69,6 +71,8 @@ sun_lig sun_lig normalize3
 0.05 0.09 0.02 terrain_col vec3!
 0.4 0.4 0.4 iris_col vec3!
 0 0 0 eyeball_col vec3!
+
+0.15 0.32 -0.05 ear_a vec3!
 
 0 value s 
 0 value i
@@ -111,6 +115,16 @@ swap dup (k1 k0 k0)
 1 - * swap /
 ;
 
+: sdStick (in float r1, in float r2, in vec3 p, in vec3 a, in vec3 b)
+over tmp3 sub3 \ (r1 r2 p a)   tmp3 = b-a
+tmp4 sub3 \ (r1 r2) tmp4 = p-a  tmp3 = b-a
+tmp3 tmp4 dot3 tmp3 tmp3 dot3 / 0 1 clamp  \ (r1 r2 h)
+dup \ (r1 r2 h h)
+tmp3 tmp3 scalarmul3 \ (r1 r2 h) tmp3 = (b-a)*h  tmp4 = p-a
+tmp4 tmp3 tmp4 sub3 \ (r1 r2 h) tmp4 = pa - ba*h
+dup dup -2 * 3 + * * mix negate tmp4 length3 +
+;
+
 : sdSphere (in vec3 p, in float s)
 swap length3 swap -
 ;
@@ -147,7 +161,7 @@ q rad sdEllipsoid 2 mapres vec2!
 time 0.8 + fract 6.2831 * cos -0.5 * 0.5 + -0.2 * 0.05 + r #2 cells #+ @ + r #2 cells #+ !
 0.2 sy * 0.2 - r #1 cells #+ @ + r #1 cells #+ !
 
-\r @ abs r #1 cells #+ r #2 cells #+ hq vec3!
+r @ abs r #1 cells #+ @ r #2 cells #+ @ hq vec3!
 
 \ head
 
@@ -161,6 +175,12 @@ r tmp5 tmp6 sub3
 tmp6 rad sdEllipsoid
 0.1 smin
 mapres @ 0.1 smin mapres !
+
+\ ear
+time 0.9 + fract dup negate 1 + * 4 * \ p3
+dup 0.05 * 0.2 + swap 0.2 * 0.2 + -0.07 ear_b vec3!
+0.01 0.04 hq ear_a ear_b sdStick
+mapres @ 0.01 smin mapres !
 
 
 \ mouth
