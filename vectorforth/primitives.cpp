@@ -1347,6 +1347,122 @@ void primitive_within(ASM::asmcode& code, compile_data& cd)
   code.add(asmcode::COMMENT, "END PRIMITIVE within");
   }
 
+void primitive_mat2x2_store(ASM::asmcode& code, compile_data& cd)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE mat2x2!");
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER); // address
+  code.add(asmcode::VMOVAPS, AVX_REG3, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(3));
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(4));
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(1), AVX_REG1);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(2), AVX_REG2);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(3), AVX_REG3);
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(5));
+  code.add(asmcode::COMMENT, "END PRIMITIVE mat2x2!");
+  }
+
+void primitive_mat3x3_store(ASM::asmcode& code, compile_data& cd)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE mat3x3!");
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER); // address
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(9));
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(8));  
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, AVX_CELLS(7));
+  code.add(asmcode::VMOVAPS, AVX_REG3, MEM_STACK_REGISTER, AVX_CELLS(6));  
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(1), AVX_REG1);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(2), AVX_REG2);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(3), AVX_REG3);
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER, AVX_CELLS(5));
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG2, MEM_STACK_REGISTER, AVX_CELLS(3));
+  code.add(asmcode::VMOVAPS, AVX_REG3, MEM_STACK_REGISTER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG4, MEM_STACK_REGISTER, AVX_CELLS(1));        
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(4), AVX_REG0);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(5), AVX_REG1);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(6), AVX_REG2);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(7), AVX_REG3);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_CELLS(8), AVX_REG4);
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(10));
+  code.add(asmcode::COMMENT, "END PRIMITIVE mat3x3!");
+  }
+
+void primitive_mul2x2(ASM::asmcode& code, compile_data& cd)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE mul2x2");
+  code.add(asmcode::MOV, asmcode::R8, MEM_STACK_REGISTER); // address target vec2
+  code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER, AVX_CELLS(1)); // address vec2
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(2)); // address mat2x2
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(3));
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RAX, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RCX);
+  code.add(asmcode::VMOVAPS, AVX_REG3, asmcode::MEM_RCX, AVX_CELLS(1));
+
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG2);
+  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG3);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_REG0);
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RAX, AVX_CELLS(3));
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG2);
+  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG3);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_CELLS(1), AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END PRIMITIVE mul2x2");
+  }
+
+void primitive_mul3x3(ASM::asmcode& code, compile_data& cd)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE mul3x3");
+
+  code.add(asmcode::MOV, asmcode::R8, MEM_STACK_REGISTER); // address target vec3
+  code.add(asmcode::MOV, asmcode::RCX, MEM_STACK_REGISTER, AVX_CELLS(1)); // address vec3
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER, AVX_CELLS(2)); // address mat3x3
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(3));
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RAX, AVX_CELLS(3));
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RAX, AVX_CELLS(6));
+  code.add(asmcode::VMOVAPS, AVX_REG3, asmcode::MEM_RCX);
+  code.add(asmcode::VMOVAPS, AVX_REG4, asmcode::MEM_RCX, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG5, asmcode::MEM_RCX, AVX_CELLS(2));
+
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG3);
+  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG4);
+  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG2, AVX_REG5);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG2);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_REG0);
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX, AVX_CELLS(1));
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RAX, AVX_CELLS(4));
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RAX, AVX_CELLS(7));
+
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG3);
+  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG4);
+  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG2, AVX_REG5);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG2);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_CELLS(1), AVX_REG0);
+
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG1, asmcode::MEM_RAX, AVX_CELLS(5));
+  code.add(asmcode::VMOVAPS, AVX_REG2, asmcode::MEM_RAX, AVX_CELLS(8));
+
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG3);
+  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG1, AVX_REG4);
+  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG2, AVX_REG5);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG2);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_R8, AVX_CELLS(2), AVX_REG0);
+
+  code.add(asmcode::COMMENT, "END PRIMITIVE mul3x3");
+  }
+
 void primitive_vec2_store(ASM::asmcode& code, compile_data& cd)
   {
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE vec2!");
@@ -2505,6 +2621,10 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("within", &primitive_within));
   pm.insert(std::pair<std::string, prim_fun>("vec3!", &primitive_vec3_store));
   pm.insert(std::pair<std::string, prim_fun>("vec2!", &primitive_vec2_store));
+  pm.insert(std::pair<std::string, prim_fun>("mat2x2!", &primitive_mat2x2_store));
+  pm.insert(std::pair<std::string, prim_fun>("mat3x3!", &primitive_mat3x3_store));
+  pm.insert(std::pair<std::string, prim_fun>("mul2x2", &primitive_mul2x2));
+  pm.insert(std::pair<std::string, prim_fun>("mul3x3", &primitive_mul3x3));
   pm.insert(std::pair<std::string, prim_fun>("dot3", &primitive_dot3));
   pm.insert(std::pair<std::string, prim_fun>("cross3", &primitive_cross3));
   pm.insert(std::pair<std::string, prim_fun>("add3", &primitive_add3));

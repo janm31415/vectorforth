@@ -2707,6 +2707,40 @@ struct vec2_tests : public compile_fixture
     }
   };
 
+struct mat2x2_tests : public compile_fixture
+  {
+  void test(const compiler_options& ops)
+    {
+    c_ops = ops;
+    run("vec2 v2 vec2 r2 mat2x2 m2");
+    run("1 2 v2 vec2!");
+    run("3 -2 1 7 m2 mat2x2!");
+    run("m2 v2 r2 mul2x2");
+    auto dsv2 = get_data_space_value(2);
+    auto dsv3 = get_data_space_value(3);
+    TEST_EQ(5.f, get_avx2_f32(dsv2, 0));
+    TEST_EQ(12.f, get_avx2_f32(dsv3, 0));
+    }
+  };
+
+struct mat3x3_tests : public compile_fixture
+  {
+  void test(const compiler_options& ops)
+    {
+    c_ops = ops;
+    run("vec3 v3 vec3 r3 mat3x3 m3");
+    run("1 2 3 v3 vec3!");
+    run("9 1 2 -3 0 7 1 4 6 m3 mat3x3!");
+    run("m3 v3 r3 mul3x3");
+    auto dsv3 = get_data_space_value(3);
+    auto dsv4 = get_data_space_value(4);
+    auto dsv5 = get_data_space_value(5);
+    TEST_EQ(6.f, get_avx2_f32(dsv3, 0));
+    TEST_EQ(13.f, get_avx2_f32(dsv4, 0));
+    TEST_EQ(34.f, get_avx2_f32(dsv5, 0));
+    }
+  };
+
 struct strength_reduction_tests : public compile_fixture
   {
   void test(const compiler_options& ops)
@@ -2775,6 +2809,8 @@ void run_compile_tests(const compiler_options& ops)
   data_space_tests().test(ops);
   vec2_tests().test(ops);
   vec3_tests().test(ops);
+  mat2x2_tests().test(ops);
+  mat3x3_tests().test(ops);
   strength_reduction_tests().test(ops);
   perf_tests().test(ops);
   }

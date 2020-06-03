@@ -104,6 +104,12 @@ void primitive_clamp(ASM::asmcode& code, compile_data& cd);
 void primitive_within(ASM::asmcode& code, compile_data& cd);
 void primitive_vec2_store(ASM::asmcode& code, compile_data& cd);
 void primitive_vec3_store(ASM::asmcode& code, compile_data& cd);
+void primitive_mat2x2_store(ASM::asmcode& code, compile_data& cd);
+void primitive_mat3x3_store(ASM::asmcode& code, compile_data& cd);
+
+void primitive_mul3x3(ASM::asmcode& code, compile_data& cd);
+void primitive_mul2x2(ASM::asmcode& code, compile_data& cd);
+
 void primitive_dot2(ASM::asmcode& code, compile_data& cd);
 void primitive_dot3(ASM::asmcode& code, compile_data& cd);
 void primitive_cross3(ASM::asmcode& code, compile_data& cd);
