@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <algorithm>
 
 VF_BEGIN
 
