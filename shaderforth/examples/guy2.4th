@@ -1,10 +1,10 @@
- \  Based on Step #2 of the LIVE Shade Deconstruction tutorial for "Happy Jumping"
+ \  Based on Step #3 of the LIVE Shade Deconstruction tutorial for "Happy Jumping"
  \  by inigo quilez
  \  License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
   
  \  https://www.youtube.com/watch?v=Cfe5UQ-1L9Q
 
- \  Step 2: https://www.shadertoy.com/view/3ljSzw
+ \  Step 3: https://www.shadertoy.com/view/ttjXDz
 
 
 
@@ -47,6 +47,7 @@ vec3 lin
 vec3 mix_col
 vec3 body_col
 vec3 terrain_col
+vec3 terrain_col2
 vec3 iris_col
 vec3 eyeball_col
 vec3 ear_a
@@ -77,6 +78,7 @@ sun_lig sun_lig normalize3
 0.5 0.7 0.9 mix_col vec3!
 0.2 0.05 0.02 body_col vec3!
 0.05 0.09 0.02 terrain_col vec3!
+0.06 0.06 0.02 terrain_col2 vec3!
 0.4 0.4 0.4 iris_col vec3!
 0 0 0 eyeball_col vec3!
 
@@ -98,14 +100,23 @@ t 0.9 * value time
 dup floor -
 ;
 
+t 0.9 * fract value t1
+t 0.9 * 0.5 * fract 0.5 - abs 0.5 / value t4
+
+t1 1 t1 - * 4 * value p
+1 2 t1 * - 4 * value pp
+
+
+
 
 : map \ (in vec3 pos)
 
 dup
-time fract dup dup 1 swap - * 4 * value p
-2 * 1 - -4 * value pp
 
-0 p 0.1 + 0 cen vec3!
+-1 2 t4 * + 0.5 * 
+p 2 p - ** 0.1 +
+time floor t1 0.7 ** 1 - + 
+cen vec3!
 
  \ body
 
@@ -262,12 +273,18 @@ ro pos pos add3 \ pos = pos + ro
 
 pos calcnormal
 
-
+1 value ks
 
 over 4 f= col eyeball_col rot col mix3
 over 3 f= col iris_col rot col mix3
 over 2 f= col body_col rot col mix3
+
+-0.2 0.2 pos @ 18 * sin pos #1 cells #+ @ 18 * sin pos #2 cells #+ @ 18 * sin + + smoothstep 2 * -1 + 0.2 * 
+terrain_col2 terrain_col2 scalarmul3 terrain_col2 terrain_col terrain_col add3
+
 over 1 f= col terrain_col rot col mix3
+
+over 1 f= ks pos #1 cells #+ @ 0.15 * 0.5 + mix to ks
 
  \ lighting
 norm sun_lig dot3 0 1 clamp  \ sun_dif
@@ -282,7 +299,7 @@ value sun_sha
 
 
 
-norm sun_hal dot3 0 1 clamp 8 ** sun_dif * sun_hal rd dot3 1 + 0 1 clamp 5 ** 0.96 * 0.04 + * \sun_spe
+norm sun_hal dot3 0 1 clamp 8 ** sun_dif * sun_hal rd dot3 1 + 0 1 clamp 5 ** 0.96 * 0.04 + * ks * \sun_spe
 value sun_spe
 
 norm #1 cells #+ @ 0.5 * 0.5 + 0 1 clamp sqrt \ sky_dif
@@ -324,9 +341,9 @@ basecol col col add3
 
 
  \ camera
-mz abs rx / 10.57 *
+time 0.15 * sin 0.7 * 1.57 +
 dup cos 1.3 * -0.25 rot sin 1.3 * ro vec3!
-0 0.65 0.4 ta vec3!
+0 0.65 -0.6 time + 0.4 time 0.5 * sin * - ta vec3!
 ta ro ro add3
 
  \ frame
