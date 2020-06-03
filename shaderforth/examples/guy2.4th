@@ -95,8 +95,6 @@ sun_lig sun_lig normalize3
 100 value h
 0 value m
 
-: t 5 ;
-
 t 0.9 * value time
 
 : fract 
@@ -175,11 +173,8 @@ mapres @ 0.1 smin mapres !
 
  \ belly wrinkles
  
-\r #1 cells #+ @ 0.02 - r @ dup * 2.5 * - dup >r
-\120 * sin 0.001 * 1 0 0.1 r> abs smoothstep - * mapres @ + mapres !
-
-q  @ dup * 120 * sin 0.001 * mapres @ + mapres !
-
+r #1 cells #+ @ 0.02 - r @ dup * 2.5 * - dup >r
+120 * sin 0.001 * 1 0 0.1 r> abs smoothstep - * mapres @ + mapres !
 
 
  \ ear
