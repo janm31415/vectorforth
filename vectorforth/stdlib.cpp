@@ -177,6 +177,8 @@ void add_stdlib_to_dictionary(dictionary& d)
 
   register_definition(d, ": vec2 #2 cells allot create ;");
   register_definition(d, ": vec3 #3 cells allot create ;");
+  register_definition(d, ": mat2x2 #4 cells allot create ;");
+  register_definition(d, ": mat3x3 #9 cells allot create ;");
   /*
   register_definition(d, R"(
 : vec3! 

@@ -133,6 +133,7 @@ value sy
 
 cen r sub3
 
+
 r @   uu r #1 cells #+ dot2  vv r #1 cells #+ dot2 q vec3!
 
 0.25 0.25 sy * 0.25 sz * rad vec3!
