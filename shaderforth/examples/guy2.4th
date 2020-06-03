@@ -58,6 +58,7 @@ vec3 eyelid_rad
 vec3 cq
 vec3 iris_center
 vec3 eyeball_center
+mat2x2 rotation
 
 vec2 mapres
 vec2 castres
@@ -94,6 +95,8 @@ sun_lig sun_lig normalize3
 100 value h
 0 value m
 
+: t 5 ;
+
 t 0.9 * value time
 
 : fract 
@@ -106,6 +109,25 @@ t 0.9 * 0.5 * fract 0.5 - abs 0.5 / value t4
 t1 1 t1 - * 4 * value p
 1 2 t1 * - 4 * value pp
 
+1 pp negate uu vec2!
+uu uu normalize2
+uu #1 cells #+ @ negate uu @ vv vec2!
+
+0 0.4 p smoothstep \ smoothstep(0.0,0.4,p)
+p 0.5 * 0.5 + \ 0.5 + 0.5*p
+over * swap 1 - - \  smoothstep(0.0,0.4,p) * (0.5 + 0.5p) + (1 - smoothstep(0.0,0.4,p))
+value sy
+1 sy / value sz
+
+t4 2 * 1 - -0.25 *
+dup
+cos
+swap
+sin
+2dup
+negate
+swap
+rotation mat2x2!
 
 
 
@@ -120,19 +142,12 @@ cen vec3!
 
  \ body
 
-1 pp negate uu vec2!
-uu uu normalize2
-uu #1 cells #+ @ negate uu @ vv vec2!
-
-0 0.4 p smoothstep \ smoothstep(0.0,0.4,p)
-p 0.5 * 0.5 + \ 0.5 + 0.5*p
-over * swap 1 - - \  smoothstep(0.0,0.4,p) * (0.5 + 0.5p) + (1 - smoothstep(0.0,0.4,p))
-value sy
-1 sy / value sz
-
 
 cen r sub3
 
+
+
+rotation r r mul2x2
 
 r @   uu r #1 cells #+ dot2  vv r #1 cells #+ dot2 q vec3!
 
@@ -157,6 +172,15 @@ r tmp5 tmp6 sub3
 tmp6 rad sdellipsoid
 0.1 smin
 mapres @ 0.1 smin mapres !
+
+ \ belly wrinkles
+ 
+\r #1 cells #+ @ 0.02 - r @ dup * 2.5 * - dup >r
+\120 * sin 0.001 * 1 0 0.1 r> abs smoothstep - * mapres @ + mapres !
+
+q  @ dup * 120 * sin 0.001 * mapres @ + mapres !
+
+
 
  \ ear
 time 0.9 + fract dup negate 1 + * 4 * \ p3
@@ -228,8 +252,8 @@ norm norm normalize3
 
 begin
 
-i 100 < \ test
-h 0.001 s * >=
+i 256 < \ test
+h abs 0.0005 s * >=
 s 20.0 <
 and and
 
@@ -240,7 +264,7 @@ s swap tmp1 scalarmul3  \ rd is top item on stack, swap with s, tmp1 = s*rd
 tmp1 tmp1 add3 \ ro is top item on stack, tmp1 = tmp1 + ro
 
 tmp1 map dup @ to h #1 cells #+ @ to m
-h 0.001 s * f>= h * s + to s
+h abs 0.0005 s * f>= h * s + to s
 i 1 + to i
 
 
@@ -267,7 +291,7 @@ basecol vec3!
 
 ro rd castRay dup #1 cells #+ @ swap @ \ (m s)
 
-dup 0 > if \ if s > 0
+dup -0.5 > if \ if s > -0.5
 
 dup rd pos scalarmul3 \ castray value is stack top, need to duplicate to validate balancing in if statement, pos = s*rd
 ro pos pos add3 \ pos = pos + ro
