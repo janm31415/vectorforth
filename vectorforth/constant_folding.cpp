@@ -2,6 +2,8 @@
 #include "primitives.h"
 #include "context_defs.h"
 
+#include <cmath>
+
 VF_BEGIN
 
 namespace
