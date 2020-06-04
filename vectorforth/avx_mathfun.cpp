@@ -28,7 +28,7 @@ __m512 _VECTORCALL log_avx_ps(__m512 x)
   return p.operator __m512();
   }
 
-__m512 _VECTORCALL pos_avx_ps(__m512 x, __m512 y)
+__m512 _VECTORCALL pow_avx_ps(__m512 x, __m512 y)
   {
   Vec16f vx(x), vy(y);
   Vec16f p = pow(vx, vy);
@@ -79,7 +79,7 @@ __m256 _VECTORCALL log_avx_ps(__m256 x)
   return p.operator __m256();
   }
 
-__m256 _VECTORCALL pos_avx_ps(__m256 x, __m256 y)
+__m256 _VECTORCALL pow_avx_ps(__m256 x, __m256 y)
   {
   Vec8f vx(x), vy(y);
   Vec8f p = pow(vx, vy);

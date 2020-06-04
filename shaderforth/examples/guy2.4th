@@ -176,7 +176,6 @@ mapres @ 0.1 smin mapres !
 r #1 cells #+ @ 0.02 - r @ dup * 2.5 * - dup >r
 120 * sin 0.001 * 1 0 0.1 r> abs smoothstep - * mapres @ + mapres !
 
-
  \ ear
 time 0.9 + fract dup negate 1 + * 4 * \ p3
 dup 0.05 * 0.2 + swap 0.2 * 0.2 + -0.07 ear_b vec3!

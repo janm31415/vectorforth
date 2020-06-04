@@ -2833,6 +2833,26 @@ void avx_mathfun_test()
 #endif
   }
 
+void avx_mathfun_test_2()
+  {
+  float nr = -277076958175912885225521152.f;
+#ifdef AVX512
+  __m512 x = _mm256_set1_ps(nr);
+  __m512 sx = sin_avx_ps(x);
+  float stdsx = std::sin(nr);
+  TEST_EQ_CLOSE(0.269475739f, stdsx, 1e-5);
+  TEST_ASSERT(get_avx2_f32(sx, 0) == get_avx2_f32(sx, 0));
+  TEST_EQ_CLOSE(0.269475739f, get_avx2_f32(sx, 0), 1e-5);
+#else
+  __m256 x = _mm256_set1_ps(nr);
+  __m256 sx = sin_avx_ps(x);
+  float stdsx = std::sin(nr);
+  TEST_EQ_CLOSE(0.269475739f, stdsx, 1e-5);
+  TEST_ASSERT(get_avx2_f32(sx, 0) == get_avx2_f32(sx, 0));
+  TEST_EQ_CLOSE(0.269475739f, get_avx2_f32(sx, 0), 1e-5);
+#endif
+  }
+
 VF_END
 
 void run_all_compile_tests()
@@ -2844,4 +2864,5 @@ void run_all_compile_tests()
   c_ops.single_pass = false;
   run_compile_tests(c_ops);
   avx_mathfun_test();
+  avx_mathfun_test_2();
   }

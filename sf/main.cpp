@@ -416,10 +416,13 @@ int main(int argc, char** argv)
           *p_im++ = 0xff000000 | (red << 16) | (green << 8) | blue;
           }
         }
+      //VF::print_stack(std::cout, ctxt);
       }
 #ifndef SINGLE
     );
 #endif
+    
+
     if (!l.quit)
       paint(wh, (const uint8_t*)image, w, -h, 4);
 

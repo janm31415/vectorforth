@@ -299,7 +299,7 @@ void primitive_sin(asmcode& code, compile_data&)
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE sin");
   code.add(asmcode::MOV, asmcode::R15, CONTEXT); // r15 should be saved by the callee but r10 not, so we save the context in r15
 
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
+  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);  
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
@@ -429,10 +429,10 @@ void primitive_pow(asmcode& code, compile_data&)
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&pos_avx_ps);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&pow_avx_ps);
 #else
   code.add(asmcode::XOR, asmcode::RAX, asmcode::RAX);
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&pos_avx_ps);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&pow_avx_ps);
 #endif  
   code.add(asmcode::CALL, asmcode::R11);
 
