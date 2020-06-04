@@ -316,6 +316,8 @@ castres
 
 : render
 
+0 0 0 col vec3!
+
  \ sky dome
 rd #1 cells #+ @ 0 max -0.5 *
 dup dup
