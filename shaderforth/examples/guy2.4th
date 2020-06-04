@@ -58,7 +58,10 @@ vec3 eyelid_rad
 vec3 cq
 vec3 iris_center
 vec3 eyeball_center
+vec3 arms_a
+vec3 arms_b
 mat2x2 rotation
+
 
 vec2 mapres
 vec2 castres
@@ -89,6 +92,7 @@ sun_lig sun_lig normalize3
 0.06 0.03 0.03 eyelid_rad vec3!
 0.08 0.28 0.08 iris_center vec3!
 0.075 0.28 0.102 eyeball_center vec3!
+0.18 0.2 -0.05 arms_a vec3!
 
 0 value s 
 0 value i
@@ -106,6 +110,9 @@ t 0.9 * 0.5 * fract 0.5 - abs 0.5 / value t4
 
 t1 1 t1 - * 4 * value p
 1 2 t1 * - 4 * value pp
+time 0.8 + fract 6.2831 * cos -0.5 * 0.5 + value p2
+
+0.3 0.1 p2 * +  -0.2 0.3 p2 * + -0.15 arms_b vec3!
 
 1 pp negate uu vec2!
 uu uu normalize2
@@ -153,7 +160,7 @@ r @   uu r #1 cells #+ dot2  vv r #1 cells #+ dot2 q vec3!
 
 q rad sdellipsoid 2 mapres vec2!
 
-time 0.8 + fract 6.2831 * cos -0.5 * 0.5 + -0.2 * 0.05 + r #2 cells #+ @ + r #2 cells #+ !
+p2 -0.2 * 0.05 + r #2 cells #+ @ + r #2 cells #+ !
 0.2 sy * 0.2 - r #1 cells #+ @ + r #1 cells #+ !
 
 r @ abs r #1 cells #+ @ r #2 cells #+ @ hq vec3!
@@ -175,6 +182,10 @@ mapres @ 0.1 smin mapres !
  
 r #1 cells #+ @ 0.02 - r @ dup * 2.5 * - dup >r
 120 * sin 0.001 * 1 0 0.1 r> abs smoothstep - * mapres @ + mapres !
+
+\ arms
+hq arms_a arms_b 0.03 0.06 sdstick
+mapres @ 0.01 smin mapres !  \ not like original: smoothing factor is 0.01 as opposed to more intelligent in original
 
  \ ear
 time 0.9 + fract dup negate 1 + * 4 * \ p3
