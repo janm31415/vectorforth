@@ -60,7 +60,10 @@ vec3 iris_center
 vec3 eyeball_center
 vec3 arms_a
 vec3 arms_b
+vec3 vp
+vec2 id
 mat2x2 rotation
+vec2 fid_prod
 
 
 vec2 mapres
@@ -94,6 +97,7 @@ sun_lig sun_lig normalize3
 0.075 0.28 0.102 eyeball_center vec3!
 0.18 0.2 -0.05 arms_a vec3!
 
+11.1 31.7 fid_prod vec2!
 0 value s 
 0 value i
 100 value h
@@ -226,8 +230,32 @@ cq 0.0395 sdsphere 4 tmpres vec2!
 mapres tmpres tmpres @ mapres @ f< mapres mix2
 
  \ ground
-#1 cells #+ @ 0.1 + \ (spheredist pos #32 @ 0.1 +)
-1 tmpres vec2!
+dup dup
+@ value posx
+#1 cells #+ @ value posy
+#2 cells #+ @ value posz
+
+posy
+posx 2 * sin posz 2 * sin + 0.05 * 0.1 + +
+\1 tmpres vec2!
+
+ \ bubbles
+
+posx 3 / floor posz 1.5 + 3 / floor id vec2!
+posx abs 3 mod posy posz 1.5 + 3 mod 1.5 - vp vec3!
+id fid_prod dot2 value fid
+fid 1.312 * time 0.1 * + fract value fy
+fy 4 * -1 + value yy
+0.7 fid sin 0.5 * 1 + 0.7 rad vec3!
+posx 3 * sin posy 4 * sin posz 5 * sin + + 0.1 *
+dup dup tmp3 vec3!
+rad tmp3 rad sub3
+4 fy 1 fy - * * rad rad scalarmul3
+2 yy 0 tmp3 vec3!
+vp tmp3 vp sub3
+vp rad sdellipsoid 0.6 * 2 min
+ 0.32 smin 1 tmpres vec2!
+
 
 mapres tmpres tmpres @ mapres @ f< mapres mix2
 
