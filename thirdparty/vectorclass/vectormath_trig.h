@@ -226,7 +226,7 @@ static inline VTYPE sincos_f(VTYPE * cosret, VTYPE const xx) {
 
     // check for overflow
     overflow = BVTYPE(q > 0x2000000 | q < 0);  // q big if overflow  [JanM: added check q < 0]
-    overflow &= is_finite(xa);
+    overflow |= ~is_finite(xa); // [JanM: set overflow if xa is infinite]
     s = select(overflow, 0.0f, s);
     c = select(overflow, 1.0f, c);
 
