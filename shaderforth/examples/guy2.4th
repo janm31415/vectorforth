@@ -97,6 +97,7 @@ sun_lig sun_lig normalize3
 0.075 0.28 0.102 eyeball_center vec3!
 0.18 0.2 -0.05 arms_a vec3!
 
+
 11.1 31.7 fid_prod vec2!
 0 value s 
 0 value i
@@ -117,6 +118,11 @@ t1 1 t1 - * 4 * value p
 time 0.8 + fract 6.2831 * cos -0.5 * 0.5 + value p2
 
 0.3 0.1 p2 * +  -0.2 0.3 p2 * + -0.15 arms_b vec3!
+
+
+time 0.9 + fract dup negate 1 + * 4 * \ p3
+dup 0.05 * 0.2 + swap 0.2 * 0.2 + -0.07 ear_b vec3!
+
 
 1 pp negate uu vec2!
 uu uu normalize2
@@ -192,8 +198,7 @@ hq arms_a arms_b 0.03 0.06 sdstick
 mapres @ 0.01 smin mapres !  \ not like original: smoothing factor is 0.01 as opposed to more intelligent in original
 
  \ ear
-time 0.9 + fract dup negate 1 + * 4 * \ p3
-dup 0.05 * 0.2 + swap 0.2 * 0.2 + -0.07 ear_b vec3!
+
 hq ear_a ear_b 0.01 0.04 sdstick
 
 mapres @ 0.01 smin mapres !
@@ -241,20 +246,24 @@ posx 2 * sin posz 2 * sin + 0.05 * 0.1 + +
 
  \ bubbles
 
-posx 3 / floor posz 1.5 + 3 / floor id vec2!
-posx abs 3 mod posy posz 1.5 + 3 mod 1.5 - vp vec3!
-id fid_prod dot2 value fid
-fid 1.312 * time 0.1 * + fract value fy
-fy 4 * -1 + value yy
-0.7 fid sin 0.5 * 1 + 0.7 rad vec3!
+\posx 3 / floor posz 1.5 + 3 / floor id vec2!
+\posx abs 3 mod posy posz 1.5 + 3 mod 1.5 - vp vec3!
+
+posx 3 / floor posz 1.5 + 3 fm/mod swap
+posx abs 3 mod posy rot 1.5 - vp vec3!
+id vec2!
+
+id fid_prod dot2 dup >r \ fid
+1.312 * time 0.1 * + fract value fy
+0.7 r> sin 0.5 * 1 + 0.7 rad vec3!
 posx 3 * sin posy 4 * sin posz 5 * sin + + 0.1 *
 dup dup tmp3 vec3!
 rad tmp3 rad sub3
 4 fy 1 fy - * * rad rad scalarmul3
-2 yy 0 tmp3 vec3!
+2 fy 4 * -1 + 0 tmp3 vec3!
 vp tmp3 vp sub3
 vp rad sdellipsoid 0.6 * 2 min
- 0.32 smin 1 tmpres vec2!
+0.32 smin 1 tmpres vec2!
 
 
 mapres tmpres tmpres @ mapres @ f< mapres mix2
@@ -316,7 +325,7 @@ castres
 
 : render
 
-0 0 0 col vec3!
+0 0 0 col vec3!  \ initialize col to remove nan from memory
 
  \ sky dome
 rd #1 cells #+ @ 0 max -0.5 *
