@@ -872,6 +872,54 @@ void primitive_substorei(ASM::asmcode& code, compile_data&)
   code.add(asmcode::COMMENT, "END PRIMITIVE #-!");
   }
 
+void primitive_addstore(ASM::asmcode& code, compile_data&)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE +!");
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::VADDPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);  
+  code.add(asmcode::COMMENT, "END PRIMITIVE +!");
+  }
+
+void primitive_substore(ASM::asmcode& code, compile_data&)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE -!");
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+  code.add(asmcode::COMMENT, "END PRIMITIVE -!");
+  }
+
+void primitive_mulstore(ASM::asmcode& code, compile_data&)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE *!");
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+  code.add(asmcode::COMMENT, "END PRIMITIVE *!");
+  }
+
+void primitive_divstore(ASM::asmcode& code, compile_data&)
+  {
+  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE /!");
+  code.add(asmcode::MOV, asmcode::RAX, MEM_STACK_REGISTER);
+  code.add(asmcode::VMOVAPS, AVX_REG1, MEM_STACK_REGISTER, AVX_CELLS(1));
+  code.add(asmcode::ADD, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
+  code.add(asmcode::VMOVAPS, AVX_REG0, asmcode::MEM_RAX);
+  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG1);
+  code.add(asmcode::VMOVAPS, asmcode::MEM_RAX, AVX_REG0);
+  code.add(asmcode::COMMENT, "END PRIMITIVE /!");
+  }
+
 void primitive_here(ASM::asmcode& code, compile_data&)
   {
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE here");
@@ -2608,6 +2656,10 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("!", &primitive_store));
   pm.insert(std::pair<std::string, prim_fun>("#+!", &primitive_addstorei));
   pm.insert(std::pair<std::string, prim_fun>("#-!", &primitive_substorei));
+  pm.insert(std::pair<std::string, prim_fun>("+!", &primitive_addstore));
+  pm.insert(std::pair<std::string, prim_fun>("-!", &primitive_substore));
+  pm.insert(std::pair<std::string, prim_fun>("*!", &primitive_mulstore));
+  pm.insert(std::pair<std::string, prim_fun>("/!", &primitive_divstore));
 
   pm.insert(std::pair<std::string, prim_fun>("if", &primitive_if));
   pm.insert(std::pair<std::string, prim_fun>("then", &primitive_then));

@@ -49,6 +49,21 @@ namespace
       //v = 0xff000000;
       v = 0xff000000 | (uint32_t(49) << 16) | (uint32_t(49) << 8) | uint32_t(49);
     }
+
+  float duration_since_midnight()
+    {
+    auto now = std::chrono::system_clock::now();
+
+    time_t tnow = std::chrono::system_clock::to_time_t(now);
+    tm *date = localtime(&tnow);
+    date->tm_hour = 0;
+    date->tm_min = 0;
+    date->tm_sec = 0;
+    auto midnight = std::chrono::system_clock::from_time_t(mktime(date));
+
+    std::chrono::duration<float> diff = now - midnight;
+    return diff.count();
+    }
   }
 
 view::view() : _w(1600), _h(900), 
@@ -559,6 +574,7 @@ void view::loop()
     {
     auto tic = std::chrono::high_resolution_clock::now();
     _shader_input.time_delta = (float)(std::chrono::duration_cast<std::chrono::microseconds>(tic - last_tic).count()) / 1000000.f;
+    _shader_input.global_time = (float)duration_since_midnight();
     last_tic = tic;
 
     _poll_for_events();

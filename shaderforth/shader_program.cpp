@@ -66,6 +66,7 @@ namespace
 : my st@ #704 #- @ ;
 : mz st@ #768 #- @ ;
 : mw st@ #832 #- @ ;
+: globaltime st@ #896 #- @ ;
 )";
 #else
     std::string main = R"(
@@ -82,6 +83,7 @@ namespace
 : my st@ #352 #- @ ;
 : mz st@ #384 #- @ ;
 : mw st@ #416 #- @ ;
+: globaltime st@ #448 #- @ ;
 )";
 #endif
     return main;
@@ -183,7 +185,7 @@ void shader_program::run(image<uint32_t>& im)
 #ifdef AVX512
   assert(im.width() % 16 == 0);
 
-  const int stack_top_offset = 832;
+  const int stack_top_offset = 896;
 
   assert(stack_top_offset % 64 == 0);
 
@@ -201,11 +203,13 @@ void shader_program::run(image<uint32_t>& im)
   __m512 my_val = _mm512_set1_ps(_input.my);
   __m512 mz_val = _mm512_set1_ps(_input.mz);
   __m512 mw_val = _mm512_set1_ps(_input.mw);
+
+  __m512 global_time_val = _mm512_set1_ps(_input.global_time);
 #else
 
   assert(im.width() % 8 == 0);
 
-  const int stack_top_offset = 416;
+  const int stack_top_offset = 448;
 
   assert(stack_top_offset % 32 == 0);
 
@@ -223,6 +227,8 @@ void shader_program::run(image<uint32_t>& im)
   __m256 my_val = _mm256_set1_ps(_input.my);
   __m256 mz_val = _mm256_set1_ps(_input.mz);
   __m256 mw_val = _mm256_set1_ps(_input.mw);
+
+  __m256 global_time_val = _mm256_set1_ps(_input.global_time);
 #endif
 
   tbb::parallel_for((int)0, _h, [&](int y)
@@ -255,6 +261,7 @@ void shader_program::run(image<uint32_t>& im)
     _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 352), my_val);
     _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 384), mz_val);
     _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 416), mw_val);
+    _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 448), global_time_val);
 #else
     __m256 y_val = _mm256_set1_ps((float)y);
     __m256 v_val = _mm256_set1_ps(vrel);
@@ -270,6 +277,8 @@ void shader_program::run(image<uint32_t>& im)
     _mm256_store_ps((float*)(ctxt.aligned_stack_top - 352), my_val);
     _mm256_store_ps((float*)(ctxt.aligned_stack_top - 384), mz_val);
     _mm256_store_ps((float*)(ctxt.aligned_stack_top - 416), mw_val);
+
+    _mm256_store_ps((float*)(ctxt.aligned_stack_top - 448), global_time_val);
 #endif
 
 #ifdef AVX512

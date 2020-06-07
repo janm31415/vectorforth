@@ -8,4 +8,5 @@ struct shader_input
   float time_delta; // render time (in seconds)
   int frame; // shader playback frame  
   float mx, my, mz, mw; // mouse pixel coords.
+  float global_time;
   };

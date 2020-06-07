@@ -18,6 +18,11 @@ void primitive_store(ASM::asmcode& code, compile_data& cd);
 void primitive_addstorei(ASM::asmcode& code, compile_data& cd);
 void primitive_substorei(ASM::asmcode& code, compile_data& cd);
 
+void primitive_addstore(ASM::asmcode& code, compile_data& cd);
+void primitive_substore(ASM::asmcode& code, compile_data& cd);
+void primitive_mulstore(ASM::asmcode& code, compile_data& cd);
+void primitive_divstore(ASM::asmcode& code, compile_data& cd);
+
 void primitive_here(ASM::asmcode& code, compile_data& cd);
 void primitive_comma(ASM::asmcode& code, compile_data& cd);
 

@@ -152,6 +152,10 @@ void superoperator_float_comma(ASM::asmcode& code, const expanded_token& et);
 void superoperator_float_comma_float_comma(ASM::asmcode& code, const expanded_token& et);
 void superoperator_float_comma_float_comma_float_comma(ASM::asmcode& code, const expanded_token& et);
 
+void superoperator_float_float_float_var_vec3store(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_float_var_vec2store(ASM::asmcode& code, const expanded_token& et);
+void superoperator_float_float_float_float_var_mat2x2store(ASM::asmcode& code, const expanded_token& et);
+
 VECTOR_FORTH_API void superoperators(std::vector<expanded_token>& words);
 
 VF_END

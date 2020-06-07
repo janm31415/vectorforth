@@ -170,8 +170,8 @@ r @   uu r #1 cells #+ dot2  vv r #1 cells #+ dot2 q vec3!
 
 q rad sdellipsoid 2 mapres vec2!
 
-p2 -0.2 * 0.05 + r #2 cells #+ @ + r #2 cells #+ !
-0.2 sy * 0.2 - r #1 cells #+ @ + r #1 cells #+ !
+p2 -0.2 * 0.05 + r #2 cells #+ +!
+0.2 sy * 0.2 - r #1 cells #+ +!
 
 r @ abs r #1 cells #+ @ r #2 cells #+ @ hq vec3!
 
@@ -294,7 +294,7 @@ norm norm normalize3
 
 begin
 
-i 256 < \ test
+i 100 < \ test
 h abs 0.0005 s * >=
 s 20.0 <
 and and

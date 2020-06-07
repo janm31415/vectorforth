@@ -136,6 +136,21 @@ std::string adapt_line_number_in_error_message(const std::string& msg, int line_
   return out;
   }
 
+float duration_since_midnight()
+  {
+  auto now = std::chrono::system_clock::now();
+
+  time_t tnow = std::chrono::system_clock::to_time_t(now);
+  tm *date = localtime(&tnow);
+  date->tm_hour = 0;
+  date->tm_min = 0;
+  date->tm_sec = 0;
+  auto midnight = std::chrono::system_clock::from_time_t(mktime(date));
+
+  std::chrono::duration<float> diff = now - midnight;
+  return diff.count();
+  }
+
 //#define SINGLE
 
 int main(int argc, char** argv)
@@ -173,6 +188,7 @@ int main(int argc, char** argv)
 : my st@ #704 #- @ ;
 : mz st@ #768 #- @ ;
 : mw st@ #832 #- @ ;
+: globaltime st@ #896 #- @ ;
 )";
 #else
   std::string main = R"(
@@ -189,6 +205,7 @@ int main(int argc, char** argv)
 : my st@ #352 #- @ ;
 : mz st@ #384 #- @ ;
 : mw st@ #416 #- @ ;
+: globaltime st@ #448 #- @ ;
 )";
 #endif
 
@@ -244,7 +261,7 @@ int main(int argc, char** argv)
 
 #ifdef AVX512
   assert(w % 16 == 0);
-  const int stack_top_offset = 832;
+  const int stack_top_offset = 896;
   assert(stack_top_offset % 64 == 0);
   const __m512 offset = _mm512_set_ps(15.f, 14.f, 13.f, 12.f, 11.f, 10.f, 9.f, 8.f, 7.f, 6.f, 5.f, 4.f, 3.f, 2.f, 1.f, 0.f);
   const float defaults[16] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
@@ -252,7 +269,7 @@ int main(int argc, char** argv)
   __m512 ry_val = _mm512_set1_ps((float)h);
 #else
   assert(w % 8 == 0);
-  const int stack_top_offset = 416;
+  const int stack_top_offset = 448;
   assert(stack_top_offset % 32 == 0);
   const __m256 offset = _mm256_set_ps(7.f, 6.f, 5.f, 4.f, 3.f, 2.f, 1.f, 0.f);
   const float defaults[8] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
@@ -266,6 +283,7 @@ int main(int argc, char** argv)
 
   while (!l.quit)
     {
+    auto global_time_duration = duration_since_midnight();
 #ifdef AVX512
     __m512 frame_val = _mm512_set1_ps((float)frame);
     __m512 mx_val = _mm512_set1_ps(l.mx);
@@ -287,9 +305,11 @@ int main(int argc, char** argv)
 #ifdef AVX512
     __m512 time_delta_val = _mm512_set1_ps((float)time_delta);
     __m512 time_val = _mm512_set1_ps((float)time);
+    __m512 global_time_val = _mm512_set1_ps((float)global_time_duration);
 #else
     __m256 time_delta_val = _mm256_set1_ps((float)time_delta);
     __m256 time_val = _mm256_set1_ps((float)time);
+    __m256 global_time_val = _mm256_set1_ps((float)global_time_duration);
 #endif
 
 #ifdef SINGLE
@@ -326,6 +346,8 @@ int main(int argc, char** argv)
       _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*352), my_val);
       _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*384), mz_val);
       _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*416), mw_val);
+
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 448), global_time_val);
 #else
       __m256 y_val = _mm256_set1_ps((float)y);
       __m256 v_val = _mm256_set1_ps(vrel);
@@ -341,6 +363,8 @@ int main(int argc, char** argv)
       _mm256_store_ps((float*)(ctxt.aligned_stack_top - 352), my_val);
       _mm256_store_ps((float*)(ctxt.aligned_stack_top - 384), mz_val);
       _mm256_store_ps((float*)(ctxt.aligned_stack_top - 416), mw_val);
+
+      _mm256_store_ps((float*)(ctxt.aligned_stack_top - 448), global_time_val);
 #endif
 
 #ifdef AVX512
