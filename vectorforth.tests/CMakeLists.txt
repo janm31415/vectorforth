@@ -37,7 +37,14 @@ add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 add_definitions(-DMEMORY_LEAK_TRACKING)
-#add_definitions(-DAVX512)
+
+if (AVX512)
+add_definitions(-DAVX512)
+endif (AVX512)
+
+if (LOOKUP)
+add_definitions(-DLOOKUP)
+endif (LOOKUP)
 
 add_executable(vectorforth.tests ${HDRS} ${SRCS})
 source_group("Header Files" FILES ${hdrs})

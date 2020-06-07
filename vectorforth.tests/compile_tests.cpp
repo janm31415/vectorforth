@@ -823,39 +823,45 @@ struct avx_mathfun : public compile_fixture
 #else
   void test(const compiler_options& ops)
     {
+#ifdef LOOKUP
+    float tol = 1e-3f;
+#else
+    float tol = 1e-6f;
+#endif
+
     c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 32, run("3.14159265359 sin"));
     auto v = get_last_stack_value();
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 7), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 6), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 5), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 4), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 3), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 2), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 1), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 0), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 7), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 6), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 5), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 4), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 3), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 2), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 1), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 0), tol);
 
     run("v8 0 1 2 3 4 5 6 7 sin");
     v = get_last_stack_value();
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 7), 1e-6f);
-    TEST_EQ_CLOSE(0.841471f, get_avx2_f32(v, 6), 1e-6f);
-    TEST_EQ_CLOSE(0.909297f, get_avx2_f32(v, 5), 1e-6f);
-    TEST_EQ_CLOSE(0.14112f, get_avx2_f32(v, 4), 1e-6f);
-    TEST_EQ_CLOSE(-0.756802f, get_avx2_f32(v, 3), 1e-6f);
-    TEST_EQ_CLOSE(-0.958924f, get_avx2_f32(v, 2), 1e-6f);
-    TEST_EQ_CLOSE(-0.279415f, get_avx2_f32(v, 1), 1e-6f);
-    TEST_EQ_CLOSE(0.656987f, get_avx2_f32(v, 0), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 7), tol);
+    TEST_EQ_CLOSE(0.841471f, get_avx2_f32(v, 6), tol);
+    TEST_EQ_CLOSE(0.909297f, get_avx2_f32(v, 5), tol);
+    TEST_EQ_CLOSE(0.14112f, get_avx2_f32(v, 4), tol);
+    TEST_EQ_CLOSE(-0.756802f, get_avx2_f32(v, 3), tol);
+    TEST_EQ_CLOSE(-0.958924f, get_avx2_f32(v, 2), tol);
+    TEST_EQ_CLOSE(-0.279415f, get_avx2_f32(v, 1), tol);
+    TEST_EQ_CLOSE(0.656987f, get_avx2_f32(v, 0), tol);
 
     run("v8 0 1 2 3 4 5 6 7 cos");
     v = get_last_stack_value();
-    TEST_EQ_CLOSE(1.f, get_avx2_f32(v, 7), 1e-6f);
-    TEST_EQ_CLOSE(0.540302f, get_avx2_f32(v, 6), 1e-6f);
-    TEST_EQ_CLOSE(-0.416147f, get_avx2_f32(v, 5), 1e-6f);
-    TEST_EQ_CLOSE(-0.989992f, get_avx2_f32(v, 4), 1e-6f);
-    TEST_EQ_CLOSE(-0.653644f, get_avx2_f32(v, 3), 1e-6f);
-    TEST_EQ_CLOSE(0.283662f, get_avx2_f32(v, 2), 1e-6f);
-    TEST_EQ_CLOSE(0.96017f, get_avx2_f32(v, 1), 1e-6f);
-    TEST_EQ_CLOSE(0.753902f, get_avx2_f32(v, 0), 1e-6f);
+    TEST_EQ_CLOSE(1.f, get_avx2_f32(v, 7), tol);
+    TEST_EQ_CLOSE(0.540302f, get_avx2_f32(v, 6), tol);
+    TEST_EQ_CLOSE(-0.416147f, get_avx2_f32(v, 5), tol);
+    TEST_EQ_CLOSE(-0.989992f, get_avx2_f32(v, 4), tol);
+    TEST_EQ_CLOSE(-0.653644f, get_avx2_f32(v, 3), tol);
+    TEST_EQ_CLOSE(0.283662f, get_avx2_f32(v, 2), tol);
+    TEST_EQ_CLOSE(0.96017f, get_avx2_f32(v, 1), tol);
+    TEST_EQ_CLOSE(0.753902f, get_avx2_f32(v, 0), tol);
 
     run("v8 0 1 2 3 4 5 6 7 exp");
     v = get_last_stack_value();
@@ -1880,7 +1886,11 @@ struct redefine_primitives : public compile_fixture
     {
     c_ops = ops;
     run(": sin 3.1415926535 2 * * sin ; 0.1 sin");
+#ifdef LOOKUP
+    TEST_EQ_CLOSE(0.58778525229f, get_stack_valuef(0), 1e-3f);
+#else
     TEST_EQ(0.58778525229f, get_stack_valuef(0));
+#endif
 
     run(": sin cos ; 5 sin 5 cos");
     TEST_EQ(get_stack_valuef(1), get_stack_valuef(0));
