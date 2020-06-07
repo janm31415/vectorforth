@@ -14,6 +14,7 @@
 #include <vectorforth/dictionary.h>
 #include <vectorforth/tokenize.h>
 #include <vectorforth/stdlib.h>
+#include <vectorforth/sincos_table.h>
 
 #include <tbb/parallel_for.h>
 #include <tbb/enumerable_thread_specific.h>
@@ -167,6 +168,8 @@ int main(int argc, char** argv)
     std::cout << "Cannot open file " << argv[1] << "\n";
     return -1;
     }
+
+  VF::initialize_lookup();
 
   std::string line;
   std::string shader;

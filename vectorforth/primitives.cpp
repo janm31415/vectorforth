@@ -2,6 +2,7 @@
 #include "context_defs.h"
 #include "asm_aux.h"
 #include "avx_mathfun.h"
+#include "sincos_table.h"
 
 #include <cassert>
 
@@ -303,10 +304,10 @@ void primitive_sin(asmcode& code, compile_data&)
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps_lookup);
 #else
   code.add(asmcode::XOR, asmcode::RAX, asmcode::RAX);
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps_lookup);
 #endif  
   code.add(asmcode::CALL, asmcode::R11);
 
@@ -329,10 +330,10 @@ void primitive_cos(asmcode& code, compile_data&)
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps_lookup);
 #else
   code.add(asmcode::XOR, asmcode::RAX, asmcode::RAX);
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps_lookup);
 #endif  
   code.add(asmcode::CALL, asmcode::R11);
 

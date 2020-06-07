@@ -14,6 +14,7 @@ expand.h
 expand_data.h
 namespace.h
 primitives.h
+sincos_table.h
 stdlib.h
 strength_reduction.h
 superoperators.h
@@ -32,6 +33,7 @@ debug.cpp
 expand.cpp
 dictionary.cpp
 primitives.cpp
+sincos_table.cpp
 stdlib.cpp
 strength_reduction.cpp
 superoperators.cpp
