@@ -14,6 +14,7 @@
 #include <vectorforth/dictionary.h>
 #include <vectorforth/tokenize.h>
 #include <vectorforth/stdlib.h>
+#include <vectorforth/sincos_table.h>
 
 namespace
   {
@@ -92,6 +93,7 @@ namespace
 
 shader_program::shader_program(int w, int h) : _w(w), _h(h), _fun_size(0), _fun(nullptr)
   {
+  VF::initialize_lookup();
   }
 
 shader_program::~shader_program()
@@ -134,7 +136,7 @@ void shader_program::log_assembly(const std::string& script, bool optimize)
   }
 
 bool shader_program::compile(const std::string& script, bool optimize)
-  {
+  {  
   if (_fun)
     ASM::free_assembled_function((void*)_fun, _fun_size);
 
