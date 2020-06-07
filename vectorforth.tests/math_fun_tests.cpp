@@ -55,26 +55,15 @@ void test_cos_lookup(float value, float tol = 1e-3f)
   TEST_EQ_CLOSE(expected, res, tol);
   }
 
-void test_tan_lookup(float value, float tol = 1e-3f)
-  {
-  float res = get_avx2_f32(tan_avx_ps_lookup(set_float(value)), 0);
-  float expected = std::tan(value);
-  if (expected > 1.f)
-    TEST_EQ_CLOSE(expected, res, tol*std::abs(expected));
-  else
-    TEST_EQ_CLOSE(expected, res, tol);
-  }
-
 void test_trigonometric_lookup()
   {
+  float tol = 1e-3f;
   for (float f = 0.f; f < 3000.f; f += 0.2f)
     {
-    test_sin_lookup(f);
-    test_sin_lookup(-f);
-    test_cos_lookup(f);
-    test_cos_lookup(-f);
-    //test_tan_lookup(f, 0.1);
-    //test_tan_lookup(-f, 0.1);
+    test_sin_lookup(f, tol);
+    test_sin_lookup(-f, tol);
+    test_cos_lookup(f, tol);
+    test_cos_lookup(-f, tol);
     }
   }
 
