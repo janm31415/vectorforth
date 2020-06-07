@@ -18,5 +18,5 @@ add_subdirectory(vectorforth.tests)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(AVX512 OFF CACHE BOOL "set ON if you want to use AVX-512. If OFF, AVX2 is used.")
-set(LOOKUP ON CACHE BOOL "turn ON to speed up sin and cos computation with a lookup table.")
+set(AVX512 OFF CACHE BOOL "Set ON for AVX-512, set OFF for AVX2.")
+set(LOOKUP ON CACHE BOOL "Set ON for sin/cos via lookup tables, set OFF for sin/cos via the vectorclass library.")
