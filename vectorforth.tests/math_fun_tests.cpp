@@ -2,6 +2,8 @@
 #include <vectorforth/sincos_table.h>
 #include "test_assert.h"
 
+#include <cmath>
+
 VF_BEGIN
 
 
