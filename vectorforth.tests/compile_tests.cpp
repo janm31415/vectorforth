@@ -726,55 +726,60 @@ struct avx_mathfun : public compile_fixture
 #ifdef AVX512
   void test(const compiler_options& ops)
     {
+#ifdef LOOKUP
+    float tol = 1e-3f;
+#else
+    float tol = 1e-6f;
+#endif
     c_ops = ops;
     TEST_EQ(ctxt.aligned_stack_top - 64, run("3.14159265359 sin"));
     auto v = get_last_stack_value();
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 15), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 14), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 13), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 12), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 11), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 10), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 9), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 8), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 7), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 6), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 5), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 4), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 3), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 2), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 1), 1e-6f);
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 0), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 15), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 14), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 13), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 12), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 11), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 10), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 9), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 8), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 7), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 6), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 5), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 4), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 3), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 2), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 1), tol);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 0), tol);
 
     run("v16 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 sin");
     v = get_last_stack_value();
-    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 15), 1e-6f);
-    TEST_EQ_CLOSE(0.841471f, get_avx2_f32(v, 14), 1e-6f);
-    TEST_EQ_CLOSE(0.909297f, get_avx2_f32(v, 13), 1e-6f);
-    TEST_EQ_CLOSE(0.14112f, get_avx2_f32(v, 12), 1e-6f);
-    TEST_EQ_CLOSE(-0.756802f, get_avx2_f32(v, 11), 1e-6f);
-    TEST_EQ_CLOSE(-0.958924f, get_avx2_f32(v, 10), 1e-6f);
-    TEST_EQ_CLOSE(-0.279415f, get_avx2_f32(v, 9), 1e-6f);
-    TEST_EQ_CLOSE(0.656987f, get_avx2_f32(v, 8), 1e-6f);
-    TEST_EQ_CLOSE(0.989358f, get_avx2_f32(v, 7), 1e-6f);
-    TEST_EQ_CLOSE(0.412118f, get_avx2_f32(v, 6), 1e-6f);
-    TEST_EQ_CLOSE(-0.544021f, get_avx2_f32(v, 5), 1e-6f);
-    TEST_EQ_CLOSE(-0.99999f, get_avx2_f32(v, 4), 1e-6f);
-    TEST_EQ_CLOSE(-0.536573f, get_avx2_f32(v, 3), 1e-6f);
-    TEST_EQ_CLOSE(0.420167f, get_avx2_f32(v, 2), 1e-6f);
-    TEST_EQ_CLOSE(0.990607f, get_avx2_f32(v, 1), 1e-6f);
-    TEST_EQ_CLOSE(0.650288f, get_avx2_f32(v, 0), 1e-6f);
+    TEST_EQ_CLOSE(0.f, get_avx2_f32(v, 15), tol);
+    TEST_EQ_CLOSE(0.841471f, get_avx2_f32(v, 14), tol);
+    TEST_EQ_CLOSE(0.909297f, get_avx2_f32(v, 13), tol);
+    TEST_EQ_CLOSE(0.14112f, get_avx2_f32(v, 12), tol);
+    TEST_EQ_CLOSE(-0.756802f, get_avx2_f32(v, 11), tol);
+    TEST_EQ_CLOSE(-0.958924f, get_avx2_f32(v, 10), tol);
+    TEST_EQ_CLOSE(-0.279415f, get_avx2_f32(v, 9), tol);
+    TEST_EQ_CLOSE(0.656987f, get_avx2_f32(v, 8), tol);
+    TEST_EQ_CLOSE(0.989358f, get_avx2_f32(v, 7), tol);
+    TEST_EQ_CLOSE(0.412118f, get_avx2_f32(v, 6), tol);
+    TEST_EQ_CLOSE(-0.544021f, get_avx2_f32(v, 5), tol);
+    TEST_EQ_CLOSE(-0.99999f, get_avx2_f32(v, 4), tol);
+    TEST_EQ_CLOSE(-0.536573f, get_avx2_f32(v, 3), tol);
+    TEST_EQ_CLOSE(0.420167f, get_avx2_f32(v, 2), tol);
+    TEST_EQ_CLOSE(0.990607f, get_avx2_f32(v, 1), tol);
+    TEST_EQ_CLOSE(0.650288f, get_avx2_f32(v, 0), tol);
 
     run("v16 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 cos");
     v = get_last_stack_value();
-    TEST_EQ_CLOSE(1.f, get_avx2_f32(v, 15), 1e-6f);
-    TEST_EQ_CLOSE(0.540302f, get_avx2_f32(v, 14), 1e-6f);
-    TEST_EQ_CLOSE(-0.416147f, get_avx2_f32(v, 13), 1e-6f);
-    TEST_EQ_CLOSE(-0.989992f, get_avx2_f32(v, 12), 1e-6f);
-    TEST_EQ_CLOSE(-0.653644f, get_avx2_f32(v, 11), 1e-6f);
-    TEST_EQ_CLOSE(0.283662f, get_avx2_f32(v, 10), 1e-6f);
-    TEST_EQ_CLOSE(0.96017f, get_avx2_f32(v, 9), 1e-6f);
-    TEST_EQ_CLOSE(0.753902f, get_avx2_f32(v, 8), 1e-6f);
+    TEST_EQ_CLOSE(1.f, get_avx2_f32(v, 15), tol);
+    TEST_EQ_CLOSE(0.540302f, get_avx2_f32(v, 14), tol);
+    TEST_EQ_CLOSE(-0.416147f, get_avx2_f32(v, 13), tol);
+    TEST_EQ_CLOSE(-0.989992f, get_avx2_f32(v, 12), tol);
+    TEST_EQ_CLOSE(-0.653644f, get_avx2_f32(v, 11), tol);
+    TEST_EQ_CLOSE(0.283662f, get_avx2_f32(v, 10), tol);
+    TEST_EQ_CLOSE(0.96017f, get_avx2_f32(v, 9), tol);
+    TEST_EQ_CLOSE(0.753902f, get_avx2_f32(v, 8), tol);
 
     run("v16 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 exp");
     v = get_last_stack_value();
