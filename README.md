@@ -57,6 +57,14 @@ The binding space is used for binding words to data space locations. This memory
 
 `!`    ( v #a -- )  Store value v in 64-bit memory address #a.
 
+`+!`    ( v #a -- )  Add value v to the value in 64-bit memory address #a and store the result in #a.
+
+`-!`    ( v #a -- )  Subtract value v from the value in 64-bit memory address #a and store the result in #a.
+
+`*!`    ( v #a -- )  Multiply value v to the value in 64-bit memory address #a and store the result in #a.
+
+`/!`    ( v #a -- )  Divide the value in 64-bit memory address #a by v and store the result in #a.
+
 `(`    ( -- )  A multiline comment until the corresponding ).
 
 `\`    ( -- )  A comment until the end of the line.
