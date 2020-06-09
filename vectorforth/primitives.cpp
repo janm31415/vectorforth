@@ -305,7 +305,7 @@ void primitive_sin(asmcode& code, compile_data&)
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
 #ifdef LOOKUP
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps_lookup);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps_joris);
 #else
   code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps);
 #endif

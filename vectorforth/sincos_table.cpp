@@ -58,6 +58,29 @@ __m512 _VECTORCALL cos_avx_ps_lookup(__m512 f0)
   return f3;
   }
 
+__m512 _VECTORCALL sin_avx_ps_joris(__m512 x)
+  {
+  __m512 one_over_twopi = _mm512_set1_ps(1.f/(2.f*PI));
+
+  __m512 s = _mm512_set1_ps(2.f);
+
+  __m512 y = _mm512_mul_ps(x, one_over_twopi);
+  __m512 k = _mm512_roundscale_ps(y, _MM_FROUND_TO_NEAREST_INT);
+  __m512 f = _mm512_mul_ps(_mm512_sub_ps(y, k), s);
+  
+
+  //sin(pi*x) = x * (a2 * x * x + a0) / (b2 * x * x + b0)
+  __m512 a0 = _mm512_set1_ps(3.21670175718844e+000);
+  __m512 a2 = _mm512_set1_ps(-3.23395890594424e+000);
+  __m512 b0 = _mm512_set1_ps(1.00000000000000e+000);
+  __m512 b2 = _mm512_set1_ps(8.53391292646496e-001);
+
+  __m512 ff = _mm512_mul_ps(f, f);
+  __m512 top = _mm512_mul_ps(f, _mm512_add_ps(_mm512_mul_ps(a2, ff), a0));
+  __m512 denom = _mm512_add_ps(_mm512_mul_ps(b2, ff), b0);
+  return _mm512_div_ps(top, denom);
+  }
+
 #else
 
 namespace

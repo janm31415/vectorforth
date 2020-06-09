@@ -11,6 +11,7 @@ VF_BEGIN
 VECTOR_FORTH_API void initialize_lookup();
 
 #ifdef AVX512
+VECTOR_FORTH_API __m512 _VECTORCALL sin_avx_ps_joris(__m512 x);
 VECTOR_FORTH_API __m512 _VECTORCALL sin_avx_ps_lookup(__m512 x);
 VECTOR_FORTH_API __m512 _VECTORCALL cos_avx_ps_lookup(__m512 x);
 #else
