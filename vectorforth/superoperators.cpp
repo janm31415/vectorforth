@@ -800,6 +800,20 @@ void superoperator_swap_over_address_addi_store(ASM::asmcode& code, const expand
   code.add(asmcode::COMMENT, "END SUPEROPERATOR swap over #addr #+ store");
   }
 
+void superoperator_address_here_fetch_swap_here_addstorei(ASM::asmcode& code, const expanded_token& et)
+  {
+  // speeds up allot
+  code.add(asmcode::COMMENT, "BEGIN SUPEROPERATOR address here @ swap here #+!");
+
+  code.add(asmcode::MOV, asmcode::RAX, asmcode::NUMBER, et.int_value);
+  code.add(asmcode::MOV, asmcode::RCX, MEM_HERE);
+  code.add(asmcode::MOV, MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::RCX);
+  code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(1));
+  code.add(asmcode::ADD, MEM_HERE, asmcode::RAX);
+
+  code.add(asmcode::COMMENT, "END SUPEROPERATOR address here @ swap here #+!");
+  }
+
 void superoperator_here_fetch_swap_here_addstorei(ASM::asmcode& code, const expanded_token& et)
   {
   // speeds up allot
@@ -3390,6 +3404,22 @@ namespace
   std::vector<expanded_token>::iterator combine_address_ops(std::vector<expanded_token>& words, std::vector<expanded_token>::iterator it)
     {
     auto sz = std::distance(it, words.end());
+    if (sz >= 6)
+      {
+      auto it1 = it + 1;
+      auto it2 = it + 2;
+      auto it3 = it + 3;
+      auto it4 = it + 4;
+      auto it5 = it + 5;
+      if (is_here(it1) && is_fetch(it2) && is_swap(it3) && is_here(it4) && is_addstorei(it5))
+        {
+        it->t = expanded_token::ET_SUPEROPERATOR;
+        it->supop = &superoperator_address_here_fetch_swap_here_addstorei;
+        *it5 = *it;
+        it = words.erase(it, it5);
+        return it;
+        }
+      }
     if (sz >= 3)
       {
       auto it1 = it + 1;
