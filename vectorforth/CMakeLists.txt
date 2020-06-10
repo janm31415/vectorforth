@@ -63,8 +63,12 @@ add_definitions(-DAVX512)
 endif (AVX512)
 
 if (${SINCOS_METHOD} STREQUAL "lookup")
-add_definitions(-DLOOKUP)
+add_definitions(-DSINCOSLOOKUP)
 endif (${SINCOS_METHOD} STREQUAL "lookup")
+
+if (${SINCOS_METHOD} STREQUAL "approximate")
+add_definitions(-DSINCOSAPPROX)
+endif (${SINCOS_METHOD} STREQUAL "approximate")
 
 if (${SINCOS_METHOD} STREQUAL "inline")
 add_definitions(-DSINCOSINLINE)

@@ -429,19 +429,18 @@ void primitive_sin(asmcode& code, compile_data&)
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
-#ifdef LOOKUP
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps_lookup);
-#else
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps);
-#endif
 #else
   code.add(asmcode::XOR, asmcode::RAX, asmcode::RAX);
-#ifdef LOOKUP
+#endif
+
+#if defined(SINCOSLOOKUP)
   code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps_lookup);
+#elif defined(SINCOSAPPROX)
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps_joris);
 #else
   code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps);
 #endif
-#endif  
+
   code.add(asmcode::CALL, asmcode::R11);
 
   code.add(asmcode::MOV, CONTEXT, asmcode::R15); // restore context
@@ -463,19 +462,17 @@ void primitive_cos(asmcode& code, compile_data&)
 
 #ifdef _WIN32
   code.add(asmcode::SUB, asmcode::RSP, asmcode::NUMBER, 32);
-#ifdef LOOKUP
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps_lookup);
-#else
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps);
-#endif
 #else
   code.add(asmcode::XOR, asmcode::RAX, asmcode::RAX);
-#ifdef LOOKUP
+#endif
+
+#if defined(SINCOSLOOKUP)
   code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps_lookup);
+#elif defined(SINCOSAPPROX)
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps_joris);
 #else
   code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps);
 #endif
-#endif  
   code.add(asmcode::CALL, asmcode::R11);
 
   code.add(asmcode::MOV, CONTEXT, asmcode::R15); // restore context
