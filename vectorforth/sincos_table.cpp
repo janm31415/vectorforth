@@ -4,13 +4,13 @@
 #include <stdint.h>
 
 #define PI    3.1415926535897f
-#define TWO_PI (2.f * 3.1415926535897f)
+#define TWO_PI (2.0 * 3.1415926535897)
 #define HLF_PI (3.1415926535897f/2.f)
 
 VF_BEGIN
 
 // Integer representations of PI
-#define TWO_PI_INT        16384
+#define TWO_PI_INT        8192//16384
 #define PI_INT            TWO_PI_INT / 2
 #define HLF_PI_INT        TWO_PI_INT / 4
 
@@ -27,7 +27,7 @@ float lookup[NR_SAMPLES] __attribute__((aligned(64)));
 void initialize_lookup()
   {
   for (unsigned i = 0; i < NR_SAMPLES; i++) {
-    lookup[i] = std::sin(i * (TWO_PI / TWO_PI_INT));
+    lookup[i] = (float)std::sin((double)i * (TWO_PI / (double)TWO_PI_INT));
     }
   }
 
@@ -35,7 +35,7 @@ void initialize_lookup()
 
 namespace
   {
-  __m512  f1 = _mm512_set1_ps(TWO_PI_INT / TWO_PI);
+  __m512  f1 = _mm512_set1_ps((float)((double)TWO_PI_INT / (double)TWO_PI));
   __m512i u0 = _mm512_set1_epi32(HLF_PI_INT);      // constant 0.5 * pi
   __m512i u1 = _mm512_set1_epi32(TWO_PI_INT - 1);  // mask 2 * pi
   }
@@ -110,7 +110,7 @@ __m512 _VECTORCALL cos_avx_ps_joris(__m512 x)
 
 namespace
   {
-  __m256  f1 = _mm256_set1_ps(TWO_PI_INT / TWO_PI);
+  __m256  f1 = _mm256_set1_ps((float)((double)TWO_PI_INT / (double)TWO_PI));
   __m256i u0 = _mm256_set1_epi32(HLF_PI_INT);      // constant 0.5 * pi
   __m256i u1 = _mm256_set1_epi32(TWO_PI_INT - 1);  // mask 2 * pi
   }
