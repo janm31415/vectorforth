@@ -76,9 +76,13 @@ if (AVX512)
 add_definitions(-DAVX512)
 endif (AVX512)
 
-if (LOOKUP)
+if (${SINCOS_METHOD} STREQUAL "lookup")
 add_definitions(-DLOOKUP)
-endif (LOOKUP)
+endif (${SINCOS_METHOD} STREQUAL "lookup")
+
+if (${SINCOS_METHOD} STREQUAL "inline")
+add_definitions(-DSINCOSINLINE)
+endif (${SINCOS_METHOD} STREQUAL "inline")
 
 if (WIN32)
 add_executable(shaderforth WIN32 ${HDRS} ${SRCS} ${IMGUI} ${JSON})

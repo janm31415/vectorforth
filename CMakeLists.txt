@@ -19,4 +19,12 @@ add_subdirectory(vectorforth.tests)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(AVX512 OFF CACHE BOOL "Set ON for AVX-512, set OFF for AVX2.")
-set(LOOKUP ON CACHE BOOL "Set ON for sin/cos via lookup tables, set OFF for sin/cos via the vectorclass library.")
+#set(LOOKUP ON CACHE BOOL "Set ON for sin/cos via lookup tables, set OFF for sin/cos via the vectorclass library.")
+#set(SINCOSINLINE
+
+
+set(SINCOS_METHOD "vectorclass" CACHE STRING  "Choose the method to compute sin/cos. Vectorclass is accurate. Inline is least accurate but fastest. ")
+ 
+set_property(CACHE SINCOS_METHOD PROPERTY STRINGS vectorclass lookup inline)
+ 
+message(STATUS "SINCOS_METHOD='${SINCOS_METHOD}'")

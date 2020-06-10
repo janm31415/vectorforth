@@ -828,8 +828,10 @@ struct avx_mathfun : public compile_fixture
 #else
   void test(const compiler_options& ops)
     {
-#ifdef LOOKUP
+#if defined(LOOKUP)
     float tol = 1e-3f;
+#elif defined(SINCOSINLINE)
+    float tol = 1e-2f;
 #else
     float tol = 1e-6f;
 #endif
@@ -1891,8 +1893,11 @@ struct redefine_primitives : public compile_fixture
     {
     c_ops = ops;
     run(": sin 3.1415926535 2 * * sin ; 0.1 sin");
-#ifdef LOOKUP
+
+#if defined(LOOKUP)
     TEST_EQ_CLOSE(0.58778525229f, get_stack_valuef(0), 1e-3f);
+#elif defined(SINCOSINLINE)
+    TEST_EQ_CLOSE(0.58778525229f, get_stack_valuef(0), 1e-2f);
 #else
     TEST_EQ(0.58778525229f, get_stack_valuef(0));
 #endif
