@@ -106,6 +106,89 @@ __m512 _VECTORCALL cos_avx_ps_joris(__m512 x)
   return _mm512_div_ps(top, denom);
   }
 
+__m512 _VECTORCALL sin_avx_ps_bhaskara(__m512 x)
+  {
+  /*
+  Met een kleine wijziging:
+
+  f = (c0+16*c1*x.*(pi-x))./(5*c2*pi^2-4*c3*x.*(pi-x));
+
+  >> c0
+  c0 =  -4.78977024753743e-002
+  >> c1
+  c1 =   1.00218324614673e+000
+  >> c2
+  c2 =   1.00064666060612e+000
+  >> c3
+  c3 =   1.00323330303060e+000
+
+  */
+  const __m512 one_over_twopi = _mm512_set1_ps(1.f / (2.f*PI));
+  const __m512 zero = _mm512_set1_ps(0.f);
+  const __m512 s = _mm512_set1_ps(2.f*PI);
+
+  const __m512 y = _mm512_mul_ps(x, one_over_twopi);
+  const __m512 k = _mm512_round_ps(y, _MM_FROUND_TO_NEAREST_INT);
+  const __m512 f = _mm512_mul_ps(_mm512_sub_ps(y, k), s);
+
+  const uint32_t signbit = 0x80000000;
+  const uint32_t nosignbit = ~signbit;
+  const __m512 sign_bit_mask = _mm512_set1_ps(*reinterpret_cast<const float*>(&signbit));
+  const __m512 no_sign_bit_mask = _mm512_set1_ps(*reinterpret_cast<const float*>(&nosignbit));
+
+  const __m512 fa = _mm512_and_ps(f, no_sign_bit_mask);
+
+  const __m512 sixteen = _mm512_set1_ps(16.f);
+  const __m512 four = _mm512_set1_ps(4.f);
+  const __m512 five_pi_sqr = _mm512_set1_ps(5.f*PI*PI);
+  const __m512 pi = _mm512_set1_ps(PI);
+
+  const __m512 pi_minus_x = _mm512_sub_ps(pi, fa);
+  const __m512 top = _mm512_mul_ps(sixteen, _mm512_mul_ps(fa, pi_minus_x));
+  const __m512 bottom = _mm512_sub_ps(five_pi_sqr, _mm512_mul_ps(four, _mm512_mul_ps(fa, pi_minus_x)));
+
+  const __m512 res = _mm512_div_ps(top, bottom);
+  const __m512 mask = _mm512_cmp_ps(f, zero, 2);
+  const __m512 min_res = _mm512_xor_ps(res, sign_bit_mask);
+
+  return _mm512_blendv_ps(res, min_res, mask);
+  }
+
+__m512 _VECTORCALL cos_avx_ps_bhaskara(__m512 x)
+  {
+  const __m512 xx = _mm512_sub_ps(_mm512_set1_ps(PI / 2.f), x);
+  const __m512 one_over_twopi = _mm512_set1_ps(1.f / (2.f*PI));
+  const __m512 zero = _mm512_set1_ps(0.f);
+  const __m512 s = _mm512_set1_ps(2.f*PI);
+
+  const __m512 y = _mm512_mul_ps(xx, one_over_twopi);
+  const __m512 k = _mm512_round_ps(y, _MM_FROUND_TO_NEAREST_INT);
+  const __m512 f = _mm512_mul_ps(_mm512_sub_ps(y, k), s);
+
+  uint32_t signbit = 0x80000000;
+  uint32_t nosignbit = ~signbit;
+  const __m512 sign_bit_mask = _mm512_set1_ps(*reinterpret_cast<const float*>(&signbit));
+  const __m512 no_sign_bit_mask = _mm512_set1_ps(*reinterpret_cast<const float*>(&nosignbit));
+
+  const __m512 fa = _mm512_and_ps(f, no_sign_bit_mask);
+
+  const __m512 sixteen = _mm512_set1_ps(16.f);
+  const __m512 four = _mm512_set1_ps(4.f);
+  const __m512 five_pi_sqr = _mm512_set1_ps(5.f*PI*PI);
+  const __m512 pi = _mm512_set1_ps(PI);
+
+  const __m512 pi_minus_x = _mm512_sub_ps(pi, fa);
+  const __m512 top = _mm512_mul_ps(sixteen, _mm512_mul_ps(fa, pi_minus_x));
+  const __m512 bottom = _mm512_sub_ps(five_pi_sqr, _mm512_mul_ps(four, _mm512_mul_ps(fa, pi_minus_x)));
+
+  const __m512 res = _mm512_div_ps(top, bottom);
+  const __m512 mask = _mm512_cmp_ps(f, zero, 2);
+  const __m512 min_res = _mm512_xor_ps(res, sign_bit_mask);
+
+  return _mm512_blendv_ps(res, min_res, mask); 
+  }
+
+
 #else
 
 namespace
@@ -182,6 +265,96 @@ __m256 _VECTORCALL cos_avx_ps_joris(__m256 x)
   return _mm256_div_ps(top, denom);
   }
   
+__m256 _VECTORCALL sin_avx_ps_bhaskara(__m256 x)
+  {
+  /*
+  Met een kleine wijziging:
+
+  f = (c0+16*c1*x.*(pi-x))./(5*c2*pi^2-4*c3*x.*(pi-x));
+
+  >> c0
+  c0 =  -4.78977024753743e-002
+  >> c1
+  c1 =   1.00218324614673e+000
+  >> c2
+  c2 =   1.00064666060612e+000
+  >> c3
+  c3 =   1.00323330303060e+000
+
+  */
+  const __m256 one_over_twopi = _mm256_set1_ps(1.f / (2.f*PI));
+  const __m256 zero = _mm256_set1_ps(0.f);
+  const __m256 s = _mm256_set1_ps(2.f*PI);
+  const __m256 y = _mm256_mul_ps(x, one_over_twopi);
+  const __m256 k = _mm256_round_ps(y, _MM_FROUND_TO_NEAREST_INT);
+  const __m256 f = _mm256_mul_ps(_mm256_sub_ps(y, k), s);
+  const uint32_t signbit = 0x80000000;
+  const uint32_t nosignbit = ~signbit;
+  const __m256 sign_bit_mask = _mm256_set1_ps(*reinterpret_cast<const float*>(&signbit));
+  const __m256 no_sign_bit_mask = _mm256_set1_ps(*reinterpret_cast<const float*>(&nosignbit));
+  const __m256 fa = _mm256_and_ps(f, no_sign_bit_mask);
+  const __m256 sixteen = _mm256_set1_ps(16.f);
+  const __m256 four = _mm256_set1_ps(4.f);
+  const __m256 five_pi_sqr = _mm256_set1_ps(5.f*PI*PI);
+  const __m256 pi = _mm256_set1_ps(PI);
+  const __m256 pi_minus_x = _mm256_sub_ps(pi, fa);
+  const __m256 top = _mm256_mul_ps(sixteen, _mm256_mul_ps(fa, pi_minus_x));
+  const __m256 bottom = _mm256_sub_ps(five_pi_sqr, _mm256_mul_ps(four, _mm256_mul_ps(fa, pi_minus_x)));  
+  const __m256 res = _mm256_div_ps(top, bottom);
+  const __m256 mask = _mm256_cmp_ps(f, zero, 2);
+  const __m256 min_res = _mm256_xor_ps(res, sign_bit_mask);
+
+  return _mm256_blendv_ps(res, min_res, mask);
+  }
+
+__m256 _VECTORCALL cos_avx_ps_bhaskara(__m256 x)
+  {
+  const __m256 xx = _mm256_sub_ps(_mm256_set1_ps(PI / 2.f), x);
+  const __m256 one_over_twopi = _mm256_set1_ps(1.f / (2.f*PI));
+  const __m256 zero = _mm256_set1_ps(0.f);
+  const __m256 s = _mm256_set1_ps(2.f*PI);
+  const __m256 y = _mm256_mul_ps(xx, one_over_twopi);
+  const __m256 k = _mm256_round_ps(y, _MM_FROUND_TO_NEAREST_INT);
+  const __m256 f = _mm256_mul_ps(_mm256_sub_ps(y, k), s);
+  const uint32_t signbit = 0x80000000;
+  const uint32_t nosignbit = ~signbit;
+  const __m256 sign_bit_mask = _mm256_set1_ps(*reinterpret_cast<const float*>(&signbit));
+  const __m256 no_sign_bit_mask = _mm256_set1_ps(*reinterpret_cast<const float*>(&nosignbit));
+  const __m256 fa = _mm256_and_ps(f, no_sign_bit_mask);
+  const __m256 sixteen = _mm256_set1_ps(16.f);
+  const __m256 four = _mm256_set1_ps(4.f);
+  const __m256 five_pi_sqr = _mm256_set1_ps(5.f*PI*PI);
+  const __m256 pi = _mm256_set1_ps(PI);
+  const __m256 pi_minus_x = _mm256_sub_ps(pi, fa);
+  const __m256 top = _mm256_mul_ps(sixteen, _mm256_mul_ps(fa, pi_minus_x));
+  const __m256 bottom = _mm256_sub_ps(five_pi_sqr, _mm256_mul_ps(four, _mm256_mul_ps(fa, pi_minus_x)));
+  const __m256 res = _mm256_div_ps(top, bottom);
+  const __m256 mask = _mm256_cmp_ps(f, zero, 2);
+  const __m256 min_res = _mm256_xor_ps(res, sign_bit_mask);
+
+  return _mm256_blendv_ps(res, min_res, mask);
+  /*
+  __m256 one_over_twopi = _mm256_set1_ps(1.f / (2.f*PI));
+  __m256 zero = _mm256_set1_ps(0.f);
+  __m256 s = _mm256_set1_ps(2.f*PI);
+
+  __m256 y = _mm256_mul_ps(x, one_over_twopi);
+  __m256 k = _mm256_round_ps(y, _MM_FROUND_TO_NEAREST_INT);
+  __m256 f = _mm256_mul_ps(_mm256_sub_ps(y, k), s);
+
+  __m256 ff = _mm256_mul_ps(f, f);
+
+  __m256 four = _mm256_set1_ps(4.f);
+  __m256 pisqr = _mm256_set1_ps(PI*PI);  
+
+
+  __m256 top = _mm256_sub_ps(pisqr, _mm256_mul_ps(four, ff));
+  __m256 bottom = _mm256_add_ps(pisqr, ff);
+
+  return _mm256_div_ps(top, bottom);  
+  */
+  }
+
 #endif
 
 VF_END

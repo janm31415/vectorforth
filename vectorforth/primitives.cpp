@@ -436,7 +436,7 @@ void primitive_sin(asmcode& code, compile_data&)
 #if defined(SINCOSLOOKUP)
   code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps_lookup);
 #elif defined(SINCOSAPPROX)
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps_joris);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps_bhaskara);
 #else
   code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&sin_avx_ps);
 #endif
@@ -469,7 +469,7 @@ void primitive_cos(asmcode& code, compile_data&)
 #if defined(SINCOSLOOKUP)
   code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps_lookup);
 #elif defined(SINCOSAPPROX)
-  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps_joris);
+  code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps_bhaskara);
 #else
   code.add(asmcode::MOV, asmcode::R11, asmcode::NUMBER, (uint64_t)&cos_avx_ps);
 #endif

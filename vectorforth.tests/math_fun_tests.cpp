@@ -64,6 +64,20 @@ void test_cos_joris(float value, float tol = 1e-3f)
   TEST_EQ_CLOSE(expected, res, tol);
   }
 
+void test_sin_bhaskara(float value, float tol = 1e-3f)
+  {
+  float res = get_avx2_f32(sin_avx_ps_bhaskara(set_float(value)), 0);
+  float expected = std::sin(value);
+  TEST_EQ_CLOSE(expected, res, tol);
+  }
+
+void test_cos_bhaskara(float value, float tol = 1e-3f)
+  {
+  float res = get_avx2_f32(cos_avx_ps_bhaskara(set_float(value)), 0);
+  float expected = std::cos(value);
+  TEST_EQ_CLOSE(expected, res, tol);
+  }
+
 void test_cos_lookup(float value, float tol = 1e-3f)
   {
   float res = get_avx2_f32(cos_avx_ps_lookup(set_float(value)), 0);
@@ -84,6 +98,10 @@ void test_trigonometric_lookup()
     test_sin_joris(-f, 0.01);
     test_cos_joris(f, 0.01);
     test_cos_joris(-f, 0.01);
+    test_sin_bhaskara(f, 0.01);
+    test_sin_bhaskara(-f, 0.01);
+    test_cos_bhaskara(f, 0.003);
+    test_cos_bhaskara(-f, 0.003);
     }
   }
 
