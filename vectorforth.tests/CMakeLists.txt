@@ -50,10 +50,6 @@ if (${SINCOS_METHOD} STREQUAL "approximate")
 add_definitions(-DSINCOSAPPROX)
 endif (${SINCOS_METHOD} STREQUAL "approximate")
 
-if (${SINCOS_METHOD} STREQUAL "inline")
-add_definitions(-DSINCOSINLINE)
-endif (${SINCOS_METHOD} STREQUAL "inline")
-
 add_executable(vectorforth.tests ${HDRS} ${SRCS})
 source_group("Header Files" FILES ${hdrs})
 source_group("Source Files" FILES ${srcs})

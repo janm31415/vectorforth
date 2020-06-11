@@ -33,8 +33,6 @@ void primitive_complex_mul(ASM::asmcode& code, compile_data& cd);
 void primitive_complex_add(ASM::asmcode& code, compile_data& cd);
 void primitive_complex_sub(ASM::asmcode& code, compile_data& cd);
 void primitive_div(ASM::asmcode& code, compile_data&);
-void primitive_sin_inline(ASM::asmcode& code, compile_data&);
-void primitive_cos_inline(ASM::asmcode& code, compile_data&);
 void primitive_sin(ASM::asmcode& code, compile_data&);
 void primitive_cos(ASM::asmcode& code, compile_data&);
 void primitive_tan(ASM::asmcode& code, compile_data&);

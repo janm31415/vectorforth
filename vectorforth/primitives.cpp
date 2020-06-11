@@ -295,131 +295,6 @@ void primitive_twoswap(asmcode& code, compile_data&)
   code.add(asmcode::COMMENT, "END PRIMITIVE 2swap");
   }
 
-void primitive_sin_inline(asmcode& code, compile_data&)
-  {
-  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE sin inline");
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-
-  float one_over_twopi = 1.f / (2.f*3.1415926535897f);
-  uint32_t v = *(reinterpret_cast<uint32_t*>(&one_over_twopi));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
-
-  float two = 2.f;
-  v = *(reinterpret_cast<uint32_t*>(&two));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG2, DWORD_MEM_STACK_REGISTER);
-
-  float a0 = 3.21670175718844e+000;
-  float a2 = -3.23395890594424e+000;
-  float b0 = 1.00000000000000e+000;
-  float b2 = 8.53391292646496e-001;
-
-  v = *(reinterpret_cast<uint32_t*>(&a0));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG3, DWORD_MEM_STACK_REGISTER);
-  v = *(reinterpret_cast<uint32_t*>(&a2));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG4, DWORD_MEM_STACK_REGISTER);
-  v = *(reinterpret_cast<uint32_t*>(&b0));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG5, DWORD_MEM_STACK_REGISTER);
-  v = *(reinterpret_cast<uint32_t*>(&b2));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG6, DWORD_MEM_STACK_REGISTER);
-
-  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
-
-#ifdef AVX512
-  code.add(asmcode::VRNDSCALEPS, AVX_REG1, AVX_REG0, asmcode::NUMBER, 0 + 8);
-#else
-  code.add(asmcode::VROUNDPS, AVX_REG1, AVX_REG0, asmcode::NUMBER, 0);
-#endif
-
-  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG2);
-  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG0, AVX_REG0);
-
-  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG1, AVX_REG4);
-  code.add(asmcode::VADDPS, AVX_REG2, AVX_REG2, AVX_REG3);
-  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG2);
-
-  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG1, AVX_REG6);
-  code.add(asmcode::VADDPS, AVX_REG2, AVX_REG2, AVX_REG5);
-
-  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG2);
-
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
-  code.add(asmcode::COMMENT, "END PRIMITIVE sin inline");
-  }
-
-void primitive_cos_inline(asmcode& code, compile_data&)
-  {
-
-  code.add(asmcode::COMMENT, "BEGIN PRIMITIVE cos inline");
-  code.add(asmcode::VMOVAPS, AVX_REG0, MEM_STACK_REGISTER);
-
-  float pi_over_two = 3.1415926535897f/2.f;
-  uint32_t v = *(reinterpret_cast<uint32_t*>(&pi_over_two));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
-
-  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG1, AVX_REG0);
-
-  float one_over_twopi = 1.f / (2.f*3.1415926535897f);
-  v = *(reinterpret_cast<uint32_t*>(&one_over_twopi));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER);
-
-  float two = 2.f;
-  v = *(reinterpret_cast<uint32_t*>(&two));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG2, DWORD_MEM_STACK_REGISTER);
-
-  float a0 = 3.21670175718844e+000;
-  float a2 = -3.23395890594424e+000;
-  float b0 = 1.00000000000000e+000;
-  float b2 = 8.53391292646496e-001;
-
-  v = *(reinterpret_cast<uint32_t*>(&a0));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG3, DWORD_MEM_STACK_REGISTER);
-  v = *(reinterpret_cast<uint32_t*>(&a2));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG4, DWORD_MEM_STACK_REGISTER);
-  v = *(reinterpret_cast<uint32_t*>(&b0));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG5, DWORD_MEM_STACK_REGISTER);
-  v = *(reinterpret_cast<uint32_t*>(&b2));
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, asmcode::NUMBER, v);
-  code.add(asmcode::VBROADCASTSS, AVX_REG6, DWORD_MEM_STACK_REGISTER);
-
-  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG1);
-
-#ifdef AVX512
-  code.add(asmcode::VRNDSCALEPS, AVX_REG1, AVX_REG0, asmcode::NUMBER, 0 + 8);
-#else
-  code.add(asmcode::VROUNDPS, AVX_REG1, AVX_REG0, asmcode::NUMBER, 0);
-#endif
-
-  code.add(asmcode::VSUBPS, AVX_REG0, AVX_REG0, AVX_REG1);
-  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG2);
-  code.add(asmcode::VMULPS, AVX_REG1, AVX_REG0, AVX_REG0);
-
-  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG1, AVX_REG4);
-  code.add(asmcode::VADDPS, AVX_REG2, AVX_REG2, AVX_REG3);
-  code.add(asmcode::VMULPS, AVX_REG0, AVX_REG0, AVX_REG2);
-
-  code.add(asmcode::VMULPS, AVX_REG2, AVX_REG1, AVX_REG6);
-  code.add(asmcode::VADDPS, AVX_REG2, AVX_REG2, AVX_REG5);
-
-  code.add(asmcode::VDIVPS, AVX_REG0, AVX_REG0, AVX_REG2);
-
-  code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, AVX_REG0);
-  code.add(asmcode::COMMENT, "END PRIMITIVE cos inline");
-
-  }
-
 void primitive_sin(asmcode& code, compile_data&)
   {
   code.add(asmcode::COMMENT, "BEGIN PRIMITIVE sin");
@@ -2739,14 +2614,8 @@ prim_map generate_primitives_map()
   pm.insert(std::pair<std::string, prim_fun>("2swap", &primitive_twoswap));
   pm.insert(std::pair<std::string, prim_fun>("min", &primitive_min));
   pm.insert(std::pair<std::string, prim_fun>("max", &primitive_max));
-
-#ifdef SINCOSINLINE
-  pm.insert(std::pair<std::string, prim_fun>("sin", &primitive_sin_inline));
-  pm.insert(std::pair<std::string, prim_fun>("cos", &primitive_cos_inline));
-#else
   pm.insert(std::pair<std::string, prim_fun>("sin", &primitive_sin));
   pm.insert(std::pair<std::string, prim_fun>("cos", &primitive_cos));
-#endif
   pm.insert(std::pair<std::string, prim_fun>("tan", &primitive_tan));
   pm.insert(std::pair<std::string, prim_fun>("exp", &primitive_exp));
   pm.insert(std::pair<std::string, prim_fun>("log", &primitive_log));

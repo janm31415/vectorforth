@@ -728,10 +728,8 @@ struct avx_mathfun : public compile_fixture
     {
 #if defined(SINCOSLOOKUP)
     float tol = 1e-3f;
-#elif defined(SINCOSINLINE)
-    float tol = 1e-2f;
 #elif defined(SINCOSAPPROX)
-    float tol = 1e-2f;
+    float tol = 0.003f;
 #else
     float tol = 1e-6f;
 #endif
@@ -834,10 +832,8 @@ struct avx_mathfun : public compile_fixture
     {
 #if defined(SINCOSLOOKUP)
     float tol = 1e-3f;
-#elif defined(SINCOSINLINE)
-    float tol = 1e-2f;
 #elif defined(SINCOSAPPROX)
-    float tol = 1e-2f;
+    float tol = 0.003f;
 #else
     float tol = 1e-6f;
 #endif
@@ -1902,10 +1898,8 @@ struct redefine_primitives : public compile_fixture
 
 #if defined(SINCOSLOOKUP)
     TEST_EQ_CLOSE(0.58778525229f, get_stack_valuef(0), 1e-3f);
-#elif defined(SINCOSINLINE)
-    TEST_EQ_CLOSE(0.58778525229f, get_stack_valuef(0), 1e-2f);
 #elif defined(SINCOSAPPROX)
-    TEST_EQ_CLOSE(0.58778525229f, get_stack_valuef(0), 1e-2f);
+    TEST_EQ_CLOSE(0.58778525229f, get_stack_valuef(0), 0.003f);
 #else
     TEST_EQ(0.58778525229f, get_stack_valuef(0));
 #endif
