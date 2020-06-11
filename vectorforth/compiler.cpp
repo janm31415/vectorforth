@@ -428,11 +428,20 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       uint32_t v1 = *(reinterpret_cast<uint32_t*>(&word.f[1]));
       uint32_t v2 = *(reinterpret_cast<uint32_t*>(&word.f[0]));     
       code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::NUMBER, v1);
-      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
-      code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1));
-      code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4);
-      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(1), AVX_REG1);
-      code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(2), AVX_REG0);
+      if (v2 == v1)
+        {
+        code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1));
+        code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(1), AVX_REG0);
+        code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(2), AVX_REG0);
+        }
+      else
+        {
+        code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
+        code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1));
+        code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4);
+        code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(1), AVX_REG1);
+        code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, -AVX_CELLS(2), AVX_REG0);
+        }
       code.add(asmcode::SUB, STACK_REGISTER, asmcode::NUMBER, AVX_CELLS(2));
       code.add(asmcode::COMMENT, "END PUSH TWO FLOATS ON THE STACK");
       break;
@@ -443,12 +452,30 @@ void compile_words(asmcode& code, compile_data& cd, std::vector<expanded_token>&
       uint32_t v1 = *(reinterpret_cast<uint32_t*>(&word.f[2]));
       uint32_t v2 = *(reinterpret_cast<uint32_t*>(&word.f[1]));
       uint32_t v3 = *(reinterpret_cast<uint32_t*>(&word.f[0]));
-      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1), asmcode::NUMBER, v1);
-      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
-      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1) - 8, asmcode::NUMBER, v3);
-      code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1));
-      code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1) - 4);
-      code.add(asmcode::VBROADCASTSS, AVX_REG2, DWORD_MEM_STACK_REGISTER, - AVX_CELLS(1) - 8);
+      code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::NUMBER, v1);
+      code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1));
+      if (v1 == v2)
+        {
+        code.add(asmcode::VMOVAPS, AVX_REG1, AVX_REG0);
+        }
+      else
+        {
+        code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
+        code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4);
+        }
+      if (v1 == v3)
+        {
+        code.add(asmcode::VMOVAPS, AVX_REG2, AVX_REG0);
+        }
+      else if (v2 == v3)
+        {
+        code.add(asmcode::VMOVAPS, AVX_REG2, AVX_REG1);
+        }
+      else
+        {
+        code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8, asmcode::NUMBER, v3);
+        code.add(asmcode::VBROADCASTSS, AVX_REG2, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8);
+        }
       code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, - AVX_CELLS(1), AVX_REG2);
       code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, - AVX_CELLS(2), AVX_REG1);
       code.add(asmcode::VMOVAPS, MEM_STACK_REGISTER, - AVX_CELLS(3), AVX_REG0);

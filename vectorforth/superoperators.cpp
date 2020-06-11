@@ -1983,12 +1983,39 @@ void superoperator_float_float_float_var_vec3store(ASM::asmcode& code, const exp
   uint32_t v1 = *(reinterpret_cast<const uint32_t*>(&et.f[2]));
   uint32_t v2 = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
   uint32_t v3 = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
+  /*
   code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::NUMBER, v1);
   code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
   code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8, asmcode::NUMBER, v3);
   code.add(asmcode::VBROADCASTSS, AVX_REG2, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1));
   code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4);
   code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8);
+  */
+  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::NUMBER, v1);
+  code.add(asmcode::VBROADCASTSS, AVX_REG2, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1));
+  if (v1 == v2)
+    {
+    code.add(asmcode::VMOVAPS, AVX_REG1, AVX_REG2);
+    }
+  else
+    {
+    code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
+    code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4);
+    }
+  if (v1 == v3)
+    {
+    code.add(asmcode::VMOVAPS, AVX_REG0, AVX_REG2);
+    }
+  else if (v2 == v3)
+    {
+    code.add(asmcode::VMOVAPS, AVX_REG0, AVX_REG1);
+    }
+  else
+    {
+    code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8, asmcode::NUMBER, v3);
+    code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 8);
+    }
+
   code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
   if (et.variable_address)
     code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, et.variable_address);
@@ -2006,9 +2033,17 @@ void superoperator_float_float_var_vec2store(ASM::asmcode& code, const expanded_
   uint32_t v1 = *(reinterpret_cast<const uint32_t*>(&et.f[1]));
   uint32_t v2 = *(reinterpret_cast<const uint32_t*>(&et.f[0]));
   code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1), asmcode::NUMBER, v1);
-  code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
   code.add(asmcode::VBROADCASTSS, AVX_REG1, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1));
-  code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4);
+
+  if (v1 == v2)
+    {
+    code.add(asmcode::VMOVAPS, AVX_REG0, AVX_REG1);
+    }
+  else
+    {
+    code.add(asmcode::MOV, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4, asmcode::NUMBER, v2);
+    code.add(asmcode::VBROADCASTSS, AVX_REG0, DWORD_MEM_STACK_REGISTER, -AVX_CELLS(1) - 4);
+    }
   code.add(asmcode::MOV, asmcode::RAX, CONSTANT_SPACE_POINTER);
   if (et.variable_address)
     code.add(asmcode::ADD, asmcode::RAX, asmcode::NUMBER, et.variable_address);
