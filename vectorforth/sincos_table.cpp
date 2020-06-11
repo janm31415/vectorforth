@@ -128,7 +128,7 @@ __m512 _VECTORCALL sin_avx_ps_bhaskara(__m512 x)
   const __m512 s = _mm512_set1_ps(2.f*PI);
 
   const __m512 y = _mm512_mul_ps(x, one_over_twopi);
-  const __m512 k = _mm512_round_ps(y, _MM_FROUND_TO_NEAREST_INT);
+  const __m512 k = _mm512_roundscale_ps(y, _MM_FROUND_TO_NEAREST_INT);
   const __m512 f = _mm512_mul_ps(_mm512_sub_ps(y, k), s);
 
   const uint32_t signbit = 0x80000000;
@@ -148,10 +148,10 @@ __m512 _VECTORCALL sin_avx_ps_bhaskara(__m512 x)
   const __m512 bottom = _mm512_sub_ps(five_pi_sqr, _mm512_mul_ps(four, _mm512_mul_ps(fa, pi_minus_x)));
 
   const __m512 res = _mm512_div_ps(top, bottom);
-  const __m512 mask = _mm512_cmp_ps(f, zero, 2);
+  const __mmask16 mask = _mm512_cmp_ps_mask(f, zero, 2);
   const __m512 min_res = _mm512_xor_ps(res, sign_bit_mask);
 
-  return _mm512_blendv_ps(res, min_res, mask);
+  return _mm512_mask_blend_ps(mask, res, min_res);
   }
 
 __m512 _VECTORCALL cos_avx_ps_bhaskara(__m512 x)
@@ -162,7 +162,7 @@ __m512 _VECTORCALL cos_avx_ps_bhaskara(__m512 x)
   const __m512 s = _mm512_set1_ps(2.f*PI);
 
   const __m512 y = _mm512_mul_ps(xx, one_over_twopi);
-  const __m512 k = _mm512_round_ps(y, _MM_FROUND_TO_NEAREST_INT);
+  const __m512 k = _mm512_roundscale_ps(y, _MM_FROUND_TO_NEAREST_INT);
   const __m512 f = _mm512_mul_ps(_mm512_sub_ps(y, k), s);
 
   uint32_t signbit = 0x80000000;
@@ -182,10 +182,10 @@ __m512 _VECTORCALL cos_avx_ps_bhaskara(__m512 x)
   const __m512 bottom = _mm512_sub_ps(five_pi_sqr, _mm512_mul_ps(four, _mm512_mul_ps(fa, pi_minus_x)));
 
   const __m512 res = _mm512_div_ps(top, bottom);
-  const __m512 mask = _mm512_cmp_ps(f, zero, 2);
+  const __mmask16 mask = _mm512_cmp_ps_mask(f, zero, 2);
   const __m512 min_res = _mm512_xor_ps(res, sign_bit_mask);
 
-  return _mm512_blendv_ps(res, min_res, mask); 
+  return _mm512_mask_blend_ps(mask, res, min_res);
   }
 
 
