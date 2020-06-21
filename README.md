@@ -25,6 +25,13 @@ Other dependencies, which are delivered with the code, are
   - Agner Fog's vectorclass (https://github.com/vectorclass/version2)
   - ocornut's dear imgui (https://github.com/ocornut/imgui)
   - nlohmann's json (https://github.com/nlohmann/json)
+  
+## The shader
+
+I've mainly used vectorforth as a test to see what the performance of a CPU is when you let it do embarrassingly parallel GPU tasks, such as writing a shader. The most basic shader application is `sf`
+
+
+![](images/happy_jumper.png)
 
 ## Memory
 
