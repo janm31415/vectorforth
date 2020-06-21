@@ -4,6 +4,11 @@ SIMD vectorized Forth compiler with CPU based shader application
 ## Building
 
 I have tested vectorforth on Windows 10 using Visual Studio 2017, and on Ubuntu 18.04.4 with gcc 7.5.0.
+You best use CMake to generate a solution file or makefile.
+
+There are 2 options to choose from when compiling:
+  - If your computer can handle it, choose AVX-512, as it will perform faster than AVX2.
+  - Computation of sine and cosine can be (as good as) exact or approximate. If you want to see the shader examples, `approximate` is a good choice as it is faster, and the loss of accuracy is not visible in the shader images. If you want the highest accuracy for sine and cosine, then choose `vectorclass`.
 
 Not all external dependencies are delivered with this code. The compiler vectorforth itself should build fine, but the sample applications sf and shaderforth both depend on [Intel's TBB library](https://software.intel.com/content/www/us/en/develop/tools/threading-building-blocks.html), and shaderforth also depends on [SDL2](https://www.libsdl.org/download-2.0.php). Both TBB and SDL2 are not delivered with the code and thus need to be installed by the user.
 
@@ -28,10 +33,43 @@ Other dependencies, which are delivered with the code, are
   
 ## The shader
 
-I've mainly used vectorforth as a test to see what the performance of a CPU is when you let it do embarrassingly parallel GPU tasks, such as writing a shader. The most basic shader application is `sf`
+I've mainly used vectorforth as a test to see what the performance of a CPU is when you let it do embarrassingly parallel GPU tasks, such as writing a shader. The most basic shader application is `sf` which has only a dependency on `TBB`. The other application is `shaderforth` which, apart from `TBB`, also depends on `SDL2` and `imgui`. Both `sf` and `shaderforth` have the same functionality, but `sf` is a command line tool, and `shaderforth` has a gui.
+
+To run a shader you have to provide the shader code in vectorforth. There are some example vectorforth shaders in subfolder shaderforth/examples. One of the examples that is good to start with (`iq_tutorial.4th`) is based on a tutorial by Inigo Quilez ( see https://www.youtube.com/watch?v=0ifChJ0nJfM). The vectorforth code looks like:
+
+    : qx u 0.33 - ;
+    : qy v 0.7 - ;
+
+    : dist-to-center qx dup * qy dup * + sqrt ;
+
+    : r 0.2 0.1 qy qx atan2 10 * qx 20 * + 1 + cos * +;
+
+    : factor r 0.01 r + dist-to-center smoothstep ;
 
 
-![](images/happy_jumper.png)
+    : r2 0.01 120 qy * cos 0.002 * + -40 v * exp +;
+
+    : factor2 1 
+          1 r2 0.01 r2 + qx 0.25 2 qy * sin * - abs smoothstep - 
+          1 0 0.1 qy smoothstep - 
+          * -  ;
+
+    factor factor2 *
+    dup dup
+    0.4 0.8 v sqrt mix * swap
+    0.1 0.3 v sqrt mix *
+
+The shader generates the following image.
+![](images/palmtree.png)
+
+
+I've also reworked the tutorial by Inigo Quilez on the Happy Jumper shader (https://www.youtube.com/watch?v=Cfe5UQ-1L9Q) to vectorforth. Currently I've processed the first three steps in the tutorial, see scripts `sphere.4th`, `guy.4th`, and `guy2.4th` with corresponding images below. I'll probably not work through steps 4 and 5, as step 3 currently has 10 FPS on my pc, so steps 4/5 will be too slow on the CPU.
+
+![](images/happy_jumper_step1.png)
+![](images/happy_jumper_step2.png)
+![](images/happy_jumper_step3.png)
+
+The other examples in subfolder shaderforth/examples are mainly taken from the website https://forthsalon.appspot.com/. The author and link to the original shader are always mentioned in the `4th` script.
 
 ## Memory
 
