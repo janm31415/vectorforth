@@ -33,7 +33,7 @@ Other dependencies, which are delivered with the code, are
   
 ## The shader
 
-I've mainly used vectorforth as a test to see what the performance of a CPU is when you let it do embarrassingly parallel GPU tasks, such as writing a shader. The most basic shader application is `sf` which has only a dependency on `TBB`. The other application is `shaderforth` which, apart from `TBB`, also depends on `SDL2` and `imgui`. Both `sf` and `shaderforth` have the same functionality, but `sf` is a command line tool, and `shaderforth` has a gui.
+I've mainly used vectorforth as a test to see what the performance of a CPU is when you let it do embarrassingly parallel GPU tasks, such as writing a shader [(watch here)](https://youtu.be/X5ZvD8SHmVI). The most basic shader application is `sf` which has only a dependency on `TBB`. The other application is `shaderforth` which, apart from `TBB`, also depends on `SDL2` and `imgui`. Both `sf` and `shaderforth` have the same functionality, but `sf` is a command line tool, and `shaderforth` has a gui.
 
 To run a shader you have to provide the shader code in vectorforth. There are some example vectorforth shaders in subfolder shaderforth/examples. One of the examples that is good to start with (`iq_tutorial.4th`) is based on a tutorial by Inigo Quilez ( see https://www.youtube.com/watch?v=0ifChJ0nJfM). The vectorforth code looks like:
 
@@ -68,6 +68,8 @@ I've also reworked the tutorial by Inigo Quilez on the Happy Jumper shader (http
 ![](images/happy_jumper_step1.png)
 ![](images/happy_jumper_step2.png)
 ![](images/happy_jumper_step3.png)
+
+You can also [watch the video](https://youtu.be/X5ZvD8SHmVI) on YouTube.
 
 The other examples in subfolder shaderforth/examples are mainly taken from the website https://forthsalon.appspot.com/. The author and link to the original shader are always mentioned in the `4th` script.
 
