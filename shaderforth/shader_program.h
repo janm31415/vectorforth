@@ -6,7 +6,11 @@
 #include <string>
 #include <stdint.h>
 
-#include <tbb/enumerable_thread_specific.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#include <jtk/concurrency.h>
 
 #include <vectorforth/context.h>
 
@@ -33,5 +37,5 @@ class shader_program
     typedef void(*fun_ptr)(void*);
     fun_ptr _fun;
 
-    tbb::enumerable_thread_specific< VF::context > local_context;
+    jtk::combinable< VF::context > local_context;
   };

@@ -16,8 +16,7 @@
 #include <vectorforth/stdlib.h>
 #include <vectorforth/sincos_table.h>
 
-#include <tbb/parallel_for.h>
-#include <tbb/enumerable_thread_specific.h>
+#include <jtk/concurrency.h>
 
 #include "window.h"
 
@@ -282,7 +281,7 @@ int main(int argc, char** argv)
   int frame = 0;
   auto last_tic = std::chrono::high_resolution_clock::now();
   float time = 0.f;
-  tbb::enumerable_thread_specific< VF::context > local_context;
+  jtk::combinable< VF::context > local_context;
 
   while (!l.quit)
     {
@@ -318,7 +317,7 @@ int main(int argc, char** argv)
 #ifdef SINGLE
     for (int y = 0; y < h; ++y)
 #else
-    tbb::parallel_for((int)0, h, [&](int y)    
+    jtk::parallel_for((int)0, h, [&](int y)    
 #endif
       {
 
@@ -463,10 +462,11 @@ int main(int argc, char** argv)
 
   _mm_free(image);
 
-  for (auto& ctxt : local_context)
+  local_context.combine_each([](VF::context& ctxt)
     {
     VF::destroy_context(ctxt);
-    }
+    });
+
   ASM::free_assembled_function((void*)fun, fun_size);
 
   printf("\n");

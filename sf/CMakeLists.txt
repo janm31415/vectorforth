@@ -10,6 +10,12 @@ if (UNIX)
   set(OPENGL_LIBRARIES "/usr/lib/x86_64-linux-gnu/libOpenGL.so.0.0.0")
 endif (UNIX)
 
+if (APPLE)
+  set(TBB_INCLUDE_DIR "")
+  set(TBB_LIBRARIES "")
+  set(OPENGL_LIBRARIES "/System/Library/Frameworks/OpenGL.framework/OpenGL")
+endif (APPLE)
+
 set(HDRS
 window.h
     )
@@ -50,17 +56,30 @@ if (${SINCOS_METHOD} STREQUAL "approximate")
 add_definitions(-DSINCOSAPPROX)
 endif (${SINCOS_METHOD} STREQUAL "approximate")
 
+if (${JTK_THREADING} STREQUAL "tbb")
+add_definitions(-D_ENABLE_TBB)
+endif (${JTK_THREADING} STREQUAL "tbb")
+
+if (${JTK_THREADING} STREQUAL "ppl")
+add_definitions(-D_ENABLE_PPL)
+endif (${JTK_THREADING} STREQUAL "ppl")
+
+if (${JTK_THREADING} STREQUAL "std")
+add_definitions(-D_ENABLE_THREADS)
+endif (${JTK_THREADING} STREQUAL "std")
+
 add_executable(sf ${HDRS} ${SRCS})
 source_group("Header Files" FILES ${hdrs})
 source_group("Source Files" FILES ${srcs})
-
+    
+if (WIN32)	
  target_include_directories(sf
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../
+    ${CMAKE_CURRENT_SOURCE_DIR}/../jtk/
     ${TBB_INCLUDE_DIR}
     )	
-    
-if (WIN32)	
+
 target_link_libraries(sf
     PRIVATE
     asm
@@ -70,11 +89,28 @@ target_link_libraries(sf
 endif (WIN32)    
 
 if (UNIX)	
+
+set(XLIBINCLUDE "")
+set(XLIBLIBRARY "X11.so")
+
+if (APPLE)
+set(XLIBINCLUDE "/usr/X11/include/")
+set(XLIBLIBRARY "/usr/X11/lib/libX11.dylib")
+endif (APPLE)
+
 target_link_libraries(sf
     PRIVATE
     asm
     vectorforth
-    X11.so
+    ${TBB_LIBRARIES}    
+    ${XLIBINCLUDE}
+    )
+
+target_link_libraries(sf
+    PRIVATE
+    asm
+    vectorforth
+    ${XLIBLIBRARY}
     ${TBB_LIBRARIES}    
     )
 endif (UNIX)

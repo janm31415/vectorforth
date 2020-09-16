@@ -5,8 +5,7 @@
 
 #include <sstream>
 
-#include <tbb/parallel_for.h>
-#include <tbb/enumerable_thread_specific.h>
+#include <jtk/concurrency.h>
 
 #include <vectorforth/context.h>
 #include <vectorforth/compiler.h>
@@ -98,10 +97,10 @@ shader_program::shader_program(int w, int h) : _w(w), _h(h), _fun_size(0), _fun(
 
 shader_program::~shader_program()
   {  
-  for (auto& ctxt : local_context)
+  local_context.combine_each([](VF::context& ctxt)
     {
     VF::destroy_context(ctxt);
-    }
+    });
   if (_fun)
     ASM::free_assembled_function((void*)_fun, _fun_size);
   }
@@ -233,7 +232,7 @@ void shader_program::run(image<uint32_t>& im)
   __m256 global_time_val = _mm256_set1_ps(_input.global_time);
 #endif
 
-  tbb::parallel_for((int)0, _h, [&](int y)
+  jtk::parallel_for((int)0, _h, [&](int y)
     {
 
     uint32_t* p_im = im.data() + y * _w;

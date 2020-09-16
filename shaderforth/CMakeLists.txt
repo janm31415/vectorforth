@@ -14,6 +14,14 @@ if (UNIX)
   set(OPENGL_LIBRARIES "/usr/lib/x86_64-linux-gnu/libOpenGL.so.0.0.0")
 endif (UNIX)
 
+if (APPLE)
+  set(SDL_INCLUDE_DIR "/Library/Frameworks/SDL2.framework/Headers/")
+  set(SDL_LIBRARIES "/Library/Frameworks/SDL2.framework/SDL2")
+  set(TBB_INCLUDE_DIR "")
+  set(TBB_LIBRARIES "")
+  set(OPENGL_LIBRARIES "/System/Library/Frameworks/OpenGL.framework/OpenGL")
+endif (APPLE)
+
 set(IMGUI
 ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/imgui_sdl/imgui.h
 ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/imgui_sdl/imgui_impl_opengl2.h
@@ -62,10 +70,10 @@ set(CMAKE_CXX_FLAGS_RELEASE "/W4 /MP /GF /O2 /Ob2 /Oi /Ot /MD /Zi")
 endif (WIN32)
 
 if (UNIX)
-set(CMAKE_C_FLAGS_DEBUG "-mavx2 -mfma")
-set(CMAKE_CXX_FLAGS_DEBUG "-mavx2 -mfma")
-set(CMAKE_C_FLAGS_RELEASE "-mavx2 -mfma")
-set(CMAKE_CXX_FLAGS_RELEASE "-mavx2 -mfma")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -mavx2 -mfma -pthread")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mavx2 -mfma -pthread")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -mavx2 -mfma -pthread")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mavx2 -mfma -pthread")
 endif (UNIX)
 
 # general build definitions
@@ -84,6 +92,18 @@ if (${SINCOS_METHOD} STREQUAL "approximate")
 add_definitions(-DSINCOSAPPROX)
 endif (${SINCOS_METHOD} STREQUAL "approximate")
 
+if (${JTK_THREADING} STREQUAL "tbb")
+add_definitions(-D_ENABLE_TBB)
+endif (${JTK_THREADING} STREQUAL "tbb")
+
+if (${JTK_THREADING} STREQUAL "ppl")
+add_definitions(-D_ENABLE_PPL)
+endif (${JTK_THREADING} STREQUAL "ppl")
+
+if (${JTK_THREADING} STREQUAL "std")
+add_definitions(-D_ENABLE_THREADS)
+endif (${JTK_THREADING} STREQUAL "std")
+
 if (WIN32)
 add_executable(shaderforth WIN32 ${HDRS} ${SRCS} ${IMGUI} ${JSON})
 endif (WIN32)
@@ -100,6 +120,7 @@ source_group("ThirdParty/json" FILES ${JSON})
  target_include_directories(shaderforth
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../
+    ${CMAKE_CURRENT_SOURCE_DIR}/../jtk/
     ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/imgui_sdl/
     ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/json/
     ${SDL_INCLUDE_DIR}

@@ -1,0 +1,3 @@
+[submodule "jtk"]
+	path = jtk
+	url = https://github.com/janm31415/jtk
