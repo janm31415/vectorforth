@@ -98,13 +98,13 @@ set(XLIBINCLUDE "/usr/X11/include/")
 set(XLIBLIBRARY "/usr/X11/lib/libX11.dylib")
 endif (APPLE)
 
-target_link_libraries(sf
-    PRIVATE
-    asm
-    vectorforth
-    ${TBB_LIBRARIES}    
-    ${XLIBINCLUDE}
-    )
+target_include_directories(sf
+   PRIVATE
+   ${CMAKE_CURRENT_SOURCE_DIR}/../
+   ${CMAKE_CURRENT_SOURCE_DIR}/../jtk/
+   ${XLIBINCLUDE}
+   ${TBB_INCLUDE_DIR}
+   )
 
 target_link_libraries(sf
     PRIVATE

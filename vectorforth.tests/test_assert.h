@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <string>
+#include <cmath>
 
 #define TEST_OUTPUT_LINE(...) \
       { printf(__VA_ARGS__); printf("\n"); }

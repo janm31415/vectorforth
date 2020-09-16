@@ -110,12 +110,21 @@ namespace
     return *reinterpret_cast<int32_t*>(&f);
     }
 
+  union cvt256_to_64
+  {
+      __m256 v;
+      uint64_t u[4];
+  };
+  
   inline uint64_t get_avx2_u64(__m256 v, int i)
     {
 #ifdef _WIN32    
     return *reinterpret_cast<uint64_t*>(&v.m256_f32[i]);
-#else
+#elif defined(unix)
     return *reinterpret_cast<uint64_t*>(&v[i]);
+#else
+        cvt256_to_64 c = {v};
+        return c.u[i];
 #endif
     }
 

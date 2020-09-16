@@ -4,6 +4,7 @@
 #include <emmintrin.h>
 #include <stdint.h>
 #include <memory>
+#include <cmath>
 
 template <class T>
 class image
