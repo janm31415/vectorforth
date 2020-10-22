@@ -3,14 +3,15 @@ SIMD vectorized Forth compiler with CPU based shader application
 
 ## Building
 
-I have tested vectorforth on Windows 10 using Visual Studio 2017, and on Ubuntu 18.04.4 with gcc 7.5.0.
-You best use CMake to generate a solution file or makefile.
+Vectorforth has been tested on Windows 10 using Visual Studio 2017/2019, on Ubuntu 18.04.4 with gcc 7.5.0, and on MacOS 10.15.6 with XCode 11.7.
+You best use CMake to generate a solution file or makefile or XCode project.
 
-There are 2 options to choose from when compiling:
-  - If your computer can handle it, choose AVX-512, as it will perform faster than AVX2.
-  - Computation of sine and cosine can be (as good as) exact or approximate. If you want to see the shader examples, `approximate` is a good choice as it is faster, and the loss of accuracy is not visible in the shader images. If you want the highest accuracy for sine and cosine, then choose `vectorclass`.
+Vectorforth uses two CMake variables: VECTORFORTH_AVX512 and VECTORFORTH_SINCOS_METHOD.
 
-Not all external dependencies are delivered with this code. The compiler vectorforth itself should build fine, but the sample applications sf and shaderforth both depend on [Intel's TBB library](https://software.intel.com/content/www/us/en/develop/tools/threading-building-blocks.html), and shaderforth also depends on [SDL2](https://www.libsdl.org/download-2.0.php). Both TBB and SDL2 are not delivered with the code and thus need to be installed by the user.
+  - If your computer can handle it, switch on VECTORFORTH_AVX512, as it will perform faster than AVX2. If your computer does not support AVX-512, and you switched VECTORFORTH_AVX512 on, the application will crash. Simply rebuild then with VECTORFORTH_AVX512 switched off.
+  - Computation of sine and cosine can be (as good as) exact or approximate. This behaviour is controlled with variable VECTORFORTH_SINCOS_METHOD. If you want to see the shader examples, `approximate` is a good choice as it is faster, and the loss of accuracy is not visible in the shader images. If you want the highest accuracy for sine and cosine, then choose `vectorclass`.
+
+Also of importance is your choice related to multithreading. This is controlled with the CMake variable JTK_THREADING. There are several choices here, but the best (fastest) choice is to use [Intel's TBB library](https://software.intel.com/content/www/us/en/develop/tools/threading-building-blocks.html). This requires some work though, as you will need to install TBB yourself first.
 
 On Windows you can download TBB's binaries from its website, and install them, preferably, in 
 folder C:\Program Files\TBB. Another folder is also possible, but then you'll need to
@@ -20,11 +21,17 @@ On Ubuntu you can simply run
     sudo apt install libtbb-dev 
 
 to install TBB.
-To install SDL2 on Windows, download its sources from its website, and build with cmake. Next install SDL2 to folder C:\Program Files\SDL2. Again, another folder is fine, but then you'll need to adapt the CMakeLists.txt file. On Ubuntu run
+On MacOS you can run
 
-    sudo apt-get install libsdl2-dev
+    brew install tbb
+    
+If this gives an error in the sense of `Cannot write to /usr/local/Cellar` then you can solve this probably by updating your write privileges in this folder with the command `sudo chmod a+w /usr/local/Cellar`, and then try `brew` again.
 
-to install SDL2.
+If you don't want to use/install TBB, you can set JTK_THREADING to std, which will use std::thread instead.
+
+The sample application shaderforth has a dependency on [SDL2](https://www.libsdl.org/download-2.0.php), which you'll need to install yourself (e.g. by downloading binaries or by downloading and building its source code).
+
+The sample application sf has the same functionality as shaderforth (except for a lack of GUI), but does not depend on SDL2. So you can try the shaders without installing SDL2, only shaderforth will not compile in that case.
 
 Other dependencies, which are delivered with the code, are
   - Agner Fog's vectorclass (https://github.com/vectorclass/version2)
