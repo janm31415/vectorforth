@@ -9,10 +9,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(JTK_THREADING "tbb" CACHE STRING  "Choose your threading library: tbb is Intel's Threading Building Blocks library, ppl is Windows' concurrency library, std uses std::thread, and none does not use threading.")
- 
-set_property(CACHE JTK_THREADING PROPERTY STRINGS tbb ppl std none)
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(AVX512 OFF CACHE BOOL "Set ON for AVX-512, set OFF for AVX2.")

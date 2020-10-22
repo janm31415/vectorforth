@@ -8,6 +8,8 @@
 #include "namespace.h"
 #include "asm_api.h"
 
+#undef FSCALE
+
 ASM_BEGIN
 
 class asmcode

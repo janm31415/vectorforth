@@ -11,8 +11,8 @@ if (UNIX)
 endif (UNIX)
 
 if (APPLE)
-  set(TBB_INCLUDE_DIR "")
-  set(TBB_LIBRARIES "")
+  set(TBB_INCLUDE_DIR "/usr/local/include" "/usr/include")
+  set(TBB_LIBRARIES "/usr/local/lib/libtbb.dylib")
   set(OPENGL_LIBRARIES "/System/Library/Frameworks/OpenGL.framework/OpenGL")
 endif (APPLE)
 
@@ -56,17 +56,7 @@ if (${SINCOS_METHOD} STREQUAL "approximate")
 add_definitions(-DSINCOSAPPROX)
 endif (${SINCOS_METHOD} STREQUAL "approximate")
 
-if (${JTK_THREADING} STREQUAL "tbb")
-add_definitions(-D_ENABLE_TBB)
-endif (${JTK_THREADING} STREQUAL "tbb")
-
-if (${JTK_THREADING} STREQUAL "ppl")
-add_definitions(-D_ENABLE_PPL)
-endif (${JTK_THREADING} STREQUAL "ppl")
-
-if (${JTK_THREADING} STREQUAL "std")
-add_definitions(-D_ENABLE_THREADS)
-endif (${JTK_THREADING} STREQUAL "std")
+include ("../jtk/jtk/jtk.cmake")
 
 add_executable(sf ${HDRS} ${SRCS})
 source_group("Header Files" FILES ${hdrs})
