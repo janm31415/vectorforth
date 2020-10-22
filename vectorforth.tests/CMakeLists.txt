@@ -38,17 +38,17 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 add_definitions(-DMEMORY_LEAK_TRACKING)
 
-if (AVX512)
+if (VECTORFORTH_AVX512)
 add_definitions(-DAVX512)
-endif (AVX512)
+endif (VECTORFORTH_AVX512)
 
-if (${SINCOS_METHOD} STREQUAL "lookup")
+if (${VECTORFORTH_SINCOS_METHOD} STREQUAL "lookup")
 add_definitions(-DSINCOSLOOKUP)
-endif (${SINCOS_METHOD} STREQUAL "lookup")
+endif (${VECTORFORTH_SINCOS_METHOD} STREQUAL "lookup")
 
-if (${SINCOS_METHOD} STREQUAL "approximate")
+if (${VECTORFORTH_SINCOS_METHOD} STREQUAL "approximate")
 add_definitions(-DSINCOSAPPROX)
-endif (${SINCOS_METHOD} STREQUAL "approximate")
+endif (${VECTORFORTH_SINCOS_METHOD} STREQUAL "approximate")
 
 add_executable(vectorforth.tests ${HDRS} ${SRCS})
 source_group("Header Files" FILES ${hdrs})

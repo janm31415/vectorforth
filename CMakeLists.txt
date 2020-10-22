@@ -11,13 +11,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(AVX512 OFF CACHE BOOL "Set ON for AVX-512, set OFF for AVX2.")
+set(VECTORFORTH_AVX512 OFF CACHE BOOL "Set ON for AVX-512, set OFF for AVX2.")
 
-set(SINCOS_METHOD "approximate" CACHE STRING  "Choose the method to compute sin/cos. Vectorclass is accurate. Approximate is least accurate but fastest. Lookup uses a lookup table and is faster than vectorclass but less accurate.")
+set(VECTORFORTH_SINCOS_METHOD "approximate" CACHE STRING  "Choose the method to compute sin/cos. Vectorclass is accurate. Approximate is least accurate but fastest. Lookup uses a lookup table and is faster than vectorclass but less accurate.")
  
-set_property(CACHE SINCOS_METHOD PROPERTY STRINGS vectorclass lookup approximate)
+set_property(CACHE VECTORFORTH_SINCOS_METHOD PROPERTY STRINGS vectorclass lookup approximate)
  
-message(STATUS "SINCOS_METHOD='${SINCOS_METHOD}'")
+message(STATUS "VECTORFORTH_SINCOS_METHOD='${VECTORFORTH_SINCOS_METHOD}'")
 
 add_subdirectory(asm)
 add_subdirectory(asm.tests)
