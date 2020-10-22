@@ -67,14 +67,12 @@ if (WIN32)
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../
     ${CMAKE_CURRENT_SOURCE_DIR}/../jtk/
-    ${TBB_INCLUDE_DIR}
     )	
 
 target_link_libraries(sf
     PRIVATE
     asm
     vectorforth
-    ${TBB_LIBRARIES}    
     )
 endif (WIN32)    
 
@@ -93,7 +91,6 @@ target_include_directories(sf
    ${CMAKE_CURRENT_SOURCE_DIR}/../
    ${CMAKE_CURRENT_SOURCE_DIR}/../jtk/
    ${XLIBINCLUDE}
-   ${TBB_INCLUDE_DIR}
    )
 
 target_link_libraries(sf
@@ -101,6 +98,16 @@ target_link_libraries(sf
     asm
     vectorforth
     ${XLIBLIBRARY}
-    ${TBB_LIBRARIES}    
     )
 endif (UNIX)
+
+if (${JTK_THREADING} STREQUAL "tbb")
+  target_include_directories(sf
+      PRIVATE
+      ${TBB_INCLUDE_DIR}
+      )
+  target_link_libraries(sf
+      PRIVATE
+      ${TBB_LIBRARIES}
+      )
+endif (${JTK_THREADING} STREQUAL "tbb")

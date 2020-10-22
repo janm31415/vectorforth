@@ -114,7 +114,6 @@ source_group("ThirdParty/json" FILES ${JSON})
     ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/imgui_sdl/
     ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/json/
     ${SDL_INCLUDE_DIR}
-    ${TBB_INCLUDE_DIR}
     )	
 	
 target_link_libraries(shaderforth
@@ -122,6 +121,16 @@ target_link_libraries(shaderforth
     asm
     ${OPENGL_LIBRARIES}
     ${SDL_LIBRARIES}
-    ${TBB_LIBRARIES}    
     vectorforth
     )	
+
+if (${JTK_THREADING} STREQUAL "tbb")
+  target_include_directories(shaderforth
+      PRIVATE
+      ${TBB_INCLUDE_DIR}
+      )
+  target_link_libraries(shaderforth
+      PRIVATE
+      ${TBB_LIBRARIES}
+      )
+endif (${JTK_THREADING} STREQUAL "tbb")
