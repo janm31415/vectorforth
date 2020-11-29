@@ -45,7 +45,9 @@ struct context
   uint64_t store_zmm6[8]; // offset 384
   uint64_t store_zmm7[8]; // offset 448
 
-  char* memory_allocated;  
+  char* memory_allocated;  // offset 512
+
+  uint64_t padding[7]; // dummy padding for memory alignment
   }
 #ifndef _WIN32 // linux alignment in gcc
 __attribute__ ((aligned (64)))

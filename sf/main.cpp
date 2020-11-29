@@ -17,6 +17,7 @@
 #include <vectorforth/sincos_table.h>
 
 #include <jtk/concurrency.h>
+#include "thread_pool.h"
 
 #include "window.h"
 
@@ -31,7 +32,7 @@ struct listener : public IWindowListener
 
   listener() : quit(false), mx(0.f), my(0.f), mz(0.f), mw(0.f) {}
 
-  virtual void OnClose() 
+  virtual void OnClose()
     {
     quit = true;
     };
@@ -47,7 +48,7 @@ struct listener : public IWindowListener
 #endif
     };
 
-  virtual void OnKeyUp(int k) 
+  virtual void OnKeyUp(int k)
     {
 #ifdef _WIN32
     if (k == 27)
@@ -141,7 +142,7 @@ float duration_since_midnight()
   auto now = std::chrono::system_clock::now();
 
   time_t tnow = std::chrono::system_clock::to_time_t(now);
-  tm *date = localtime(&tnow);
+  tm* date = localtime(&tnow);
   date->tm_hour = 0;
   date->tm_min = 0;
   date->tm_sec = 0;
@@ -152,9 +153,10 @@ float duration_since_midnight()
   }
 
 //#define SINGLE
+#define USE_THREAD_POOL
 
 int main(int argc, char** argv)
-  {  
+  {
   if (argc < 2)
     {
     std::cout << "Usage: sf <shader.4th>\n";
@@ -167,6 +169,9 @@ int main(int argc, char** argv)
     std::cout << "Cannot open file " << argv[1] << "\n";
     return -1;
     }
+
+  jtk::thread_pool tp;
+  tp.init();
 
   VF::initialize_lookup();
 
@@ -258,7 +263,7 @@ int main(int argc, char** argv)
   listener l;
 
   WindowHandle wh = create_window("Shader forth", w, h); // create window for visualization
-  
+
   register_listener(wh, &l);
 
 #ifdef AVX512
@@ -266,7 +271,7 @@ int main(int argc, char** argv)
   const int stack_top_offset = 896;
   assert(stack_top_offset % 64 == 0);
   const __m512 offset = _mm512_set_ps(15.f, 14.f, 13.f, 12.f, 11.f, 10.f, 9.f, 8.f, 7.f, 6.f, 5.f, 4.f, 3.f, 2.f, 1.f, 0.f);
-  const float defaults[16] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+  const float defaults[16] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
   __m512 rx_val = _mm512_set1_ps((float)w);
   __m512 ry_val = _mm512_set1_ps((float)h);
 #else
@@ -276,7 +281,7 @@ int main(int argc, char** argv)
   const __m256 offset = _mm256_set_ps(7.f, 6.f, 5.f, 4.f, 3.f, 2.f, 1.f, 0.f);
   const float defaults[8] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
   __m256 rx_val = _mm256_set1_ps((float)w);
-  __m256 ry_val = _mm256_set1_ps((float)h);  
+  __m256 ry_val = _mm256_set1_ps((float)h);
 #endif
   int frame = 0;
   auto last_tic = std::chrono::high_resolution_clock::now();
@@ -314,10 +319,13 @@ int main(int argc, char** argv)
     __m256 global_time_val = _mm256_set1_ps((float)global_time_duration);
 #endif
 
-#ifdef SINGLE
+#if defined(SINGLE)
     for (int y = 0; y < h; ++y)
+#elif defined(USE_THREAD_POOL)
+    //jtk::parallel_for((int)0, h, [&](int y)    
+    jtk::pooled_parallel_for((int)0, h, [&](int y)
 #else
-    jtk::parallel_for((int)0, h, [&](int y)    
+    jtk::parallel_for((int)0, h, [&](int y)
 #endif
       {
 
@@ -327,27 +335,27 @@ int main(int argc, char** argv)
 
       if (ctxt.memory_allocated == nullptr)
 #ifdef AVX512
-        ctxt = VF::create_context(2048 * 1024, 4096*2, 2048 * 1024);
+        ctxt = VF::create_context(2048 * 1024, 4096 * 2, 2048 * 1024);
 #else
-        ctxt = VF::create_context(1024 * 1024, 2048*2, 1024 * 1024);
+        ctxt = VF::create_context(1024 * 1024, 2048 * 2, 1024 * 1024);
 #endif
 
       const float vrel = (float)y / (float)h;
 #ifdef AVX512
       __m512 y_val = _mm512_set1_ps((float)y);
       __m512 v_val = _mm512_set1_ps(vrel);
-      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*64), y_val);
-      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*192), v_val);
-      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*224), time_val);
-      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*256), time_delta_val);
-      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*96), rx_val);
-      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*128), ry_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 64), y_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 192), v_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 224), time_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 256), time_delta_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 96), rx_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 128), ry_val);
 
-      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*288), frame_val);
-      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*320), mx_val);
-      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*352), my_val);
-      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*384), mz_val);
-      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*416), mw_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 288), frame_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 320), mx_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 352), my_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 384), mz_val);
+      _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 416), mw_val);
 
       _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 448), global_time_val);
 #else
@@ -378,8 +386,8 @@ int main(int argc, char** argv)
 #ifdef AVX512
         __m512 x_val = _mm512_add_ps(_mm512_set1_ps((float)x), offset);
         __m512 u_val = _mm512_div_ps(x_val, rx_val);
-        _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*32), x_val);
-        _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2*160), u_val);
+        _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 32), x_val);
+        _mm512_store_ps((float*)(ctxt.aligned_stack_top - 2 * 160), u_val);
 #else
         __m256 x_val = _mm256_add_ps(_mm256_set1_ps((float)x), offset);
         __m256 u_val = _mm256_div_ps(x_val, rx_val);
@@ -394,7 +402,7 @@ int main(int argc, char** argv)
 #else
         char* data_space_pointer = ctxt.here_pointer + 32;
 #endif
-        *((uint64_t*)ctxt.here_pointer) = (uint64_t)((void*)data_space_pointer);
+        * ((uint64_t*)ctxt.here_pointer) = (uint64_t)((void*)data_space_pointer);
 
         fun(&ctxt);
 
@@ -443,32 +451,36 @@ int main(int argc, char** argv)
           }
         }
       //VF::print_stack(std::cout, ctxt);
+#if defined(SINGLE)
       }
-#ifndef SINGLE
-    );
+#elif defined(USE_THREAD_POOL)
+
+    }, tp);
+#else
+      });
 #endif
-    
+
 
     if (!l.quit)
       paint(wh, (const uint8_t*)image, w, -h, 4);
 
     os_restart_line();
-    printf("%.2f FPS     average: %.2f FPS             ", 1.f / time_delta, (float)frame/total_time);
+    printf("%.2f FPS     average: %.2f FPS             ", 1.f / time_delta, (float)frame / total_time);
     total_time += time_delta;
     ++frame;
-    }
+  }
+    tp.stop();
+    close_window(wh); // close the visualization window
 
-  close_window(wh); // close the visualization window
+    _mm_free(image);
 
-  _mm_free(image);
+    local_context.combine_each([](VF::context& ctxt)
+      {
+      VF::destroy_context(ctxt);
+      });
 
-  local_context.combine_each([](VF::context& ctxt)
-    {
-    VF::destroy_context(ctxt);
-    });
+    ASM::free_assembled_function((void*)fun, fun_size);
 
-  ASM::free_assembled_function((void*)fun, fun_size);
-
-  printf("\n");
-  return 0;
+    printf("\n");
+    return 0;
   }
