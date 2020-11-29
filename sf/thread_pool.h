@@ -59,7 +59,7 @@ namespace jtk
 
       void init()
         {
-        unsigned int number_of_threads = hardware_concurrency()*8;
+        unsigned int number_of_threads = hardware_concurrency()*32;
         _pool.reserve(number_of_threads);
         for (unsigned int i = 0; i < number_of_threads; ++i)
            _pool.push_back(std::thread(&thread_pool::_query_loop, this));
