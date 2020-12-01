@@ -17,7 +17,6 @@
 #include <vectorforth/sincos_table.h>
 
 #include <jtk/concurrency.h>
-#include "thread_pool.h"
 
 #include "window.h"
 

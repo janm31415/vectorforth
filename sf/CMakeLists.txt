@@ -17,7 +17,6 @@ if (APPLE)
 endif (APPLE)
 
 set(HDRS
-thread_pool.h
 window.h
     )
 	
