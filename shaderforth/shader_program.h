@@ -38,4 +38,5 @@ class shader_program
     fun_ptr _fun;
 
     jtk::combinable< VF::context > local_context;
+    jtk::thread_pool _tp;
   };

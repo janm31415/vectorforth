@@ -15,6 +15,8 @@
 #include <vectorforth/stdlib.h>
 #include <vectorforth/sincos_table.h>
 
+#define USE_THREAD_POOL
+
 namespace
   {
 
@@ -92,11 +94,17 @@ namespace
 
 shader_program::shader_program(int w, int h) : _w(w), _h(h), _fun_size(0), _fun(nullptr)
   {
+#if defined(USE_THREAD_POOL)
+  _tp.init();
+#endif
   VF::initialize_lookup();
   }
 
 shader_program::~shader_program()
-  {  
+  {
+#if defined(USE_THREAD_POOL)
+  _tp.stop();
+#endif
   local_context.combine_each([](VF::context& ctxt)
     {
     VF::destroy_context(ctxt);
@@ -232,7 +240,11 @@ void shader_program::run(image<uint32_t>& im)
   __m256 global_time_val = _mm256_set1_ps(_input.global_time);
 #endif
 
+#if defined(USE_THREAD_POOL)
+  jtk::pooled_parallel_for((int)0, _h, [&](int y)
+#else
   jtk::parallel_for((int)0, _h, [&](int y)
+#endif
     {
 
     uint32_t* p_im = im.data() + y * _w;
@@ -352,7 +364,11 @@ void shader_program::run(image<uint32_t>& im)
         *p_im++ = 0xff000000 | (blue << 16) | (green << 8) | red;
         }
       }
+#if defined(USE_THREAD_POOL)
+    }, _tp);
+#else
     });
+#endif
   }
 
 void shader_program::set_shader_input(const shader_input& inp)
