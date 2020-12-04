@@ -1,22 +1,16 @@
 if (WIN32)
-  set(SDL_INCLUDE_DIR "C:/Program Files/SDL2/include/SDL2/")
-  set(SDL_LIBRARIES "C:/Program Files/SDL2/lib/SDL2.lib" "C:/Program Files/SDL2/lib/SDL2main.lib")
   set(TBB_INCLUDE_DIR "C:/Program Files/TBB/include")
   set(TBB_LIBRARIES "C:/Program Files/TBB/lib/intel64/vc14/tbb.lib" "C:/Program Files/TBB/lib/intel64/vc14/tbb_debug.lib")
   set(OPENGL_LIBRARIES opengl32.lib)
 endif (WIN32)
 
 if (UNIX)
-  set(SDL_INCLUDE_DIR "/usr/include/SDL2/")
-  set(SDL_LIBRARIES "/usr/lib/x86_64-linux-gnu/libSDL2-2.0.so" "/usr/lib/x86_64-linux-gnu/libSDL2-2.0.so.0")
   set(TBB_INCLUDE_DIR "/usr/local/include" "/usr/include")
   set(TBB_LIBRARIES "/usr/lib/x86_64-linux-gnu/libtbb.so" "/usr/lib/x86_64-linux-gnu/libtbb.so.2")
   set(OPENGL_LIBRARIES "/usr/lib/x86_64-linux-gnu/libOpenGL.so.0.0.0")
 endif (UNIX)
 
 if (APPLE)
-  set(SDL_INCLUDE_DIR "/Library/Frameworks/SDL2.framework/Headers/")
-  set(SDL_LIBRARIES "/Library/Frameworks/SDL2.framework/SDL2")
   set(TBB_INCLUDE_DIR "/usr/local/include" "/usr/include")
   set(TBB_LIBRARIES "/usr/local/lib/libtbb.dylib")
   set(OPENGL_LIBRARIES "/System/Library/Frameworks/OpenGL.framework/OpenGL")
@@ -113,14 +107,15 @@ source_group("ThirdParty/json" FILES ${JSON})
     ${CMAKE_CURRENT_SOURCE_DIR}/../jtk/
     ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/imgui_sdl/
     ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/json/
-    ${SDL_INCLUDE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../SDL2/include/
     )	
 	
 target_link_libraries(shaderforth
     PRIVATE
     asm
     ${OPENGL_LIBRARIES}
-    ${SDL_LIBRARIES}
+    SDL2
+    SDL2main
     vectorforth
     )	
 

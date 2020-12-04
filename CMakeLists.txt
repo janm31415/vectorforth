@@ -22,10 +22,19 @@ message(STATUS "VECTORFORTH_SINCOS_METHOD='${VECTORFORTH_SINCOS_METHOD}'")
 add_subdirectory(asm)
 add_subdirectory(asm.tests)
 add_subdirectory(jtk)
+add_subdirectory(SDL2)
 add_subdirectory(sf)
 add_subdirectory(shaderforth)
 add_subdirectory(vectorforth)
 add_subdirectory(vectorforth.tests)
+
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+set_target_properties (SDL2 PROPERTIES FOLDER SDL2)
+set_target_properties (SDL2main PROPERTIES FOLDER SDL2)
+set_target_properties (SDL2-static PROPERTIES FOLDER SDL2)
+set_target_properties (uninstall PROPERTIES FOLDER SDL2)
 
 
 
