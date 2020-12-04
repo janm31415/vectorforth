@@ -17,7 +17,7 @@ Also of importance is your choice related to multithreading. This is controlled 
 
 On Windows you can download TBB's binaries from its website, and install them, preferably, in 
 folder C:\Program Files\TBB. Another folder is also possible, but then you'll need to
-adapt the CMakeLists.txt file and make it point to the correct location.
+change the CMake variables `TBB_INCLUDE_DIR` and `TBB_LIBRARIES` and make them point to the correct location.
 On Ubuntu you can simply run 
 
     sudo apt install libtbb-dev 
@@ -31,11 +31,8 @@ If this gives an error in the sense of `Cannot write to /usr/local/Cellar` then 
 
 If you don't want to use/install TBB, you can set JTK_THREADING to std, which will use std::thread instead.
 
-The sample application shaderforth has a dependency on [SDL2](https://www.libsdl.org/download-2.0.php), which you'll need to install yourself (e.g. by downloading binaries or by downloading and building its source code).
-
-The sample application sf has the same functionality as shaderforth (except for a lack of GUI), but does not depend on SDL2. So you can try the shaders without installing SDL2, only shaderforth will not compile in that case.
-
 Other dependencies, which are delivered with the code, are
+  - SDL2 (https://www.libsdl.org/)
   - Agner Fog's vectorclass (https://github.com/vectorclass/version2)
   - ocornut's dear imgui (https://github.com/ocornut/imgui)
   - nlohmann's json (https://github.com/nlohmann/json)
