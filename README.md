@@ -3,6 +3,8 @@ SIMD vectorized Forth compiler with CPU based shader application
 
 Vectorforth is a forth compiler that creates executable code, but every instruction is vectorized. For instance, if you compile `1 2 +`, then the result will obviously be `3`, but actually you will get 16 times the result `3` (using AVX-512), as each instruction is vectorized. The main toy application that I am interested in here is to see how fast your CPU can compute pixel shaders a la [ShaderToy](https://www.shadertoy.com). So we make use as much as possible of SIMD (i.e. vectorized) instructions and multithreading. Of course the CPU will not beat the GPU but it was fun to test how large the gap would be. 
 
+As the compiler generates machine instructions, this will only work for an Intel architecture, and not for ARM architectures.
+
 ## Building
 
 Vectorforth has been tested on Windows 10 using Visual Studio 2017/2019, on Ubuntu 18.04.4 with gcc 7.5.0, and on MacOS 10.15.6 with XCode 11.7.
