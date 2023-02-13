@@ -35,6 +35,8 @@ set_target_properties (SDL2 PROPERTIES FOLDER SDL2)
 set_target_properties (SDL2main PROPERTIES FOLDER SDL2)
 set_target_properties (SDL2-static PROPERTIES FOLDER SDL2)
 set_target_properties (uninstall PROPERTIES FOLDER SDL2)
+set_target_properties (SDL2_test PROPERTIES FOLDER SDL2)
+set_target_properties (sdl_headers_copy PROPERTIES FOLDER SDL2)
 
 
 
